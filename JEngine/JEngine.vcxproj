@@ -139,8 +139,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Arena.h" />
+    <ClInclude Include="Include\Iterator.h" />
     <ClInclude Include="Include\JMath.h" />
     <ClInclude Include="Include\pch.h" />
+    <ClInclude Include="Include\View.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

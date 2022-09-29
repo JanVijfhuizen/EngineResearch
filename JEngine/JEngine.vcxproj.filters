@@ -35,5 +35,11 @@
     <ClInclude Include="Include\JMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\View.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Iterator.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
