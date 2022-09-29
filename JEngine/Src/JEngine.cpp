@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "Arena.h"
+#include "Array.h"
+#include "JMove.h"
 
 int main()
 {
@@ -23,4 +25,14 @@ int main()
 	
 	arena.Free(a);
 	arena.Free(s);
+
+	je::Array<float> f{ arena, 8 };
+	je::View<float> view = f;
+	for (int i = 0; i < 8; ++i)
+	{
+		view[i] = i;
+	}
+	je::Array<float> g = je::Move(f);
+
+
 }

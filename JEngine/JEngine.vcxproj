@@ -139,8 +139,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Arena.h" />
+    <ClInclude Include="Include\Array.h" />
     <ClInclude Include="Include\Iterator.h" />
     <ClInclude Include="Include\JMath.h" />
+    <ClInclude Include="Include\JMove.h" />
     <ClInclude Include="Include\pch.h" />
     <ClInclude Include="Include\View.h" />
   </ItemGroup>

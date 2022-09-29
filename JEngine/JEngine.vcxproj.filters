@@ -41,5 +41,11 @@
     <ClInclude Include="Include\Iterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JMove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

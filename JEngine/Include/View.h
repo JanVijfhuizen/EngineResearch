@@ -18,6 +18,8 @@ namespace je
 		virtual Iterator<T> begin() const;
 		virtual Iterator<T> end() const;
 
+		[[nodiscard]] T* GetData() const;
+
 	private:
 		T* _data = nullptr;
 		size_t _length = SIZE_MAX;
@@ -65,5 +67,11 @@ namespace je
 		it.index = _length;
 		it.data = _data;
 		return it;
+	}
+
+	template <typename T>
+	T* View<T>::GetData() const
+	{
+		return _data;
 	}
 }
