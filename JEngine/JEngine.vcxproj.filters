@@ -47,5 +47,8 @@
     <ClInclude Include="Include\JMove.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\JVector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -11,22 +11,24 @@ namespace je
 	public:
 		Array(Arena& arena, size_t length);
 		Array(Array&& other) noexcept;
-		~Array();
+		virtual ~Array();
 
-		[[nodiscard]] operator View<T>() const;
+		[[nodiscard]] virtual operator View<T>() const;
+		[[nodiscard]] size_t GetLength() const;
 
 	private:
 		Arena* _arena = nullptr;
-		View<T> _view{};
+		T* _ptr = nullptr;
+		size_t _length = SIZE_MAX;
 	};
 
 	template <typename T>
-	Array<T>::Array(Arena& arena, const size_t length) : _arena(&arena), _view({arena.New<T>(length), length})
+	Array<T>::Array(Arena& arena, const size_t length) : _arena(&arena), _ptr(arena.New<T>(length)), _length(length)
 	{
 	}
 
 	template <typename T>
-	Array<T>::Array(Array&& other) noexcept : _arena(other._arena), _view(other._view)  // NOLINT(performance-move-constructor-init)
+	Array<T>::Array(Array&& other) noexcept : _arena(other._arena), _ptr(other._ptr), _length(other._length)
 	{
 		other._arena = nullptr;
 	}
@@ -35,13 +37,19 @@ namespace je
 	Array<T>::~Array()
 	{
 		if(_arena)
-			_arena->Free(_view.GetData());
+			_arena->Free(_ptr);
 		_arena = nullptr;
 	}
 
 	template <typename T>
 	Array<T>::operator View<T>() const
 	{
-		return _view;
+		return {_ptr, _length };
+	}
+
+	template <typename T>
+	size_t Array<T>::GetLength() const
+	{
+		return _length;
 	}
 }

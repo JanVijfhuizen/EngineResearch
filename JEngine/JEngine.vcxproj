@@ -144,6 +144,7 @@
     <ClInclude Include="Include\JMath.h" />
     <ClInclude Include="Include\JMove.h" />
     <ClInclude Include="Include\pch.h" />
+    <ClInclude Include="Include\JVector.h" />
     <ClInclude Include="Include\View.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
