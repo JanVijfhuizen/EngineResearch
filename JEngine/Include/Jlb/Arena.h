@@ -31,6 +31,9 @@ namespace je
 
 		[[nodiscard]] Scope CreateScope();
 
+		void Empty();
+		[[nodiscard]] bool IsEmpty() const;
+
 	private:
 		void* _ptr = nullptr;
 		size_t _size = 0;

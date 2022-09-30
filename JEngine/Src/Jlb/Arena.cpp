@@ -92,4 +92,26 @@ namespace je
 		scope._current = _current;
 		return scope;
 	}
+
+	void Arena::Empty()
+	{
+		Arena* next = this;
+		while (next)
+		{
+			next->_current = 0;
+			next = next->_next;
+		}
+	}
+
+	bool Arena::IsEmpty() const
+	{
+		const Arena* next = this;
+		while(next)
+		{
+			if (next->_current > 0)
+				return false;
+			next = next->_next;
+		}
+		return true;
+	}
 }
