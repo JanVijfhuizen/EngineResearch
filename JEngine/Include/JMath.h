@@ -13,4 +13,17 @@ namespace je::math
 	{
 		return a > b ? a : b;
 	}
+
+	template <typename T>
+	[[nodiscard]] constexpr T GetFractals(const size_t number)
+	{
+		size_t d = 1;
+		size_t length = 0;
+		while (d <= number)
+		{
+			d *= 10;
+			++length;
+		}
+		return length;
+	}
 }

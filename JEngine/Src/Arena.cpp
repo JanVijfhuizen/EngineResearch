@@ -75,7 +75,7 @@ namespace je
 
 #ifdef _DEBUG
 		const void* ptrCurrent = static_cast<unsigned char*>(_ptr) + _current - size + sizeof(size_t);
-		assert(ptrCurrent != ptr);
+		assert(ptrCurrent == ptr);
 #endif
 		
 		_current -= size;

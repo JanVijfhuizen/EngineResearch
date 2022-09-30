@@ -131,6 +131,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\JString.cpp" />
+    <ClCompile Include="Src\StringView.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -143,8 +145,10 @@
     <ClInclude Include="Include\Iterator.h" />
     <ClInclude Include="Include\JMath.h" />
     <ClInclude Include="Include\JMove.h" />
+    <ClInclude Include="Include\JString.h" />
     <ClInclude Include="Include\pch.h" />
     <ClInclude Include="Include\JVector.h" />
+    <ClInclude Include="Include\StringView.h" />
     <ClInclude Include="Include\View.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

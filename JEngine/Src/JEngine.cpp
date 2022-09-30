@@ -1,7 +1,12 @@
 #include "pch.h"
+
+#include <iostream>
+
 #include "Arena.h"
 #include "Array.h"
 #include "JMove.h"
+#include "JString.h"
+#include "StringView.h"
 
 int main()
 {
@@ -34,4 +39,6 @@ int main()
 	}
 	je::Array<float> g = je::Move(f);
 
+	const je::String string{arena, je::StringView("Hello")};
+	std::cout << string.GetStringView() << std::endl;
 }

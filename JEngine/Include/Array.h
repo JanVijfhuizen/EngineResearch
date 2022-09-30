@@ -1,10 +1,9 @@
 #pragma once
 #include "View.h"
+#include "Arena.h"
 
 namespace je
 {
-	class Arena;
-
 	template <typename T>
 	class Array
 	{
@@ -18,19 +17,21 @@ namespace je
 		[[nodiscard]] operator View<T>() const;
 		[[nodiscard]] size_t GetLength() const;
 
+		[[nodiscard]] T* GetData() const;
+
 	private:
 		Arena* _arena = nullptr;
-		T* _ptr = nullptr;
+		T* _data = nullptr;
 		size_t _length = SIZE_MAX;
 	};
 
 	template <typename T>
-	Array<T>::Array(Arena& arena, const size_t length) : _arena(&arena), _ptr(arena.New<T>(length)), _length(length)
+	Array<T>::Array(Arena& arena, const size_t length) : _arena(&arena), _data(arena.New<T>(length)), _length(length)
 	{
 	}
 
 	template <typename T>
-	Array<T>::Array(Array&& other) noexcept : _arena(other._arena), _ptr(other._ptr), _length(other._length)
+	Array<T>::Array(Array&& other) noexcept : _arena(other._arena), _data(other._data), _length(other._length)
 	{
 		other._arena = nullptr;
 	}
@@ -39,14 +40,14 @@ namespace je
 	Array<T>::~Array()
 	{
 		if(_arena)
-			_arena->Free(_ptr);
+			_arena->Free(_data);
 		_arena = nullptr;
 	}
 
 	template <typename T>
 	View<T> Array<T>::GetView() const
 	{
-		return { _ptr, _length };
+		return { _data, _length };
 	}
 
 	template <typename T>
@@ -59,5 +60,11 @@ namespace je
 	size_t Array<T>::GetLength() const
 	{
 		return _length;
+	}
+
+	template <typename T>
+	T* Array<T>::GetData() const
+	{
+		return _data;
 	}
 }
