@@ -143,13 +143,16 @@
     <ClInclude Include="Include\Jlb\Arena.h" />
     <ClInclude Include="Include\Jlb\Array.h" />
     <ClInclude Include="Include\Jlb\Iterator.h" />
+    <ClInclude Include="Include\Jlb\JMap.h" />
     <ClInclude Include="Include\Jlb\JMath.h" />
     <ClInclude Include="Include\Jlb\JMove.h" />
     <ClInclude Include="Include\Jlb\JString.h" />
+    <ClInclude Include="Include\Jlb\KeyPair.h" />
     <ClInclude Include="Include\pch.h" />
     <ClInclude Include="Include\Jlb\JVector.h" />
     <ClInclude Include="Include\Jlb\StringView.h" />
     <ClInclude Include="Include\Jlb\View.h" />
+    <ClInclude Include="Include\Jlb\Utils.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

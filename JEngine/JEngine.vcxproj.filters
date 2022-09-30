@@ -62,5 +62,14 @@
     <ClInclude Include="Include\Jlb\JString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Jlb\JMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Jlb\Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Jlb\KeyPair.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

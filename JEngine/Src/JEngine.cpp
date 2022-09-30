@@ -4,6 +4,7 @@
 
 #include "Jlb/Arena.h"
 #include "Jlb/Array.h"
+#include "Jlb/JMap.h"
 #include "Jlb/JMove.h"
 #include "Jlb/JString.h"
 #include "Jlb/StringView.h"
@@ -41,4 +42,9 @@ int main()
 
 	const je::String string{arena, je::StringView("Hello")};
 	std::cout << string.GetStringView() << std::endl;
+
+	je::Map<float> map{arena, 12};
+	map.Insert(27.2f, 2);
+	assert(map.Contains(2));
+	assert(!map.Contains(4));
 }
