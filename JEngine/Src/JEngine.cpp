@@ -4,6 +4,7 @@
 
 #include "Jlb/Arena.h"
 #include "Jlb/Array.h"
+#include "Jlb/Heap.h"
 #include "Jlb/JMap.h"
 #include "Jlb/JMove.h"
 #include "Jlb/JString.h"
@@ -65,4 +66,8 @@ int main()
 	q.Enqueue(3);
 	je::Queue<float> q2 = Move(q);
 	q2.Enqueue(5);
+
+	je::Heap<float> heap{arena, 7};
+	heap.Insert(52.34f, 8);
+	assert(heap.Peek() > 52.f);
 }

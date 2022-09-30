@@ -12,7 +12,8 @@ namespace je
 
 		T& Add(const T& instance = {});
 		void Remove(size_t index);
-		
+		void Clear();
+
 		[[nodiscard]] size_t GetCount() const;
 		[[nodiscard]] View<T> GetView() const override;
 
@@ -42,6 +43,12 @@ namespace je
 	void Vector<T>::Remove(const size_t index)
 	{
 		Array<T>::_ptr[index] = Array<T>::_ptr[--_count];
+	}
+
+	template <typename T>
+	void Vector<T>::Clear()
+	{
+		_count = 0;
 	}
 
 	template <typename T>

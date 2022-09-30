@@ -14,6 +14,7 @@ namespace je
 		[[nodiscard]] T& Peek();
 		T Dequeue();
 
+		void Clear();
 		[[nodiscard]] size_t GetCount() const;
 
 	private:
@@ -55,6 +56,13 @@ namespace je
 		const T instance = Array<T>::GetData()[_begin++];
 		_begin %= Array<T>::GetLength();
 		return instance;
+	}
+
+	template <typename T>
+	void Queue<T>::Clear()
+	{
+		_begin = 0;
+		_count = 0;
 	}
 
 	template <typename T>
