@@ -34,5 +34,4 @@ int main()
 	}
 	je::Array<float> g = je::Move(f);
 
-
 }

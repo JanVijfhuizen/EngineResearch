@@ -12,9 +12,9 @@ namespace je
 
 		T& Add(const T& instance = {});
 		void Remove(size_t index);
-
-		[[nodiscard]] operator View<T>() const;
+		
 		[[nodiscard]] size_t GetCount() const;
+		[[nodiscard]] View<T> GetView() const override;
 
 	private:
 		size_t _count = 0;
@@ -45,14 +45,14 @@ namespace je
 	}
 
 	template <typename T>
-	Vector<T>::operator View<T>() const
-	{
-		return { Array<T>::_ptr, _count };
-	}
-
-	template <typename T>
 	size_t Vector<T>::GetCount() const
 	{
 		return _count;
+	}
+
+	template <typename T>
+	View<T> Vector<T>::GetView() const
+	{
+		return { Array<T>::_ptr, _count };
 	}
 }

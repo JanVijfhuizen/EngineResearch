@@ -64,16 +64,19 @@ namespace je
 
 	void Arena::Free(void* ptr)
 	{
-		void* ptrSize = static_cast<unsigned char*>(ptr) - sizeof(size_t);
-		const size_t size = *static_cast<size_t*>(ptrSize);
-		const void* ptrCurrent = static_cast<unsigned char*>(_ptr) + _current - size + sizeof(size_t);
-
-		if(ptrCurrent != ptr)
+		if(_next && _next->_current > 0)
 		{
-			assert(_next);
 			_next->Free(ptr);
 			return;
 		}
+
+		void* ptrSize = static_cast<unsigned char*>(ptr) - sizeof(size_t);
+		const size_t size = *static_cast<size_t*>(ptrSize);
+
+#ifdef _DEBUG
+		const void* ptrCurrent = static_cast<unsigned char*>(_ptr) + _current - size + sizeof(size_t);
+		assert(ptrCurrent != ptr);
+#endif
 		
 		_current -= size;
 	}

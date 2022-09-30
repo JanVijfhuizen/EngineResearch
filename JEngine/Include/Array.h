@@ -13,7 +13,9 @@ namespace je
 		Array(Array&& other) noexcept;
 		virtual ~Array();
 
-		[[nodiscard]] virtual operator View<T>() const;
+		virtual View<T> GetView() const;
+
+		[[nodiscard]] operator View<T>() const;
 		[[nodiscard]] size_t GetLength() const;
 
 	private:
@@ -42,9 +44,15 @@ namespace je
 	}
 
 	template <typename T>
+	View<T> Array<T>::GetView() const
+	{
+		return { _ptr, _length };
+	}
+
+	template <typename T>
 	Array<T>::operator View<T>() const
 	{
-		return {_ptr, _length };
+		return GetView();
 	}
 
 	template <typename T>
