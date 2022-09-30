@@ -23,7 +23,7 @@ namespace je
 		}
 	}
 
-	String::String(Arena& arena, const StringView& view) noexcept : Array<char>(arena, view.GetLength() + 1)
+	String::String(Arena& arena, const StringView& view) : Array<char>(arena, view.GetLength() + 1)
 	{
 		const auto data = GetData();
 		const size_t length = GetLength() - 1;

@@ -9,7 +9,7 @@ namespace je
 	{
 	public:
 		String(Arena& arena, size_t number);
-		String(Arena& arena, const StringView& view) noexcept;
+		String(Arena& arena, const StringView& view);
 		
 		[[nodiscard]] explicit operator StringView() const;
 		[[nodiscard]] StringView GetStringView() const;

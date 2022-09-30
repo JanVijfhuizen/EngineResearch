@@ -2,6 +2,8 @@
 
 namespace je
 {
+	constexpr static size_t ARENA_META_DATA_SIZE = sizeof(size_t);
+
 	class Arena final
 	{
 	public:
