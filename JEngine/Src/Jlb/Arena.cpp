@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Arena.h"
-#include "JMath.h"
+#include "Jlb/Arena.h"
+#include "Jlb/JMath.h"
 
 namespace je
 {

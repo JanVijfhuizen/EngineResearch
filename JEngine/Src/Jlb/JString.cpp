@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
-#include "JString.h"
+#include "Jlb/JString.h"
 
-#include "JMath.h"
-#include "StringView.h"
+#include "Jlb/JMath.h"
+#include "Jlb/StringView.h"
 
 namespace je
 {

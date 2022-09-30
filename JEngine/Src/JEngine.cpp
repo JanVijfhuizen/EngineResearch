@@ -2,11 +2,11 @@
 
 #include <iostream>
 
-#include "Arena.h"
-#include "Array.h"
-#include "JMove.h"
-#include "JString.h"
-#include "StringView.h"
+#include "Jlb/Arena.h"
+#include "Jlb/Array.h"
+#include "Jlb/JMove.h"
+#include "Jlb/JString.h"
+#include "Jlb/StringView.h"
 
 int main()
 {

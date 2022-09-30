@@ -131,25 +131,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\JString.cpp" />
-    <ClCompile Include="Src\StringView.cpp" />
+    <ClCompile Include="Src\Jlb\JString.cpp" />
+    <ClCompile Include="Src\Jlb\StringView.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Src\Arena.cpp" />
+    <ClCompile Include="Src\Jlb\Arena.cpp" />
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Arena.h" />
-    <ClInclude Include="Include\Array.h" />
-    <ClInclude Include="Include\Iterator.h" />
-    <ClInclude Include="Include\JMath.h" />
-    <ClInclude Include="Include\JMove.h" />
-    <ClInclude Include="Include\JString.h" />
+    <ClInclude Include="Include\Jlb\Arena.h" />
+    <ClInclude Include="Include\Jlb\Array.h" />
+    <ClInclude Include="Include\Jlb\Iterator.h" />
+    <ClInclude Include="Include\Jlb\JMath.h" />
+    <ClInclude Include="Include\Jlb\JMove.h" />
+    <ClInclude Include="Include\Jlb\JString.h" />
     <ClInclude Include="Include\pch.h" />
-    <ClInclude Include="Include\JVector.h" />
-    <ClInclude Include="Include\StringView.h" />
-    <ClInclude Include="Include\View.h" />
+    <ClInclude Include="Include\Jlb\JVector.h" />
+    <ClInclude Include="Include\Jlb\StringView.h" />
+    <ClInclude Include="Include\Jlb\View.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

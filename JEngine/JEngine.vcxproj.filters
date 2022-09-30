@@ -18,48 +18,48 @@
     <ClCompile Include="Src\JEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Arena.cpp">
+    <ClCompile Include="Src\Jlb\Arena.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\StringView.cpp">
+    <ClCompile Include="Src\Jlb\StringView.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\JString.cpp">
+    <ClCompile Include="Src\Jlb\JString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Arena.h">
+    <ClInclude Include="Include\Jlb\Arena.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\JMath.h">
+    <ClInclude Include="Include\Jlb\JMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\View.h">
+    <ClInclude Include="Include\Jlb\View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Iterator.h">
+    <ClInclude Include="Include\Jlb\Iterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Array.h">
+    <ClInclude Include="Include\Jlb\Array.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\JMove.h">
+    <ClInclude Include="Include\Jlb\JMove.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\JVector.h">
+    <ClInclude Include="Include\Jlb\JVector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\StringView.h">
+    <ClInclude Include="Include\Jlb\StringView.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\JString.h">
+    <ClInclude Include="Include\Jlb\JString.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
