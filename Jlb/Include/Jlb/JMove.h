@@ -20,6 +20,7 @@ namespace je
 		typedef T Type;
 	};
 
+	// Custom move method akin to std::move.
 	template <typename T>
 	typename RemoveReference<T>::Type&& Move(T&& arg)
 	{

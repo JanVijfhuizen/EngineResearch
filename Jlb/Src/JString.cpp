@@ -39,7 +39,7 @@ namespace je
 
 	StringView String::GetStringView() const
 	{
-		return {GetData() };
+		return StringView{GetData() };
 	}
 
 	View<char> String::GetView() const

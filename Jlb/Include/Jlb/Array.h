@@ -4,6 +4,7 @@
 
 namespace je
 {
+	// Standard array.
 	template <typename T>
 	class Array
 	{
@@ -15,6 +16,7 @@ namespace je
 		virtual View<T> GetView() const;
 
 		[[nodiscard]] operator View<T>() const;
+		[[nodiscard]] operator T*() const;
 		[[nodiscard]] size_t GetLength() const;
 
 		[[nodiscard]] T* GetData() const;
@@ -54,6 +56,12 @@ namespace je
 	Array<T>::operator View<T>() const
 	{
 		return GetView();
+	}
+
+	template <typename T>
+	Array<T>::operator T*() const
+	{
+		return _data;
 	}
 
 	template <typename T>
