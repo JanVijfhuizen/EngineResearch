@@ -3,6 +3,7 @@
 
 namespace je
 {
+	// First-In-Last-Out.
 	template <typename T>
 	class Stack final : public Array<T>
 	{

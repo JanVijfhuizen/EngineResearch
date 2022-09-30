@@ -4,6 +4,7 @@
 
 namespace je
 {
+	// Standard array.
 	template <typename T>
 	class Array
 	{

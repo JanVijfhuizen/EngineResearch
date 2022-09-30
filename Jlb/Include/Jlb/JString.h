@@ -5,6 +5,7 @@ namespace je
 {
 	class StringView;
 
+	// Array of chars specialized in string behaviour.
 	class String final : public Array<char>
 	{
 	public:

@@ -2,11 +2,15 @@
 
 namespace je
 {
+	// Additional memory required for arena allocations.
 	constexpr static size_t ARENA_META_DATA_SIZE = sizeof(size_t);
 
+	// Linear/stack allocator.
 	class Arena final
 	{
 	public:
+		// Local scope for arena.
+		// Allocations done within the lifetime of the scope will be automatically cleared on destruction.
 		struct Scope final
 		{
 			friend Arena;
@@ -22,10 +26,12 @@ namespace je
 
 		explicit Arena(void* ptr, size_t size);
 		~Arena();
-
+		
 		[[nodiscard]] void* Alloc(size_t size);
+		// Does not call destructors.
 		void Free(void* ptr);
 
+		// Allocate N objects of type T. Calls default constructors.
 		template <typename T>
 		[[nodiscard]] T* New(size_t count = 1);
 

@@ -4,6 +4,7 @@
 
 namespace je
 {
+	// Automatically sorts values during insertion.
 	template <typename T>
 	class Heap final : public Array<KeyPair<T>>
 	{

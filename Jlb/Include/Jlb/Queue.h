@@ -3,6 +3,7 @@
 
 namespace je
 {
+	// First-In-First-Out.
 	template <typename T>
 	class Queue final : public Array<T>
 	{

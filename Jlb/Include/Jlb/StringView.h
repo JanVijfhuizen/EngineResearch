@@ -2,6 +2,7 @@
 
 namespace je
 {
+	// Immutable string for increased performance.
 	class StringView final
 	{
 	public:

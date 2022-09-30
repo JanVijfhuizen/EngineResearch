@@ -8,7 +8,6 @@ namespace je
 	template <typename T>
 	struct View
 	{
-		// ReSharper disable once CppNonExplicitConvertingConstructor
 		View(T& instance);
 		View(void* data, size_t length);
 

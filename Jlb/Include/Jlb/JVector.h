@@ -3,6 +3,7 @@
 
 namespace je
 {
+	// Allows for resizing, adding and removing values.
 	template <typename T>
 	class Vector : public Array<T>
 	{

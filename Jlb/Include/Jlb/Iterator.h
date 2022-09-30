@@ -2,7 +2,7 @@
 
 namespace je
 {
-	// Standard iterator that can be used to allow for for loops in arrays/vectors and similar data structures.
+	// Standard linear allocator.
 	template <typename T>
 	struct Iterator final
 	{

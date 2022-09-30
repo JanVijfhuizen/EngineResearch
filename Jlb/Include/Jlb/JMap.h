@@ -5,6 +5,7 @@
 
 namespace je
 {
+	// Allows for quick lookup of values.
 	template <typename T>
 	class Map final : public Array<KeyPair<T>>
 	{
