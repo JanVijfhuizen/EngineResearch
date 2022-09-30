@@ -6,20 +6,13 @@
 namespace je
 {
 	template <typename T>
-	class Map : public Array<KeyPair<T>>
+	class Map final : public Array<KeyPair<T>>
 	{
 	public:
-		Map(Arena& arena, size_t length) : Array<KeyPair<T>>(arena, length)
-		{
-		}
+		Map(Arena& arena, size_t length);
+		Map(Array<T>&& other) noexcept;
 
-		Map(Array<T>&& other) : Array<KeyPair<T>>(other)
-		{
-
-		}
-		
-		void Insert(T& value, size_t key);
-		void Insert(T&& value, size_t key);
+		void Insert(const T& instance, size_t key);
 
 		[[nodiscard]] T* Contains(size_t key) const;
 		void Erase(T& value);
@@ -27,23 +20,10 @@ namespace je
 
 	protected:
 		[[nodiscard]] size_t GetHash(size_t key) const;
-		void LInsert(T& value, size_t key);
 
 	private:
 		size_t _count = 0;
 	};
-
-	template <typename T>
-	void Map<T>::Insert(T& value, const size_t key)
-	{
-		LInsert(value, key);
-	}
-
-	template <typename T>
-	void Map<T>::Insert(T&& value, const size_t key)
-	{
-		LInsert(value, key);
-	}
 
 	template <typename T>
 	void Map<T>::Erase(T& value)
@@ -75,6 +55,46 @@ namespace je
 		// Move the key group one place backwards by swapping the first and last index.
 		Swap(data, index, index + i - 1);
 		--_count;
+	}
+
+	template <typename T>
+	Map<T>::Map(Arena& arena, size_t length): Array<KeyPair<T>>(arena, length)
+	{
+	}
+
+	template <typename T>
+	Map<T>::Map(Array<T>&& other) noexcept : Array<KeyPair<T>>(other), _count(other._count)
+	{
+
+	}
+
+	template <typename T>
+	void Map<T>::Insert(const T& instance, const size_t key)
+	{
+		const size_t length = Array<KeyPair<T>>::GetLength();
+		assert(_count < length);
+
+		// If it already contains this value, replace the old one with the newer value.
+		if (Contains(key))
+			return;
+
+		auto data = Array<KeyPair<T>>::GetData();
+
+		const size_t hash = GetHash(key);
+
+		for (size_t i = 0; i < length; ++i)
+		{
+			const size_t index = (hash + i) % length;
+			auto& keyPair = data[index];
+			// Set to true the first time the key group has been found.
+			if (keyPair.key != SIZE_MAX)
+				continue;
+
+			keyPair.key = key;
+			keyPair.value = instance;
+			++_count;
+			break;
+		}
 	}
 
 	template <typename T>
@@ -111,34 +131,5 @@ namespace je
 	size_t Map<T>::GetHash(const size_t key) const
 	{
 		return key % Array<KeyPair<T>>::GetLength();
-	}
-
-	template <typename T>
-	void Map<T>::LInsert(T& value, const size_t key)
-	{
-		const size_t length = Array<KeyPair<T>>::GetLength();
-		assert(_count < length);
-
-		// If it already contains this value, replace the old one with the newer value.
-		if (Contains(key))
-			return;
-
-		auto data = Array<KeyPair<T>>::GetData();
-
-		const size_t hash = GetHash(key);
-
-		for (size_t i = 0; i < length; ++i)
-		{
-			const size_t index = (hash + i) % length;
-			auto& keyPair = data[index];
-			// Set to true the first time the key group has been found.
-			if (keyPair.key != SIZE_MAX)
-				continue;
-
-			keyPair.key = key;
-			keyPair.value = value;
-			++_count;
-			break;
-		}
 	}
 }

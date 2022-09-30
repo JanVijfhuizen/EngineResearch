@@ -148,6 +148,7 @@
     <ClInclude Include="Include\Jlb\JMove.h" />
     <ClInclude Include="Include\Jlb\JString.h" />
     <ClInclude Include="Include\Jlb\KeyPair.h" />
+    <ClInclude Include="Include\Jlb\Stack.h" />
     <ClInclude Include="Include\pch.h" />
     <ClInclude Include="Include\Jlb\JVector.h" />
     <ClInclude Include="Include\Jlb\StringView.h" />

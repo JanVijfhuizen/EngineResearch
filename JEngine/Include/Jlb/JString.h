@@ -9,9 +9,9 @@ namespace je
 	{
 	public:
 		String(Arena& arena, size_t number);
-		String(Arena& arena, const StringView& view);
+		String(Arena& arena, const StringView& view) noexcept;
 		
-		[[nodiscard]] operator StringView() const;
+		[[nodiscard]] explicit operator StringView() const;
 		[[nodiscard]] StringView GetStringView() const;
 		[[nodiscard]] View<char> GetView() const override;
 	};

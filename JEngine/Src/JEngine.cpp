@@ -7,6 +7,7 @@
 #include "Jlb/JMap.h"
 #include "Jlb/JMove.h"
 #include "Jlb/JString.h"
+#include "Jlb/Stack.h"
 #include "Jlb/StringView.h"
 
 int main()
@@ -47,4 +48,13 @@ int main()
 	map.Insert(27.2f, 2);
 	assert(map.Contains(2));
 	assert(!map.Contains(4));
+
+	je::Stack<float> stack{arena, 4};
+	stack.Push(2);
+	stack.Push(3);
+	stack.Push(4);
+	for (const auto& val : stack.GetView())
+	{
+		std::cout << val << std::endl;
+	}
 }
