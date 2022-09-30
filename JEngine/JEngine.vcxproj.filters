@@ -74,5 +74,8 @@
     <ClInclude Include="Include\Jlb\Stack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Jlb\Queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

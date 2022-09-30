@@ -7,6 +7,7 @@
 #include "Jlb/JMap.h"
 #include "Jlb/JMove.h"
 #include "Jlb/JString.h"
+#include "Jlb/Queue.h"
 #include "Jlb/Stack.h"
 #include "Jlb/StringView.h"
 
@@ -57,4 +58,11 @@ int main()
 	{
 		std::cout << val << std::endl;
 	}
+
+	je::Stack<float> s2 = Move(stack);
+
+	je::Queue<float> q{ arena, 24 };
+	q.Enqueue(3);
+	je::Queue<float> q2 = Move(q);
+	q2.Enqueue(5);
 }
