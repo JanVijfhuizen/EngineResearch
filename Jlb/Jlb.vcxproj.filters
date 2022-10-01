@@ -18,7 +18,7 @@
     <ClInclude Include="Include\framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\pch.h">
+    <ClInclude Include="Include\jpch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Jlb\Arena.h">
@@ -71,7 +71,7 @@
     <ClCompile Include="Src\Jlb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\pch.cpp">
+    <ClCompile Include="Src\jpch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Arena.cpp">

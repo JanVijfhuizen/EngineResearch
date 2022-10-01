@@ -2,8 +2,7 @@
 
 #include <iostream>
 
-#include "Jlb/Arena.h"
-#include "Jlb/Array.h"
+#include "Window.h"
 #include "Jlb/Heap.h"
 #include "Jlb/JMap.h"
 #include "Jlb/JMove.h"
@@ -70,4 +69,35 @@ int main()
 	je::Heap<float> heap{arena, 7};
 	heap.Insert(52.34f, 8);
 	assert(heap.Peek() > 52.f);
+
+	class Engine final : public je::engine::IWindow
+	{
+	public:
+		void OnWindowResized(size_t width, size_t height) override
+		{
+			
+		}
+		void OnKeyCallback(size_t key, size_t action) override
+		{
+			
+		}
+		void OnMouseCallback(size_t key, size_t action) override
+		{
+			
+		}
+		void OnScrollCallback(double xOffset, double yOffset) override
+		{
+			
+		}
+		void OnBeginFrame(bool& outQuit) override
+		{
+			std::cout << "hello" << std::endl;
+		}
+	} engine{};
+
+	je::engine::CreateInfo info{};
+	info.window = &engine;
+
+	const auto result = Run(info);
+	assert(!result);
 }
