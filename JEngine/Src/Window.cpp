@@ -9,25 +9,29 @@ namespace je::engine
 		static void GLFWKeyCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
 		{
 			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
-			engine->OnKeyCallback(key, action);
+			if (engine->onKeyCallback)
+				engine->onKeyCallback(key, action);
 		}
 
 		static void GLFWMouseKeyCallback(GLFWwindow* window, const int button, const int action, const int mods)
 		{
 			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
-			engine->OnMouseCallback(button, action);
+			if (engine->onMouseCallback)
+				engine->onMouseCallback(button, action);
 		}
 
 		static void GLFWScrollCallback(GLFWwindow* window, const double xOffset, const double yOffset)
 		{
 			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
-			engine->OnScrollCallback(xOffset, yOffset);
+			if (engine->onScrollCallback)
+				engine->onScrollCallback({ xOffset, yOffset });
 		}
 
 		static void FrameBufferResizeCallback(GLFWwindow* window, const int width, const int height)
 		{
 			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
-			engine->OnWindowResized(width, height);
+			if (engine->onWindowResized)
+				engine->onWindowResized({ width, height });
 		}
 
 		GLFWwindow* window = nullptr;
@@ -44,6 +48,8 @@ namespace je::engine
 
 	void Window::BeginFrame(bool& outQuit)
 	{
+		assert(internalWindow.running);
+
 		// Check for events.
 		glfwPollEvents();
 
@@ -60,8 +66,6 @@ namespace je::engine
 			glfwGetFramebufferSize(window, &width, &height);
 			glfwWaitEvents();
 		}
-
-		OnBeginFrame(outQuit);
 	}
 
 	Window::Window(const StringView& name, glm::ivec2 overrideResolution)
@@ -100,25 +104,5 @@ namespace je::engine
 		glfwDestroyWindow(internalWindow.window);
 		glfwTerminate();
 		internalWindow.running = false;
-	}
-
-	void Window::OnWindowResized(size_t width, size_t height)
-	{
-	}
-
-	void Window::OnKeyCallback(size_t key, size_t action)
-	{
-	}
-
-	void Window::OnMouseCallback(size_t key, size_t action)
-	{
-	}
-
-	void Window::OnScrollCallback(double xOffset, double yOffset)
-	{
-	}
-
-	void Window::OnBeginFrame(bool& outQuit)
-	{
 	}
 }

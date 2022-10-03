@@ -70,21 +70,9 @@ int main()
 	heap.Insert(52.34f, 8);
 	assert(heap.Peek() > 52.f);
 
-	class Engine final : public je::engine::Window
-	{
-	public:
-		Engine() : Window("Hello", glm::ivec2(800, 600))
-		{
-			
-		}
-
-		void OnBeginFrame(bool& outQuit) override
-		{
-			std::cout << "hello" << std::endl;
-		}
-	} engine{};
+	je::engine::Window window{"hi", {800, 600}};
 
 	bool quit = false;
 	while(!quit)
-		engine.OnBeginFrame(quit);
+		window.BeginFrame(quit);
 }
