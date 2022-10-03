@@ -144,6 +144,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Engine.h" />
+    <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\Window.h" />
     <ClInclude Include="Include\pch.h" />
   </ItemGroup>

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "JMove.h"
 
 namespace je
 {
@@ -53,7 +54,7 @@ namespace je
 		void* ptr = Alloc(sizeof(T) * count);
 		T* ptrType = static_cast<T*>(ptr);
 		for (size_t i = 0; i < count; ++i)
-			ptrType[i] = {};
+			ptrType[i] = T();
 		return ptrType;
 	}
 }

@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "Module.h"
 #include "Jlb/Arena.h"
 
 namespace je
@@ -43,6 +44,7 @@ namespace je
 		Arena _persistentArena;
 		Arena _tempArena;
 		Arena _dumpArena;
+		Module* _linkedModules = nullptr;
 
 		template <typename T>
 		void AddModule();
@@ -57,5 +59,10 @@ namespace je
 	template <typename T>
 	void Engine::AddModule()
 	{
+		T* instance = _persistentArena.New<T>();
+		Module* mod = dynamic_cast<Module*>(instance);
+		static_assert(dynamic_cast<Module*>(instance));
+		mod->_next = _linkedModules;
+		_linkedModules = mod;
 	}
 }
