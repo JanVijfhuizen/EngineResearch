@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Engine.cpp" />
     <ClCompile Include="Src\Window.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -142,6 +143,7 @@
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\Window.h" />
     <ClInclude Include="Include\pch.h" />
   </ItemGroup>
