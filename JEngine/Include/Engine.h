@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include "Module.h"
 #include "Jlb/Arena.h"
+#include "Jlb/JMap.h"
+#include "Jlb/LinkedList.h"
+#include <vcruntime_typeinfo.h>
 
 namespace je
 {
@@ -18,7 +21,20 @@ namespace je
 			[[nodiscard]] size_t GetMemorySpaceRequired() const;
 		};
 
-		Engine(const CreateInfo& info = {});
+		struct ModuleFinder final
+		{
+			friend Engine;
+
+			template <typename T>
+			[[nodiscard]] T* Get();
+
+		private:
+			Map<Module*> _map;
+
+			explicit ModuleFinder(Engine& engine);
+		};
+
+		explicit Engine(const CreateInfo& info = {});
 		virtual ~Engine();
 
 		[[nodiscard]] size_t Run();
@@ -36,19 +52,31 @@ namespace je
 
 			explicit Initializer(Engine& engine);
 		};
-
+		
 		virtual void DefineAdditionalModules(const Initializer& initializer) = 0;
 
 	private:
+		struct Chain final
+		{
+			Module* ptr = nullptr;
+			size_t hashCode = SIZE_MAX;
+		};
+
 		void* _memory;
 		Arena _persistentArena;
 		Arena _tempArena;
 		Arena _dumpArena;
-		Module* _linkedModules = nullptr;
+		LinkedList<Chain> _linkedModules;
 
 		template <typename T>
 		void AddModule();
 	};
+
+	template <typename T>
+	T* Engine::ModuleFinder::Get()
+	{
+		return static_cast<T*>(_map.Contains(typeid(T).hash_code()));
+	}
 
 	template <typename T>
 	void Engine::Initializer::AddModule() const
@@ -59,10 +87,9 @@ namespace je
 	template <typename T>
 	void Engine::AddModule()
 	{
-		T* instance = _persistentArena.New<T>();
-		Module* mod = dynamic_cast<Module*>(instance);
-		static_assert(dynamic_cast<Module*>(instance));
-		mod->_next = _linkedModules;
-		_linkedModules = mod;
+		Chain chain{};
+		chain.ptr = _persistentArena.New<T>();
+		chain.hashCode = typeid(T).hash_code();
+		_linkedModules.Add(chain);
 	}
 }
