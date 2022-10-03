@@ -70,34 +70,21 @@ int main()
 	heap.Insert(52.34f, 8);
 	assert(heap.Peek() > 52.f);
 
-	class Engine final : public je::engine::IWindow
+	class Engine final : public je::engine::Window
 	{
 	public:
-		void OnWindowResized(size_t width, size_t height) override
+		Engine() : Window("Hello", glm::ivec2(800, 600))
 		{
 			
 		}
-		void OnKeyCallback(size_t key, size_t action) override
-		{
-			
-		}
-		void OnMouseCallback(size_t key, size_t action) override
-		{
-			
-		}
-		void OnScrollCallback(double xOffset, double yOffset) override
-		{
-			
-		}
+
 		void OnBeginFrame(bool& outQuit) override
 		{
 			std::cout << "hello" << std::endl;
 		}
 	} engine{};
 
-	je::engine::CreateInfo info{};
-	info.window = &engine;
-
-	const auto result = Run(info);
-	assert(!result);
+	bool quit = false;
+	while(!quit)
+		engine.OnBeginFrame(quit);
 }

@@ -3,22 +3,22 @@
 
 namespace je::engine
 {
-	class IWindow
+	class Window
 	{
+		friend class WindowInternal;
+
 	public:
-		virtual void OnWindowResized(size_t width, size_t height) = 0;
-		virtual void OnKeyCallback(size_t key, size_t action) = 0;
-		virtual void OnMouseCallback(size_t key, size_t action) = 0;
-		virtual void OnScrollCallback(double xOffset, double yOffset) = 0;
-		virtual void OnBeginFrame(bool& outQuit) = 0;
-	};
+		[[nodiscard]] static const char** GetRequiredExtensions(size_t& count);
+		void BeginFrame(bool& outQuit);
 
-	struct CreateInfo final
-	{
-		StringView name = "JEngine";
-		IWindow* window = nullptr;
-	};
+	protected:
+		explicit Window(const StringView& name = "JEngine", glm::ivec2 overrideResolution = {});
+		~Window();
 
-	[[nodiscard]] size_t Run(const CreateInfo& info = {});
-	[[nodiscard]] const char** GetRequiredExtensions(size_t& count);
+		virtual void OnWindowResized(size_t width, size_t height);
+		virtual void OnKeyCallback(size_t key, size_t action);
+		virtual void OnMouseCallback(size_t key, size_t action);
+		virtual void OnScrollCallback(double xOffset, double yOffset);
+		virtual void OnBeginFrame(bool& outQuit);
+	};
 }
