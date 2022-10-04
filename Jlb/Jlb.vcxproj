@@ -149,7 +149,7 @@
     <ClInclude Include="Include\Jlb\JMap.h" />
     <ClInclude Include="Include\Jlb\JMath.h" />
     <ClInclude Include="Include\Jlb\JMove.h" />
-    <ClInclude Include="Include\Jlb\JString.h" />
+    <ClInclude Include="Include\Jlb\StringArray.h" />
     <ClInclude Include="Include\Jlb\JVector.h" />
     <ClInclude Include="Include\Jlb\KeyPair.h" />
     <ClInclude Include="Include\Jlb\LinkedList.h" />
@@ -166,7 +166,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Src\JString.cpp" />
     <ClCompile Include="Src\jpch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
