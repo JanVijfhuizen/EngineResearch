@@ -11,7 +11,7 @@ namespace je
 	{
 	public:
 		Map(Arena& arena, size_t length);
-		Map(Array<T>&& other) noexcept;
+		Map(Map<T>&& other) noexcept;
 
 		void Insert(const T& instance, size_t key);
 
@@ -64,7 +64,7 @@ namespace je
 	}
 
 	template <typename T>
-	Map<T>::Map(Array<T>&& other) noexcept : Array<KeyPair<T>>(other), _count(other._count)
+	Map<T>::Map(Map<T>&& other) noexcept : Array<KeyPair<T>>(Move(other)), _count(other._count)
 	{
 
 	}

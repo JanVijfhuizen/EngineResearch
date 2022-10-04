@@ -6,6 +6,7 @@
 
 namespace je
 {
+	/*
 	String::String(Arena& arena, const size_t number) : Array<char>(arena, math::GetFractals<size_t>(number) + 1)
 	{
 		const auto data = GetData();
@@ -31,7 +32,7 @@ namespace je
 			data[i] = view[i];
 		data[length] = '\0';
 	}
-
+	*/
 	String::operator StringView() const
 	{
 		return GetStringView();

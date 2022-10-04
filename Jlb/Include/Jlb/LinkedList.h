@@ -35,7 +35,7 @@ namespace je
 		};
 
 		explicit LinkedList(Arena& arena);
-		LinkedList(LinkedList&& other) noexcept;
+		LinkedList(LinkedList<T>&& other) noexcept;
 		~LinkedList();
 
 		T& Add(const T& instance = {});
@@ -84,7 +84,7 @@ namespace je
 	}
 
 	template <typename T>
-	LinkedList<T>::LinkedList(LinkedList&& other) noexcept : _arena(other._arena), _chain(other._chain)
+	LinkedList<T>::LinkedList(LinkedList<T>&& other) noexcept : _arena(other._arena), _chain(other._chain)
 	{
 		other._arena = nullptr;
 		other._chain = nullptr;
