@@ -40,6 +40,49 @@ namespace je::engine
 		bool running = false;
 	} internalWindow;
 
+	void Window::OnBegin(EngineInfo& info)
+	{
+		Module::OnBegin(info);
+
+		assert(!internalWindow.running);
+		internalWindow.running = true;
+
+		const int result = glfwInit();
+		assert(result);
+
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
+		glfwWindowHint(GLFW_RESIZABLE, false);
+
+		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+
+		// Create window.
+		auto& window = internalWindow.window;
+		auto& overrideResolution = createInfo.overrideResolution;
+		const bool fullscreen = overrideResolution.x == 0 && overrideResolution.y == 0;
+		overrideResolution = fullscreen ? glm::ivec2{ mode->width, mode->height } : overrideResolution;
+		window = glfwCreateWindow(overrideResolution.x, overrideResolution.y, createInfo.name, fullscreen ? monitor : nullptr, nullptr);
+		assert(window);
+		glfwSetWindowUserPointer(window, this);
+
+		glfwSetFramebufferSizeCallback(window, WindowInternal::FrameBufferResizeCallback);
+		glfwSetKeyCallback(window, WindowInternal::GLFWKeyCallback);
+		glfwSetMouseButtonCallback(window, WindowInternal::GLFWMouseKeyCallback);
+		glfwSetScrollCallback(window, WindowInternal::GLFWScrollCallback);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+
+		glfwMakeContextCurrent(window);
+	}
+
+	void Window::OnExit(EngineInfo& info)
+	{
+		glfwDestroyWindow(internalWindow.window);
+		glfwTerminate();
+		internalWindow.running = false;
+
+		Module::OnExit(info);
+	}
+
 	const char** Window::GetRequiredExtensions(size_t& count)
 	{
 		uint32_t glfwExtensionCount = 0;
@@ -70,43 +113,5 @@ namespace je::engine
 			glfwGetFramebufferSize(window, &width, &height);
 			glfwWaitEvents();
 		}
-	}
-
-	Window::Window(const StringView& name, glm::ivec2 overrideResolution)
-	{
-		assert(!internalWindow.running);
-		internalWindow.running = true;
-
-		const int result = glfwInit();
-		assert(result);
-
-		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-		glfwWindowHint(GLFW_RESIZABLE, false);
-
-		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
-		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-
-		// Create window.
-		auto& window = internalWindow.window;
-		const bool fullscreen = overrideResolution.x == 0 && overrideResolution.y == 0;
-		overrideResolution = fullscreen ? glm::ivec2{mode->width, mode->height} : overrideResolution;
-		window = glfwCreateWindow(overrideResolution.x, overrideResolution.y, name, fullscreen ? monitor : nullptr, nullptr);
-		assert(window);
-		glfwSetWindowUserPointer(window, this);
-
-		glfwSetFramebufferSizeCallback(window, WindowInternal::FrameBufferResizeCallback);
-		glfwSetKeyCallback(window, WindowInternal::GLFWKeyCallback);
-		glfwSetMouseButtonCallback(window, WindowInternal::GLFWMouseKeyCallback);
-		glfwSetScrollCallback(window, WindowInternal::GLFWScrollCallback);
-		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-
-		glfwMakeContextCurrent(window);
-	}
-
-	Window::~Window()
-	{
-		glfwDestroyWindow(internalWindow.window);
-		glfwTerminate();
-		internalWindow.running = false;
 	}
 }

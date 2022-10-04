@@ -45,6 +45,8 @@ namespace je
 		EngineInfo info{*this, finder};
 
 		for (const auto& mod : _linkedModules)
+			mod.value->OnInitialize(info);
+		for (const auto& mod : _linkedModules)
 			mod.value->OnBegin(info);
 
 		while(!info.quit)
@@ -53,6 +55,8 @@ namespace je
 				mod.value->OnUpdate(info);
 			for (const auto& mod : _linkedModules)
 				mod.value->OnPostUpdate(info);
+
+			_dumpArena.Empty();
 		}
 
 		for (const auto& mod : _linkedModules)

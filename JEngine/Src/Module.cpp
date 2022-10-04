@@ -3,6 +3,10 @@
 
 namespace je
 {
+	void Module::OnInitialize(EngineInfo& info)
+	{
+	}
+
 	void Module::OnBegin(EngineInfo& info)
 	{
 	}
