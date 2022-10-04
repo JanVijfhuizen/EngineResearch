@@ -10,6 +10,7 @@ namespace je
 	class Engine
 	{
 		friend struct Initializer;
+		friend struct EngineInfo;
 
 	public:
 		struct CreateInfo final

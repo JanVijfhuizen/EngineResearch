@@ -2,14 +2,16 @@
 
 namespace je
 {
+	struct EngineInfo;
+
 	class Module
 	{
 		friend class Engine;
 
 	protected:
-		virtual void OnBegin();
-		virtual void OnUpdate();
-		virtual void OnPostUpdate();
-		virtual void OnExit();
+		virtual void OnBegin(const EngineInfo& info);
+		virtual void OnUpdate(const EngineInfo& info);
+		virtual void OnPostUpdate(const EngineInfo& info);
+		virtual void OnExit(const EngineInfo& info);
 	};
 }

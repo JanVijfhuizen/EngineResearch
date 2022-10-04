@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "Engine.h"
+
+#include "EngineInfo.h"
 #include "ModuleFinder.h"
 #include "Jlb/LinkedList.h"
 
@@ -37,6 +39,22 @@ namespace je
 		ModuleFinder finder{ _persistentArena, _linkedModules };
 		for (auto& [ptr, hashCode] : _linkedModules)
 			finder._map.Insert(ptr, hashCode);
+
+		const EngineInfo info{*this, finder};
+
+		for (const auto& mod : _linkedModules)
+			mod.value->OnBegin(info);
+
+		while(!info.quit)
+		{
+			for (const auto& mod : _linkedModules)
+				mod.value->OnUpdate(info);
+			for (const auto& mod : _linkedModules)
+				mod.value->OnPostUpdate(info);
+		}
+
+		for (const auto& mod : _linkedModules)
+			mod.value->OnExit(info);
 
 		_running = false;
 		return EXIT_SUCCESS;

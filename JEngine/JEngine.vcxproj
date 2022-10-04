@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Engine.cpp" />
+    <ClCompile Include="Src\EngineInfo.cpp" />
     <ClCompile Include="Src\Module.cpp" />
     <ClCompile Include="Src\ModuleFinder.cpp" />
     <ClCompile Include="Src\Window.cpp" />
@@ -146,6 +147,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\Engine.h" />
+    <ClInclude Include="Include\EngineInfo.h" />
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\ModuleFinder.h" />
     <ClInclude Include="Include\Window.h" />
