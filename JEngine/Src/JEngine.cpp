@@ -18,11 +18,6 @@ protected:
 
 int main()
 {
-	je::engine::Window window{"hi", {800, 600}};
-
 	MyEngine engine{};
-
-	bool quit = false;
-	while(!quit)
-		window.BeginFrame(quit);
+	return static_cast<int>(engine.Run());
 }

@@ -3,19 +3,19 @@
 
 namespace je
 {
-	void Module::OnBegin(const EngineInfo& info)
+	void Module::OnBegin(EngineInfo& info)
 	{
 	}
 
-	void Module::OnUpdate(const EngineInfo& info)
+	void Module::OnUpdate(EngineInfo& info)
 	{
 	}
 
-	void Module::OnPostUpdate(const EngineInfo& info)
+	void Module::OnPostUpdate(EngineInfo& info)
 	{
 	}
 
-	void Module::OnExit(const EngineInfo& info)
+	void Module::OnExit(EngineInfo& info)
 	{
 	}
 }

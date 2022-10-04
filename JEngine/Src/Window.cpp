@@ -1,6 +1,8 @@
 ﻿#include "pch.h"
 #include "Window.h"
 
+#include "EngineInfo.h"
+
 namespace je::engine
 {
 	class WindowInternal final
@@ -46,8 +48,10 @@ namespace je::engine
 		return buffer;
 	}
 
-	void Window::BeginFrame(bool& outQuit)
+	void Window::OnUpdate(EngineInfo& info)
 	{
+		Module::OnUpdate(info);
+
 		assert(internalWindow.running);
 
 		// Check for events.
@@ -55,8 +59,8 @@ namespace je::engine
 
 		// Check if the user pressed the close button.
 		const auto& window = internalWindow.window;
-		outQuit = glfwWindowShouldClose(window);
-		if (outQuit)
+		info.quit = info.quit ? info.quit : glfwWindowShouldClose(window);
+		if (info.quit)
 			return;
 
 		int32_t width = 0, height = 0;

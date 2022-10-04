@@ -9,9 +9,9 @@ namespace je
 		friend class Engine;
 
 	protected:
-		virtual void OnBegin(const EngineInfo& info);
-		virtual void OnUpdate(const EngineInfo& info);
-		virtual void OnPostUpdate(const EngineInfo& info);
-		virtual void OnExit(const EngineInfo& info);
+		virtual void OnBegin(EngineInfo& info);
+		virtual void OnUpdate(EngineInfo& info);
+		virtual void OnPostUpdate(EngineInfo& info);
+		virtual void OnExit(EngineInfo& info);
 	};
 }

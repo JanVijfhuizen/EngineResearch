@@ -33,8 +33,8 @@ namespace je
 		void Free(void* ptr);
 
 		// Allocate N objects of type T. Calls default constructors.
-		template <typename T>
-		[[nodiscard]] T* New(size_t count = 1);
+		template <typename T, typename ...Args>
+		[[nodiscard]] T* New(size_t count = 1, Args... args);
 
 		[[nodiscard]] Scope CreateScope();
 
@@ -48,13 +48,13 @@ namespace je
 		Arena* _next = nullptr;
 	};
 
-	template <typename T>
-	T* Arena::New(const size_t count)
+	template <typename T, typename ...Args>
+	T* Arena::New(const size_t count, Args... args)
 	{
 		void* ptr = Alloc(sizeof(T) * count);
 		T* ptrType = static_cast<T*>(ptr);
 		for (size_t i = 0; i < count; ++i)
-			ptrType[i] = T();
+			new(&ptrType[i]) T(args...);
 		return ptrType;
 	}
 }

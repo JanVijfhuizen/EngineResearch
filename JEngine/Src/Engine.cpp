@@ -3,6 +3,7 @@
 
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
+#include "Window.h"
 #include "Jlb/LinkedList.h"
 
 namespace je
@@ -33,6 +34,7 @@ namespace je
 
 		{
 			const Initializer initializer{ *this };
+			initializer.AddModule<engine::Window>();
 			DefineAdditionalModules(initializer);
 		}
 
@@ -40,7 +42,7 @@ namespace je
 		for (auto& [ptr, hashCode] : _linkedModules)
 			finder._map.Insert(ptr, hashCode);
 
-		const EngineInfo info{*this, finder};
+		EngineInfo info{*this, finder};
 
 		for (const auto& mod : _linkedModules)
 			mod.value->OnBegin(info);

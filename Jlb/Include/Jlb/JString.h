@@ -17,4 +17,3 @@ namespace je
 		[[nodiscard]] View<char> GetView() const override;
 	};
 }
-

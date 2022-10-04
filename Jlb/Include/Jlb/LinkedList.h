@@ -6,7 +6,6 @@ namespace je
 	template <typename T>
 	class LinkedList final
 	{
-	private:
 		struct Chain final
 		{
 			T instance{};
@@ -106,7 +105,7 @@ namespace je
 	T& LinkedList<T>::Add(const T& instance)
 	{
 		++_count;
-		Chain* chain = _arena->New<Chain>();
+		auto* chain = _arena->New<Chain>();
 		chain->instance = instance;
 		chain->next = _chain;
 		_chain = chain;
