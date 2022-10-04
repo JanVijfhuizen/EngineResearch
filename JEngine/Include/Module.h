@@ -7,8 +7,9 @@ namespace je
 		friend class Engine;
 
 	protected:
-
-	private:
-		Module* _next = nullptr;
+		virtual void OnBegin();
+		virtual void OnUpdate();
+		virtual void OnPostUpdate();
+		virtual void OnExit();
 	};
 }

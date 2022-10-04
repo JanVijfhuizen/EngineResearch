@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "Engine.h"
-
+#include "ModuleFinder.h"
 #include "Jlb/LinkedList.h"
 
 namespace je
@@ -8,11 +8,6 @@ namespace je
 	size_t Engine::CreateInfo::GetMemorySpaceRequired() const
 	{
 		return persistentArenaSize + tempArenaSize + dumpArenaSize;
-	}
-
-	Engine::ModuleFinder::ModuleFinder(Engine& engine) : _map(engine._persistentArena, engine._linkedModules.GetCount())
-	{
-
 	}
 
 	Engine::Engine(const CreateInfo& info) :
@@ -31,15 +26,19 @@ namespace je
 
 	size_t Engine::Run()
 	{
+		assert(!_running);
+		_running = true;
+
 		{
 			const Initializer initializer{ *this };
 			DefineAdditionalModules(initializer);
 		}
 
-		ModuleFinder finder{ *this };
+		ModuleFinder finder{ _persistentArena, _linkedModules };
 		for (auto& [ptr, hashCode] : _linkedModules)
 			finder._map.Insert(ptr, hashCode);
 
+		_running = false;
 		return EXIT_SUCCESS;
 	}
 

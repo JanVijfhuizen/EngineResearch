@@ -21,19 +21,6 @@ namespace je
 			[[nodiscard]] size_t GetMemorySpaceRequired() const;
 		};
 
-		struct ModuleFinder final
-		{
-			friend Engine;
-
-			template <typename T>
-			[[nodiscard]] T* Get();
-
-		private:
-			Map<Module*> _map;
-
-			explicit ModuleFinder(Engine& engine);
-		};
-
 		explicit Engine(const CreateInfo& info = {});
 		virtual ~Engine();
 
@@ -56,27 +43,16 @@ namespace je
 		virtual void DefineAdditionalModules(const Initializer& initializer) = 0;
 
 	private:
-		struct Chain final
-		{
-			Module* ptr = nullptr;
-			size_t hashCode = SIZE_MAX;
-		};
-
 		void* _memory;
 		Arena _persistentArena;
 		Arena _tempArena;
 		Arena _dumpArena;
-		LinkedList<Chain> _linkedModules;
+		LinkedList<KeyPair<Module*>> _linkedModules;
+		bool _running = false;
 
 		template <typename T>
 		void AddModule();
 	};
-
-	template <typename T>
-	T* Engine::ModuleFinder::Get()
-	{
-		return static_cast<T*>(_map.Contains(typeid(T).hash_code()));
-	}
 
 	template <typename T>
 	void Engine::Initializer::AddModule() const
@@ -87,9 +63,9 @@ namespace je
 	template <typename T>
 	void Engine::AddModule()
 	{
-		Chain chain{};
-		chain.ptr = _persistentArena.New<T>();
-		chain.hashCode = typeid(T).hash_code();
-		_linkedModules.Add(chain);
+		KeyPair<Module*> pair{};
+		pair.value = _persistentArena.New<T>();
+		pair.key = typeid(T).hash_code();
+		_linkedModules.Add(pair);
 	}
 }
