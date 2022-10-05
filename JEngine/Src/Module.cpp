@@ -3,11 +3,6 @@
 
 namespace je
 {
-	void Module::DefineDependencies(const EngineInitializer& initializer)
-	{
-		
-	}
-
 	void Module::OnInitialize(EngineInfo& info)
 	{
 	}

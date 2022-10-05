@@ -45,17 +45,9 @@ namespace je
 	template <typename T>
 	void Engine::AddModule()
 	{
-		const size_t key = typeid(T).hash_code();
-		/*
-		for (const auto& mod : _linkedModules)
-		{
-			if (mod.key == key)
-				return;
-		}
-		*/
 		KeyPair<Module*> pair{};
 		pair.value = _persistentArena.New<T>();
-		pair.key = key;
+		pair.key = typeid(T).hash_code();
 		_linkedModules.Add(pair);
 	}
 }
