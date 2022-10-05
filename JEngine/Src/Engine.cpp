@@ -2,6 +2,7 @@
 #include "Engine.h"
 
 #include "EngineInfo.h"
+#include "EngineInitializer.h"
 #include "ModuleFinder.h"
 #include "Window.h"
 #include "Jlb/LinkedList.h"
@@ -33,7 +34,7 @@ namespace je
 		_running = true;
 
 		{
-			const Initializer initializer{ *this };
+			const EngineInitializer initializer{ *this };
 			initializer.AddModule<engine::Window>();
 			DefineAdditionalModules(initializer);
 		}
@@ -64,10 +65,5 @@ namespace je
 
 		_running = false;
 		return EXIT_SUCCESS;
-	}
-
-	Engine::Initializer::Initializer(Engine& engine) : _engine(&engine)
-	{
-
 	}
 }

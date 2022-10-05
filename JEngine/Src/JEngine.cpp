@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Engine.h"
+#include "EngineInitializer.h"
 #include "Window.h"
 
 class SomeModule final : public je::Module
@@ -10,7 +11,7 @@ class SomeModule final : public je::Module
 class MyEngine final : public je::Engine
 {
 protected:
-	void DefineAdditionalModules(const Initializer& initializer) override
+	void DefineAdditionalModules(const je::EngineInitializer& initializer) override
 	{
 		initializer.AddModule<SomeModule>();
 	}

@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\EngineInitializer.cpp" />
     <ClCompile Include="Src\Engine.cpp" />
     <ClCompile Include="Src\EngineInfo.cpp" />
     <ClCompile Include="Src\Module.cpp" />
@@ -146,6 +147,7 @@
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\EngineInitializer.h" />
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
     <ClInclude Include="Include\Module.h" />

@@ -9,8 +9,8 @@ namespace je
 {
 	class Engine
 	{
-		friend struct Initializer;
 		friend struct EngineInfo;
+		friend struct EngineInitializer;
 
 	public:
 		struct CreateInfo final
@@ -28,20 +28,7 @@ namespace je
 		[[nodiscard]] size_t Run();
 
 	protected:
-		struct Initializer final
-		{
-			friend Engine;
-
-			template <typename T, typename ...Args>
-			void AddModule(Args... args) const;
-
-		private:
-			Engine* _engine = nullptr;
-
-			explicit Initializer(Engine& engine);
-		};
-		
-		virtual void DefineAdditionalModules(const Initializer& initializer) = 0;
+		virtual void DefineAdditionalModules(const EngineInitializer& initializer) = 0;
 
 	private:
 		void* _memory;
@@ -51,22 +38,24 @@ namespace je
 		LinkedList<KeyPair<Module*>> _linkedModules;
 		bool _running = false;
 
-		template <typename T, typename ...Args>
-		void AddModule(Args... args);
+		template <typename T>
+		void AddModule();
 	};
 
-	template <typename T, typename ...Args>
-	void Engine::Initializer::AddModule(Args... args) const
+	template <typename T>
+	void Engine::AddModule()
 	{
-		_engine->AddModule<T>(args...);
-	}
-
-	template <typename T, typename ...Args>
-	void Engine::AddModule(Args... args)
-	{
+		const size_t key = typeid(T).hash_code();
+		/*
+		for (const auto& mod : _linkedModules)
+		{
+			if (mod.key == key)
+				return;
+		}
+		*/
 		KeyPair<Module*> pair{};
-		pair.value = _persistentArena.New<T>(1, args...);
-		pair.key = typeid(T).hash_code();
+		pair.value = _persistentArena.New<T>();
+		pair.key = key;
 		_linkedModules.Add(pair);
 	}
 }
