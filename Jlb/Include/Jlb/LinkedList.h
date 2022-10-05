@@ -39,9 +39,10 @@ namespace je
 		~LinkedList();
 
 		T& Add(const T& instance = {});
+		[[nodiscard]] T& operator[](size_t index);
 
 		[[nodiscard]] size_t GetCount() const;
-		Iterator begin() const;
+		[[nodiscard]] Iterator begin() const;
 		static Iterator end();
 
 	private:
@@ -109,6 +110,17 @@ namespace je
 		chain->instance = instance;
 		chain->next = _chain;
 		_chain = chain;
+		return chain->instance;
+	}
+
+	template <typename T>
+	T& LinkedList<T>::operator[](const size_t index)
+	{
+		Chain* chain = _chain;
+		for (size_t i = 1; i < index; ++i)
+		{
+			chain = chain->next;
+		}
 		return chain->instance;
 	}
 

@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include "Engine.h"
+#include <vcruntime_typeinfo.h>
 
 namespace je
 {
@@ -7,18 +8,22 @@ namespace je
 	{
 		friend Engine;
 
-		template <typename T, typename ...Args>
-		void AddModule(Args... args) const;
+		template <typename T>
+		void AddModule();
 
 	private:
-		Engine& _engine;
+		Arena& _tempArena;
+		LinkedList<KeyPair<Module*>> _linkedModules;
 
 		explicit EngineInitializer(Engine& engine);
 	};
 
-	template <typename T, typename ...Args>
-	void EngineInitializer::AddModule(Args... args) const
+	template <typename T>
+	void EngineInitializer::AddModule()
 	{
-		_engine.AddModule<T>(args...);
+		KeyPair<Module*> pair{};
+		pair.value = _tempArena.New<T>();
+		pair.key = typeid(T).hash_code();
+		_linkedModules.Add(pair);
 	}
 }

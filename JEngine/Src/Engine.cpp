@@ -34,9 +34,11 @@ namespace je
 		_running = true;
 
 		{
-			const EngineInitializer initializer{ *this };
+			EngineInitializer initializer{ *this };
 			initializer.AddModule<engine::Window>();
 			DefineAdditionalModules(initializer);
+
+			// todo move content to _linkedModules.
 		}
 
 		ModuleFinder finder{ _persistentArena, _linkedModules };
@@ -45,23 +47,23 @@ namespace je
 
 		EngineInfo info{*this, finder};
 
-		for (const auto& mod : _linkedModules)
-			mod.value->OnInitialize(info);
-		for (const auto& mod : _linkedModules)
-			mod.value->OnBegin(info);
+		for (const auto& [value, hashCode] : _linkedModules)
+			value->OnInitialize(info);
+		for (const auto& [value, hashCode] : _linkedModules)
+			value->OnBegin(info);
 
 		while(!info.quit)
 		{
-			for (const auto& mod : _linkedModules)
-				mod.value->OnUpdate(info);
-			for (const auto& mod : _linkedModules)
-				mod.value->OnPostUpdate(info);
+			for (const auto& [ptr, hashCode] : _linkedModules)
+				ptr->OnUpdate(info);
+			for (const auto& [ptr, hashCode] : _linkedModules)
+				ptr->OnPostUpdate(info);
 
 			_dumpArena.Empty();
 		}
 
-		for (const auto& mod : _linkedModules)
-			mod.value->OnExit(info);
+		for (const auto& [ptr, hashCode] : _linkedModules)
+			ptr->OnExit(info);
 
 		_running = false;
 		return EXIT_SUCCESS;

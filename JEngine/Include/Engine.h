@@ -3,7 +3,6 @@
 #include "Jlb/Arena.h"
 #include "Jlb/JMap.h"
 #include "Jlb/LinkedList.h"
-#include <vcruntime_typeinfo.h>
 
 namespace je
 {
@@ -28,7 +27,7 @@ namespace je
 		[[nodiscard]] size_t Run();
 
 	protected:
-		virtual void DefineAdditionalModules(const EngineInitializer& initializer) = 0;
+		virtual void DefineAdditionalModules(EngineInitializer& initializer) = 0;
 
 	private:
 		void* _memory;
@@ -37,17 +36,5 @@ namespace je
 		Arena _dumpArena;
 		LinkedList<KeyPair<Module*>> _linkedModules;
 		bool _running = false;
-
-		template <typename T>
-		void AddModule();
 	};
-
-	template <typename T>
-	void Engine::AddModule()
-	{
-		KeyPair<Module*> pair{};
-		pair.value = _persistentArena.New<T>();
-		pair.key = typeid(T).hash_code();
-		_linkedModules.Add(pair);
-	}
 }

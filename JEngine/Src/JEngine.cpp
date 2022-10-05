@@ -11,7 +11,7 @@ class SomeModule final : public je::Module
 class MyEngine final : public je::Engine
 {
 protected:
-	void DefineAdditionalModules(const je::EngineInitializer& initializer) override
+	void DefineAdditionalModules(je::EngineInitializer& initializer) override
 	{
 		initializer.AddModule<SomeModule>();
 	}
