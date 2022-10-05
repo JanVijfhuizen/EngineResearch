@@ -23,12 +23,12 @@ namespace je
 	};
 
 	template <typename T>
-	Vector<T>::Vector(Arena& arena, const size_t length): Array<T>(arena, length)
+	Vector<T>::Vector(Arena& arena, const size_t length) : Array<T>(arena, length)
 	{
 	}
 
 	template <typename T>
-	Vector<T>::Vector(Vector<T>&& other) noexcept: Array<T>(other)
+	Vector<T>::Vector(Vector<T>&& other) noexcept : Array<T>(Move(other))
 	{
 		_count = other._count;
 	}
@@ -37,13 +37,13 @@ namespace je
 	T& Vector<T>::Add(const T& instance)
 	{
 		assert(GetCount() < Array<T>::GetLength());
-		return Array<T>::_ptr[_count++] = instance;
+		return Array<T>::GetData()[_count++] = instance;
 	}
 
 	template <typename T>
 	void Vector<T>::Remove(const size_t index)
 	{
-		Array<T>::_ptr[index] = Array<T>::_ptr[--_count];
+		Array<T>::GetData()[index] = Array<T>::GetData()[--_count];
 	}
 
 	template <typename T>
@@ -61,6 +61,6 @@ namespace je
 	template <typename T>
 	View<T> Vector<T>::GetView() const
 	{
-		return { Array<T>::_ptr, _count };
+		return { Array<T>::GetData(), _count };
 	}
 }

@@ -18,7 +18,7 @@
     <ClInclude Include="Include\framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\pch.h">
+    <ClInclude Include="Include\jpch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Jlb\Arena.h">
@@ -42,7 +42,7 @@
     <ClInclude Include="Include\Jlb\JMove.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Jlb\JString.h">
+    <ClInclude Include="Include\Jlb\StringArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Jlb\JVector.h">
@@ -66,18 +66,18 @@
     <ClInclude Include="Include\Jlb\View.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Jlb\LinkedList.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Jlb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\pch.cpp">
+    <ClCompile Include="Src\jpch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Arena.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\JString.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\StringView.cpp">

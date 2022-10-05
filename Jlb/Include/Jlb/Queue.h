@@ -9,7 +9,7 @@ namespace je
 	{
 	public:
 		Queue(Arena& arena, size_t length);
-		Queue(Array<T>&& other) noexcept;
+		Queue(Queue<T>&& other) noexcept;
 
 		void Enqueue(const T& instance = {});
 		[[nodiscard]] T& Peek();
@@ -29,7 +29,7 @@ namespace je
 	}
 
 	template <typename T>
-	Queue<T>::Queue(Array<T>&& other) noexcept : Array<T>(other), _count(other._count), _begin(other._begin)
+	Queue<T>::Queue(Queue<T>&& other) noexcept : Array<T>(Move(other)), _count(other._count), _begin(other._begin)
 	{
 
 	}

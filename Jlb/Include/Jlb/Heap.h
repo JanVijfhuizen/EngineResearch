@@ -10,7 +10,7 @@ namespace je
 	{
 	public:
 		Heap(Arena& arena, size_t length);
-		Heap(Array<KeyPair<T>>&& other);
+		Heap(Heap<KeyPair<T>>&& other);
 
 		void Insert(const T& value, size_t key);
 		
@@ -33,7 +33,7 @@ namespace je
 	}
 
 	template <typename T>
-	Heap<T>::Heap(Array<KeyPair<T>>&& other) : Array<KeyPair<T>>(other), _count(other._count)
+	Heap<T>::Heap(Heap<KeyPair<T>>&& other) : Array<KeyPair<T>>(Move(other)), _count(other._count)
 	{
 	}
 

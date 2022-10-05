@@ -1,4 +1,5 @@
 ﻿#pragma once
+#include "JMove.h"
 
 namespace je
 {
@@ -18,10 +19,11 @@ namespace je
 			~Scope();
 
 		private:
-			Scope();
+			explicit Scope(Arena& arena, size_t& scopeCount, size_t current);
 
-			Arena* _arena = nullptr;
-			size_t _current = SIZE_MAX;
+			Arena& _arena;
+			size_t& _scopeCount;
+			size_t _current;
 		};
 
 		explicit Arena(void* ptr, size_t size);
@@ -32,8 +34,8 @@ namespace je
 		void Free(void* ptr);
 
 		// Allocate N objects of type T. Calls default constructors.
-		template <typename T>
-		[[nodiscard]] T* New(size_t count = 1);
+		template <typename T, typename ...Args>
+		[[nodiscard]] T* New(size_t count = 1, Args... args);
 
 		[[nodiscard]] Scope CreateScope();
 
@@ -45,15 +47,16 @@ namespace je
 		size_t _size = 0;
 		size_t _current = 0;
 		Arena* _next = nullptr;
+		size_t _scopeCount = 0;
 	};
 
-	template <typename T>
-	T* Arena::New(const size_t count)
+	template <typename T, typename ...Args>
+	T* Arena::New(const size_t count, Args... args)
 	{
 		void* ptr = Alloc(sizeof(T) * count);
 		T* ptrType = static_cast<T*>(ptr);
 		for (size_t i = 0; i < count; ++i)
-			ptrType[i] = {};
+			new(&ptrType[i]) T(args...);
 		return ptrType;
 	}
 }

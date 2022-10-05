@@ -10,6 +10,7 @@ namespace je
 	{
 		View(T& instance);
 		View(void* data, size_t length);
+		virtual ~View() = default;
 
 		[[nodiscard]] T& operator [](size_t index);
 		[[nodiscard]] size_t GetLength() const;

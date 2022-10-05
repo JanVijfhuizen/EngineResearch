@@ -9,7 +9,7 @@ namespace je
 	{
 	public:
 		Stack(Arena& arena, size_t length);
-		Stack(Array<T>&& other) noexcept;
+		Stack(Stack<T>&& other) noexcept;
 
 		void Push(const T& instance = {});
 		[[nodiscard]] T& Peek();
@@ -27,7 +27,7 @@ namespace je
 	}
 
 	template <typename T>
-	Stack<T>::Stack(Array<T>&& other) noexcept : Array<T>(other), _count(other._count)
+	Stack<T>::Stack(Stack<T>&& other) noexcept : Array<T>(Move(other)), _count(other._count)
 	{
 		
 	}
