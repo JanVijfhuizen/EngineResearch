@@ -34,7 +34,6 @@ namespace je
 		Arena _persistentArena;
 		Arena _tempArena;
 		Arena _dumpArena;
-		LinkedList<KeyPair<Module*>> _linkedModules;
 		bool _running = false;
 	};
 }

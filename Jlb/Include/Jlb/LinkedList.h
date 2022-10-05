@@ -41,14 +41,22 @@ namespace je
 		T& Add(const T& instance = {});
 		[[nodiscard]] T& operator[](size_t index);
 
+		void Inverse();
+
 		[[nodiscard]] size_t GetCount() const;
 		[[nodiscard]] Iterator begin() const;
 		static Iterator end();
+
+		// Returns whether or not this deallocates dependencies on destruction.
+		[[nodiscard]] bool GetIsDangling() const;
+		void SetDangling();
 
 	private:
 		Arena* _arena = nullptr;
 		Chain* _chain = nullptr;
 		size_t _count = 0;
+
+		[[nodiscard]] Chain* Inverse(Chain* previous, Chain* current);
 	};
 
 	template <typename T>
@@ -94,11 +102,15 @@ namespace je
 	template <typename T>
 	LinkedList<T>::~LinkedList()
 	{
+		if (!_arena)
+			return;
+
 		Chain* chain = _chain;
 		while(chain)
 		{
+			Chain* next = chain->next;
 			_arena->Free(chain);
-			chain = chain->next;
+			chain = next;
 		}
 	}
 
@@ -125,6 +137,12 @@ namespace je
 	}
 
 	template <typename T>
+	void LinkedList<T>::Inverse()
+	{
+		_chain = Inverse(nullptr, _chain);
+	}
+
+	template <typename T>
 	size_t LinkedList<T>::GetCount() const
 	{
 		return _count;
@@ -142,5 +160,27 @@ namespace je
 	typename LinkedList<T>::Iterator LinkedList<T>::end()
 	{
 		return {};
+	}
+
+	template <typename T>
+	bool LinkedList<T>::GetIsDangling() const
+	{
+		return !_arena;
+	}
+
+	template <typename T>
+	void LinkedList<T>::SetDangling()
+	{
+		_arena = nullptr;
+	}
+
+	template <typename T>
+	typename LinkedList<T>::Chain* LinkedList<T>::Inverse(Chain* previous, Chain* current)
+	{
+		if (!current)
+			return previous;
+		Chain* begin = Inverse(current, current->next);
+		current->next = previous;
+		return begin;
 	}
 }

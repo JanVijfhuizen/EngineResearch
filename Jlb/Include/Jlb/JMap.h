@@ -59,7 +59,7 @@ namespace je
 	}
 
 	template <typename T>
-	Map<T>::Map(Arena& arena, size_t length): Array<KeyPair<T>>(arena, length)
+	Map<T>::Map(Arena& arena, size_t length) : Array<KeyPair<T>>(arena, length)
 	{
 	}
 

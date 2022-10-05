@@ -12,7 +12,7 @@ namespace je
 		void AddModule();
 
 	private:
-		Arena& _tempArena;
+		Arena& _persistentArena;
 		LinkedList<KeyPair<Module*>> _linkedModules;
 
 		explicit EngineInitializer(Engine& engine);
@@ -22,7 +22,7 @@ namespace je
 	void EngineInitializer::AddModule()
 	{
 		KeyPair<Module*> pair{};
-		pair.value = _tempArena.New<T>();
+		pair.value = _persistentArena.New<T>();
 		pair.key = typeid(T).hash_code();
 		_linkedModules.Add(pair);
 	}

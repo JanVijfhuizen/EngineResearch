@@ -18,8 +18,7 @@ namespace je
 		_memory(malloc(info.GetMemorySpaceRequired())),
 		_persistentArena(_memory, info.persistentArenaSize),
 		_tempArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize, info.tempArenaSize),
-		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize),
-		_linkedModules(_persistentArena)
+		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize)
 	{
 	}
 
@@ -33,38 +32,44 @@ namespace je
 		assert(!_running);
 		_running = true;
 
+		auto _ = _persistentArena.CreateScope();
+
+		LinkedList<KeyPair<Module*>> linkedModules{_persistentArena};
+
 		{
 			EngineInitializer initializer{ *this };
 			initializer.AddModule<engine::Window>();
 			DefineAdditionalModules(initializer);
-
-			// todo move content to _linkedModules.
+			
+			for (auto& mod : initializer._linkedModules)
+				linkedModules.Add(mod);
 		}
 
-		ModuleFinder finder{ _persistentArena, _linkedModules };
-		for (auto& [ptr, hashCode] : _linkedModules)
+		ModuleFinder finder{ _persistentArena, linkedModules };
+		for (auto& [ptr, hashCode] : linkedModules)
 			finder._map.Insert(ptr, hashCode);
 
 		EngineInfo info{*this, finder};
 
-		for (const auto& [value, hashCode] : _linkedModules)
+		for (const auto& [value, hashCode] : linkedModules)
 			value->OnInitialize(info);
-		for (const auto& [value, hashCode] : _linkedModules)
+		for (const auto& [value, hashCode] : linkedModules)
 			value->OnBegin(info);
 
 		while(!info.quit)
 		{
-			for (const auto& [ptr, hashCode] : _linkedModules)
+			for (const auto& [ptr, hashCode] : linkedModules)
 				ptr->OnUpdate(info);
-			for (const auto& [ptr, hashCode] : _linkedModules)
+			for (const auto& [ptr, hashCode] : linkedModules)
 				ptr->OnPostUpdate(info);
 
 			_dumpArena.Empty();
 		}
 
-		for (const auto& [ptr, hashCode] : _linkedModules)
+		for (const auto& [ptr, hashCode] : linkedModules)
 			ptr->OnExit(info);
 
+		linkedModules.SetDangling();
 		_running = false;
 		return EXIT_SUCCESS;
 	}
