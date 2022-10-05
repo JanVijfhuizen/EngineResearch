@@ -6,16 +6,21 @@ namespace je
 {
 	Arena::Scope::~Scope()
 	{
-		Arena* next = _arena->_next;
+		Arena* next = _arena._next;
 		while(next)
 		{
 			next->_current = 0;
 			next = next->_next;
 		}
-		_arena->_current = _current;
+		_arena._current = _current;
+		--_scopeCount;
 	}
 
-	Arena::Scope::Scope() = default;
+	Arena::Scope::Scope(Arena& arena, size_t& scopeCount, const size_t current) :
+		_arena(arena), _scopeCount(scopeCount), _current(current)
+	{
+		++_scopeCount;
+	}
 
 	Arena::Arena(void* ptr, const size_t size) : _ptr(ptr), _size(size)
 	{
@@ -64,6 +69,9 @@ namespace je
 
 	void Arena::Free(void* ptr)
 	{
+		if (_scopeCount > 0)
+			return;
+
 		if(_next && _next->_current > 0)
 		{
 			_next->Free(ptr);
@@ -83,13 +91,11 @@ namespace je
 
 	Arena::Scope Arena::CreateScope()
 	{
-		Arena* next = this;
+		const Arena* next = this;
 		while (next->_next && next->_next->_current > 0)
 			next = next->_next;
 
-		Scope scope{};
-		scope._arena = next;
-		scope._current = _current;
+		Scope scope{*this, _scopeCount, _current};
 		return scope;
 	}
 

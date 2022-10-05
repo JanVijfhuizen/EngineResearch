@@ -32,7 +32,7 @@ namespace je
 		assert(!_running);
 		_running = true;
 
-		auto _ = _persistentArena.CreateScope();
+		const auto _ = _persistentArena.CreateScope();
 
 		LinkedList<KeyPair<Module*>> linkedModules{_persistentArena};
 
@@ -51,25 +51,31 @@ namespace je
 
 		EngineInfo info{*this, finder};
 
-		for (const auto& [value, hashCode] : linkedModules)
-			value->OnInitialize(info);
-		for (const auto& [value, hashCode] : linkedModules)
-			value->OnBegin(info);
+		{
+			const auto _ = _dumpArena.CreateScope();
+
+			for (const auto& [value, hashCode] : linkedModules)
+				value->OnInitialize(info);
+			for (const auto& [value, hashCode] : linkedModules)
+				value->OnBegin(info);
+		}
 
 		while(!info.quit)
 		{
+			const auto _ = _dumpArena.CreateScope();
+
 			for (const auto& [ptr, hashCode] : linkedModules)
 				ptr->OnUpdate(info);
 			for (const auto& [ptr, hashCode] : linkedModules)
 				ptr->OnPostUpdate(info);
-
-			_dumpArena.Empty();
 		}
 
-		for (const auto& [ptr, hashCode] : linkedModules)
-			ptr->OnExit(info);
-
-		linkedModules.SetDangling();
+		{
+			const auto _ = _dumpArena.CreateScope();
+			for (const auto& [ptr, hashCode] : linkedModules)
+				ptr->OnExit(info);
+		}
+		
 		_running = false;
 		return EXIT_SUCCESS;
 	}

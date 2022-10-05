@@ -21,10 +21,6 @@ namespace je
 
 		[[nodiscard]] T* GetData() const;
 
-		// Returns whether or not this deallocates dependencies on destruction.
-		[[nodiscard]] bool GetIsDangling() const;
-		void SetDangling();
-
 	private:
 		Arena* _arena = nullptr;
 		T* _data = nullptr;
@@ -78,17 +74,5 @@ namespace je
 	T* Array<T>::GetData() const
 	{
 		return _data;
-	}
-
-	template <typename T>
-	bool Array<T>::GetIsDangling() const
-	{
-		return !_arena;
-	}
-
-	template <typename T>
-	void Array<T>::SetDangling()
-	{
-		_arena = nullptr;
 	}
 }

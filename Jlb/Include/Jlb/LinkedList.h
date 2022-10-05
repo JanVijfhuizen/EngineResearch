@@ -47,10 +47,6 @@ namespace je
 		[[nodiscard]] Iterator begin() const;
 		static Iterator end();
 
-		// Returns whether or not this deallocates dependencies on destruction.
-		[[nodiscard]] bool GetIsDangling() const;
-		void SetDangling();
-
 	private:
 		Arena* _arena = nullptr;
 		Chain* _chain = nullptr;
@@ -160,18 +156,6 @@ namespace je
 	typename LinkedList<T>::Iterator LinkedList<T>::end()
 	{
 		return {};
-	}
-
-	template <typename T>
-	bool LinkedList<T>::GetIsDangling() const
-	{
-		return !_arena;
-	}
-
-	template <typename T>
-	void LinkedList<T>::SetDangling()
-	{
-		_arena = nullptr;
 	}
 
 	template <typename T>
