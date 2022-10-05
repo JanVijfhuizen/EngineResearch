@@ -1,11 +1,10 @@
 ﻿#pragma once
 #include "Module.h"
 #include "Jlb/Arena.h"
-#include "Jlb/JMap.h"
-#include "Jlb/LinkedList.h"
 
 namespace je
 {
+	// Engine class that manages all the modules, like the windowing, resource manager or rendering.
 	class Engine
 	{
 		friend struct EngineInfo;
@@ -27,6 +26,7 @@ namespace je
 		[[nodiscard]] size_t Run();
 
 	protected:
+		// Define what additional modules are loaded into the engine. This can include a game manager, or a movement system for example.
 		virtual void DefineAdditionalModules(EngineInitializer& initializer) = 0;
 
 	private:

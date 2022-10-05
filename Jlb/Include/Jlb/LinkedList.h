@@ -3,6 +3,7 @@
 
 namespace je
 {
+	// List that linearly links different, likely non adjacent points in memory.
 	template <typename T>
 	class LinkedList final
 	{

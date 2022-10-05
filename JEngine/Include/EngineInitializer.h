@@ -2,12 +2,17 @@
 #include "Engine.h"
 #include <vcruntime_typeinfo.h>
 
+#include "Jlb/KeyPair.h"
+#include "Jlb/LinkedList.h"
+
 namespace je
 {
+	// Used to initialize the modules for the engine.
 	struct EngineInitializer final
 	{
 		friend Engine;
 
+		// Load in a module for the engine.
 		template <typename T>
 		void AddModule();
 

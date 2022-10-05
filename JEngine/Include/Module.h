@@ -4,6 +4,8 @@ namespace je
 {
 	struct EngineInfo;
 
+	// Modules are dynamic parts of the engine that can communicate with each other.
+	// Examples can be: windowing, rendering, collision system, etc.
 	class Module
 	{
 		friend class Engine;

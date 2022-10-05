@@ -6,6 +6,7 @@ namespace je
 	class Arena;
 	class Engine;
 
+	// Used to communicate with the engine from the modules.
 	struct EngineInfo final
 	{
 		friend Engine;
