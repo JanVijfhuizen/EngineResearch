@@ -3,7 +3,8 @@
 
 namespace je
 {
-	EngineInitializer::EngineInitializer(Engine& engine) : _persistentArena(engine._persistentArena), _linkedModules(engine._tempArena)
+	EngineInitializer::EngineInitializer(Engine& engine) :
+		_persistentArena(engine._persistentArena), _linkedModules(engine._tempArena)
 	{
 		
 	}

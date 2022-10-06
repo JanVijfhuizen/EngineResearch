@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Resource.cpp" />
     <ClCompile Include="Src\ResourceModule.cpp" />
     <ClCompile Include="Src\EngineInitializer.cpp" />
     <ClCompile Include="Src\Engine.cpp" />

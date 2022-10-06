@@ -1,6 +1,8 @@
 ﻿#pragma once
+#include "EngineInfo.h"
 #include "Module.h"
 #include "Resource.h"
+#include "Jlb/JMap.h"
 #include "Jlb/LinkedList.h"
 
 namespace je::engine
@@ -12,10 +14,14 @@ namespace je::engine
 		{
 			friend ResourceModule;
 
-		private:
-			LinkedList<Resource>& _linkedResources;
+			template <typename T>
+			void Add(const char* path);
 
-			explicit Initializer(LinkedList<Resource>& linkedResources);
+		private:
+			EngineInfo& _info;
+			LinkedList<Resource*>& _linkedResources;
+
+			explicit Initializer(EngineInfo& info, LinkedList<Resource*>& linkedResources);
 		};
 
 		class User
@@ -26,9 +32,30 @@ namespace je::engine
 			virtual void DefineResourceUsage(const Initializer& initializer) = 0;
 		};
 
+		template <typename T>
+		[[nodiscard]] T* GetResource(const char* path);
+
 	private:
-		LinkedList<Resource>* _linkedResources = nullptr;
+		LinkedList<Resource*>* _linkedResources = nullptr;
+		Map<Resource*>* _mapResources = nullptr;
 
 		void OnBegin(EngineInfo& info) override;
 	};
+
+	template <typename T>
+	void ResourceModule::Initializer::Add(const char* path)
+	{
+		for (const auto& resource : _linkedResources)
+			if (resource->GetPath() == path)
+				return;
+
+		const T* ptr = _info.persistentArena.New<T>();
+		_linkedResources.Add(ptr);
+	}
+
+	template <typename T>
+	T* ResourceModule::GetResource(const char* path)
+	{
+		return static_cast<T*>(_mapResources->Contains(reinterpret_cast<size_t>(path)));
+	}
 }
