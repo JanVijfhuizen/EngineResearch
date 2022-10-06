@@ -2,7 +2,6 @@
 #include "Engine.h"
 #include "EngineInfo.h"
 #include "EngineInitializer.h"
-#include "EngineInitializer.h"
 #include "ModuleFinder.h"
 #include "ResourceModule.h"
 #include "TimeModule.h"

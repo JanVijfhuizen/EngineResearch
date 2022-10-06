@@ -7,6 +7,22 @@ namespace je::engine
 	{
 	}
 
+	void Resource::Load(Info& info)
+	{
+		assert(!_loaded);
+		_loaded = true;
+
+		OnLoad(info);
+	}
+
+	void Resource::Unload(Info& info)
+	{
+		assert(_loaded);
+		_loaded = false;
+
+		OnUnload(info);
+	}
+
 	const char* Resource::GetPath() const
 	{
 		return _path;

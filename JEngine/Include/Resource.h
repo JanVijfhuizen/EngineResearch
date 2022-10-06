@@ -17,9 +17,16 @@ namespace je::engine
 	protected:
 		explicit Resource(Info& info);
 
+		virtual void OnLoad(Info& info) = 0;
+		virtual void OnUnload(Info& info) = 0;
+
 	private:
 		const char* _path = nullptr;
+		bool _loaded = false;
 		size_t _usages = 0;
 		float _inactiveDuration = 0;
+
+		void Load(Info& info);
+		void Unload(Info& info);
 	};
 }

@@ -33,13 +33,14 @@ namespace je::engine
 		};
 
 		template <typename T>
-		[[nodiscard]] T* GetResource(const char* path);
+		[[nodiscard]] T* GetResource(Info& info, const char* path);
 
 	private:
 		LinkedList<Resource*>* _linkedResources = nullptr;
 		Map<Resource*>* _mapResources = nullptr;
 
 		void OnBegin(Info& info) override;
+		void OnPostUpdate(Info& info) override;
 	};
 
 	template <typename T>
@@ -54,8 +55,12 @@ namespace je::engine
 	}
 
 	template <typename T>
-	T* ResourceModule::GetResource(const char* path)
+	T* ResourceModule::GetResource(Info& info, const char* path)
 	{
-		return static_cast<T*>(_mapResources->Contains(reinterpret_cast<size_t>(path)));
+		Resource* resource = *_mapResources->Contains(reinterpret_cast<size_t>(path));
+		++resource->_usages;
+		if (!resource->_loaded)
+			resource->Load(info);
+		return static_cast<T*>(resource);
 	}
 }

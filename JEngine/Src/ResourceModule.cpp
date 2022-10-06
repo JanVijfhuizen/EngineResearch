@@ -2,6 +2,7 @@
 #include "ResourceModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
+#include "TimeModule.h"
 
 namespace je
 {
@@ -27,5 +28,33 @@ namespace je
 		_mapResources = info.persistentArena.New<Map<Resource*>>(1, info.persistentArena, _linkedResources->GetCount());
 		for (auto& resource : *_linkedResources)
 			_mapResources->Insert(resource, reinterpret_cast<size_t>(resource->GetPath()));
+	}
+
+	void engine::ResourceModule::OnPostUpdate(Info& info)
+	{
+		Module::OnPostUpdate(info);
+
+		const auto timeModule = info.finder.Get<TimeModule>();
+
+		for (const auto& resource : *_linkedResources)
+		{
+			if (resource->alwaysLoaded)
+			{
+				if (!resource->_loaded)
+					resource->Load(info);
+				continue;
+			}
+
+			if (!resource->_loaded)
+				continue;
+				
+			const bool used = resource->_usages > 0;
+
+			resource->_usages = 0;
+			resource->_inactiveDuration = used ? 0 : resource->_inactiveDuration + timeModule->GetDeltaTime();
+
+			if(!used && resource->_inactiveDuration > resource->streamDelay)
+				resource->Unload(info);
+		}
 	}
 }
