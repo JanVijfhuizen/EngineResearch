@@ -5,7 +5,7 @@
 
 namespace je
 {
-	class StringView;
+	struct StringView;
 
 	// Array of chars specialized in string behaviour.
 	template <typename T = char>

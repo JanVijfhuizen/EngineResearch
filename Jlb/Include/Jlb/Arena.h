@@ -20,8 +20,9 @@ namespace je
 
 		private:
 			explicit Scope(Arena& arena, size_t& scopeCount, size_t current);
+			Scope(Scope&& other) noexcept;
 
-			Arena& _arena;
+			Arena* _arena = nullptr;
 			size_t& _scopeCount;
 			size_t _current;
 		};

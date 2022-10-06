@@ -46,7 +46,7 @@ namespace je
 
 		[[nodiscard]] size_t GetCount() const;
 		[[nodiscard]] Iterator begin() const;
-		static Iterator end();
+		[[nodiscard]] Iterator end() const;
 
 	private:
 		Arena* _arena = nullptr;
@@ -154,7 +154,7 @@ namespace je
 	}
 
 	template <typename T>
-	typename LinkedList<T>::Iterator LinkedList<T>::end()
+	typename LinkedList<T>::Iterator LinkedList<T>::end() const
 	{
 		return {};
 	}

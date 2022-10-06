@@ -6,20 +6,29 @@ namespace je
 {
 	Arena::Scope::~Scope()
 	{
-		Arena* next = _arena._next;
+		if (!_arena)
+			return;
+
+		Arena* next = _arena->_next;
 		while(next)
 		{
 			next->_current = 0;
 			next = next->_next;
 		}
-		_arena._current = _current;
+		_arena->_current = _current;
 		--_scopeCount;
 	}
 
 	Arena::Scope::Scope(Arena& arena, size_t& scopeCount, const size_t current) :
-		_arena(arena), _scopeCount(scopeCount), _current(current)
+		_arena(&arena), _scopeCount(scopeCount), _current(current)
 	{
 		++_scopeCount;
+	}
+
+	Arena::Scope::Scope(Scope&& other) noexcept :
+		_arena(other._arena), _scopeCount(other._scopeCount), _current(other._current)
+	{
+		other._arena = nullptr;
 	}
 
 	Arena::Arena(void* ptr, const size_t size) : _ptr(ptr), _size(size)
@@ -96,7 +105,7 @@ namespace je
 			next = next->_next;
 
 		Scope scope{*this, _scopeCount, _current};
-		return scope;
+		return Move(scope);
 	}
 
 	void Arena::Empty()

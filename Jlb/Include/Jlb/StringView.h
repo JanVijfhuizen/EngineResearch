@@ -3,9 +3,8 @@
 namespace je
 {
 	// Immutable string for increased performance.
-	class StringView final
+	struct StringView final
 	{
-	public:
 		StringView() = default;
 		StringView(const char* strLit);
 

@@ -5,7 +5,7 @@
 namespace je::engine
 {
 	// Window module that manages platform specific windowing.
-	class Window final : public Module
+	class WindowModule final : public Module
 	{
 	public:
 		struct CreateInfo final
@@ -19,12 +19,11 @@ namespace je::engine
 		void (*onMouseCallback)(size_t key, size_t action) = nullptr;
 		void (*onScrollCallback)(glm::vec<2, double> offset) = nullptr;
 
-		void OnBegin(EngineInfo& info) override;
-		void OnExit(EngineInfo& info) override;
-
 		[[nodiscard]] static const char** GetRequiredExtensions(size_t& count);
 
-	protected:
-		void OnUpdate(EngineInfo& info) override;
+	private:
+		void OnBegin(Info& info) override;
+		void OnUpdate(Info& info) override;
+		void OnExit(Info& info) override;
 	};
 }

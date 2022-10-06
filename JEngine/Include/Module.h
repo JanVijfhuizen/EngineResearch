@@ -2,19 +2,28 @@
 
 namespace je
 {
-	struct EngineInfo;
+	class Engine;
+
+	namespace engine
+	{
+		struct Info;
+	}
 
 	// Modules are dynamic parts of the engine that can communicate with each other.
 	// Examples can be: windowing, rendering, collision system, etc.
 	class Module
 	{
-		friend class Engine;
+	public:
+		virtual ~Module() = default;
+
+	private:
+		friend Engine;
 
 	protected:
-		virtual void OnInitialize(EngineInfo& info);
-		virtual void OnBegin(EngineInfo& info);
-		virtual void OnUpdate(EngineInfo& info);
-		virtual void OnPostUpdate(EngineInfo& info);
-		virtual void OnExit(EngineInfo& info);
+		virtual void OnInitialize(engine::Info& info);
+		virtual void OnBegin(engine::Info& info);
+		virtual void OnUpdate(engine::Info& info);
+		virtual void OnPostUpdate(engine::Info& info);
+		virtual void OnExit(engine::Info& info);
 	};
 }
