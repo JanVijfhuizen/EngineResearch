@@ -5,13 +5,13 @@
 
 namespace je
 {
-	engine::ResourceModule::Initializer::Initializer(EngineInfo& info, LinkedList<Resource*>& linkedResources) :
+	engine::ResourceModule::Initializer::Initializer(Info& info, LinkedList<Resource*>& linkedResources) :
 		_info(info), _linkedResources(linkedResources)
 	{
 
 	}
 
-	void engine::ResourceModule::OnBegin(EngineInfo& info)
+	void engine::ResourceModule::OnBegin(Info& info)
 	{
 		Module::OnBegin(info);
 

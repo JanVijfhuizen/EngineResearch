@@ -1,9 +1,9 @@
 #include "pch.h"
 #include "Resource.h"
 
-namespace je
+namespace je::engine
 {
-	Resource::Resource(EngineInfo& info)
+	Resource::Resource(Info& info)
 	{
 	}
 

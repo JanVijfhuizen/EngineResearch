@@ -4,7 +4,7 @@
 #include "Jlb/KeyPair.h"
 #include "Jlb/LinkedList.h"
 
-namespace je
+namespace je::engine
 {
 	// Interface to find modules loaded by the engine.
 	struct ModuleFinder final

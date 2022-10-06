@@ -18,10 +18,10 @@ namespace je::engine
 			void Add(const char* path);
 
 		private:
-			EngineInfo& _info;
+			Info& _info;
 			LinkedList<Resource*>& _linkedResources;
 
-			explicit Initializer(EngineInfo& info, LinkedList<Resource*>& linkedResources);
+			explicit Initializer(Info& info, LinkedList<Resource*>& linkedResources);
 		};
 
 		class User
@@ -39,7 +39,7 @@ namespace je::engine
 		LinkedList<Resource*>* _linkedResources = nullptr;
 		Map<Resource*>* _mapResources = nullptr;
 
-		void OnBegin(EngineInfo& info) override;
+		void OnBegin(Info& info) override;
 	};
 
 	template <typename T>

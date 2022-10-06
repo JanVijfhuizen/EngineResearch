@@ -10,7 +10,7 @@ class SomeModule final : public je::Module
 class MyEngine final : public je::Engine
 {
 protected:
-	void DefineAdditionalModules(je::EngineInitializer& initializer) override
+	void DefineAdditionalModules(je::engine::Initializer& initializer) override
 	{
 		initializer.AddModule<SomeModule>();
 	}

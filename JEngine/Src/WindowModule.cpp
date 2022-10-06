@@ -40,7 +40,7 @@ namespace je::engine
 		bool running = false;
 	} internalWindow;
 
-	void WindowModule::OnBegin(EngineInfo& info)
+	void WindowModule::OnBegin(Info& info)
 	{
 		Module::OnBegin(info);
 
@@ -74,7 +74,7 @@ namespace je::engine
 		glfwMakeContextCurrent(window);
 	}
 
-	void WindowModule::OnExit(EngineInfo& info)
+	void WindowModule::OnExit(Info& info)
 	{
 		glfwDestroyWindow(internalWindow.window);
 		glfwTerminate();
@@ -91,7 +91,7 @@ namespace je::engine
 		return buffer;
 	}
 
-	void WindowModule::OnUpdate(EngineInfo& info)
+	void WindowModule::OnUpdate(Info& info)
 	{
 		Module::OnUpdate(info);
 

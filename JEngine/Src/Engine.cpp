@@ -2,8 +2,10 @@
 #include "Engine.h"
 #include "EngineInfo.h"
 #include "EngineInitializer.h"
+#include "EngineInitializer.h"
 #include "ModuleFinder.h"
 #include "ResourceModule.h"
+#include "TimeModule.h"
 #include "WindowModule.h"
 #include "Jlb/LinkedList.h"
 
@@ -37,20 +39,21 @@ namespace je
 		LinkedList<KeyPair<Module*>> linkedModules{_persistentArena};
 
 		{
-			EngineInitializer initializer{ *this };
+			engine::Initializer initializer{ *this };
 			initializer.AddModule<engine::ResourceModule>();
 			initializer.AddModule<engine::WindowModule>();
+			initializer.AddModule<engine::TimeModule>();
 			DefineAdditionalModules(initializer);
 			
 			for (auto& mod : initializer._linkedModules)
 				linkedModules.Add(mod);
 		}
 
-		ModuleFinder finder{ _persistentArena, linkedModules };
+		engine::ModuleFinder finder{ _persistentArena, linkedModules };
 		for (auto& [ptr, hashCode] : linkedModules)
 			finder._map.Insert(ptr, hashCode);
 
-		EngineInfo info{*this, finder};
+		engine::Info info{*this, finder};
 
 		{
 			const auto _ = _dumpArena.CreateScope();

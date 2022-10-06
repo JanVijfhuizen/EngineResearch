@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "ModuleFinder.h"
 
-namespace je
+namespace je::engine
 {
 	LinkedList<KeyPair<Module*>>::Iterator ModuleFinder::begin() const
 	{
