@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Window.h"
+#include "WindowModule.h"
 
 #include "EngineInfo.h"
 
@@ -10,28 +10,28 @@ namespace je::engine
 	public:
 		static void GLFWKeyCallback(GLFWwindow* window, const int key, const int scancode, const int action, const int mods)
 		{
-			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
+			const auto engine = static_cast<WindowModule*>(glfwGetWindowUserPointer(window));
 			if (engine->onKeyCallback)
 				engine->onKeyCallback(key, action);
 		}
 
 		static void GLFWMouseKeyCallback(GLFWwindow* window, const int button, const int action, const int mods)
 		{
-			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
+			const auto engine = static_cast<WindowModule*>(glfwGetWindowUserPointer(window));
 			if (engine->onMouseCallback)
 				engine->onMouseCallback(button, action);
 		}
 
 		static void GLFWScrollCallback(GLFWwindow* window, const double xOffset, const double yOffset)
 		{
-			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
+			const auto engine = static_cast<WindowModule*>(glfwGetWindowUserPointer(window));
 			if (engine->onScrollCallback)
 				engine->onScrollCallback({ xOffset, yOffset });
 		}
 
 		static void FrameBufferResizeCallback(GLFWwindow* window, const int width, const int height)
 		{
-			const auto engine = static_cast<Window*>(glfwGetWindowUserPointer(window));
+			const auto engine = static_cast<WindowModule*>(glfwGetWindowUserPointer(window));
 			if (engine->onWindowResized)
 				engine->onWindowResized({ width, height });
 		}
@@ -40,7 +40,7 @@ namespace je::engine
 		bool running = false;
 	} internalWindow;
 
-	void Window::OnBegin(EngineInfo& info)
+	void WindowModule::OnBegin(EngineInfo& info)
 	{
 		Module::OnBegin(info);
 
@@ -74,7 +74,7 @@ namespace je::engine
 		glfwMakeContextCurrent(window);
 	}
 
-	void Window::OnExit(EngineInfo& info)
+	void WindowModule::OnExit(EngineInfo& info)
 	{
 		glfwDestroyWindow(internalWindow.window);
 		glfwTerminate();
@@ -83,7 +83,7 @@ namespace je::engine
 		Module::OnExit(info);
 	}
 
-	const char** Window::GetRequiredExtensions(size_t& count)
+	const char** WindowModule::GetRequiredExtensions(size_t& count)
 	{
 		uint32_t glfwExtensionCount = 0;
 		const auto buffer = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
@@ -91,7 +91,7 @@ namespace je::engine
 		return buffer;
 	}
 
-	void Window::OnUpdate(EngineInfo& info)
+	void WindowModule::OnUpdate(EngineInfo& info)
 	{
 		Module::OnUpdate(info);
 

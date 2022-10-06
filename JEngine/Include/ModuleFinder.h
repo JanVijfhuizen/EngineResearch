@@ -14,8 +14,12 @@ namespace je
 		template <typename T>
 		[[nodiscard]] T* Get();
 
+		[[nodiscard]] LinkedList<KeyPair<Module*>>::Iterator begin() const;
+		[[nodiscard]] LinkedList<KeyPair<Module*>>::Iterator end() const;
+
 	private:
 		Map<Module*> _map;
+		const LinkedList<KeyPair<Module*>>& _linkedList;
 
 		explicit ModuleFinder(Arena& arena, const LinkedList<KeyPair<Module*>>& modules);
 	};

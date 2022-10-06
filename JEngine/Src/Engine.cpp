@@ -1,17 +1,17 @@
 ﻿#include "pch.h"
 #include "Engine.h"
-
 #include "EngineInfo.h"
 #include "EngineInitializer.h"
 #include "ModuleFinder.h"
-#include "Window.h"
+#include "ResourceModule.h"
+#include "WindowModule.h"
 #include "Jlb/LinkedList.h"
 
 namespace je
 {
 	size_t Engine::CreateInfo::GetMemorySpaceRequired() const
 	{
-		return persistentArenaSize + tempArenaSize + dumpArenaSize;
+		return persistentArenaSize + dumpArenaSize;
 	}
 
 	Engine::Engine(const CreateInfo& info) :
@@ -38,7 +38,8 @@ namespace je
 
 		{
 			EngineInitializer initializer{ *this };
-			initializer.AddModule<engine::Window>();
+			initializer.AddModule<engine::ResourceModule>();
+			initializer.AddModule<engine::WindowModule>();
 			DefineAdditionalModules(initializer);
 			
 			for (auto& mod : initializer._linkedModules)

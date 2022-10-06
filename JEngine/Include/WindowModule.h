@@ -5,7 +5,7 @@
 namespace je::engine
 {
 	// Window module that manages platform specific windowing.
-	class Window final : public Module
+	class WindowModule final : public Module
 	{
 	public:
 		struct CreateInfo final
