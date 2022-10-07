@@ -8,6 +8,7 @@ namespace je
 	template <typename T>
 	struct View
 	{
+		View() = default;
 		View(T& instance);
 		View(void* data, size_t length);
 		virtual ~View() = default;
@@ -22,7 +23,7 @@ namespace je
 
 	private:
 		T* _data = nullptr;
-		size_t _length = SIZE_MAX;
+		size_t _length = 0;
 	};
 
 	template <typename T>

@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
-#include "ResourceModule.h"
+#include "Modules/ResourceModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
-#include "TimeModule.h"
+#include "Modules/TimeModule.h"
 
 namespace je
 {
