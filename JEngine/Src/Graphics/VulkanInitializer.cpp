@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Graphics/VulkanInitializer.h"
+#include <cstring>
 #include "Graphics/PhysicalDeviceInfo.h"
 #include "Graphics/VulkanApp.h"
 
@@ -28,7 +29,7 @@ namespace je::vkinit
 		return deviceFeatures;
 	}
 
-	void CheckValidationSupport(Arena& tempArena)
+	void CheckValidationSupport(Arena& tempArena, const Array<StringView>& validationLayers)
 	{
 #ifdef NDEBUG
 		return;
@@ -41,6 +42,23 @@ namespace je::vkinit
 
 		const Array<VkLayerProperties> availableLayers{tempArena, layerCount};
 		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.GetData());
+
+		const auto validationLayersView = validationLayers.GetView();
+		const auto availableLayersView = availableLayers.GetView();
+
+		// Iterate over all the layers to see if they are available.
+		for (const auto& layer : validationLayersView)
+		{
+			bool layerFound = false;
+
+			for (const auto& layerProperties : availableLayersView)
+				if (strcmp(layer, layerProperties.layerName) == 0)
+				{
+					layerFound = true;
+					break;
+				}
+			assert(layerFound);
+		}
 	}
 
 	VulkanApp CreateApp(const Info& info)
@@ -81,7 +99,7 @@ namespace je::vkinit
 		if (!khronosValidationPresent)
 			validationLayers[validationLayers.GetLength() - 1] = "VK_LAYER_KHRONOS_validation";
 
-		CheckValidationSupport(*info.tempArena);
+		CheckValidationSupport(*info.tempArena, validationLayers);
 
 		return VulkanApp{};
 	}
