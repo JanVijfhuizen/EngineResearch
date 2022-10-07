@@ -124,20 +124,43 @@ namespace je::vkinit
 		return instance;
 	}
 
+	VkResult CreateDebugUtilsMessengerEXT(const VkInstance instance,
+		const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+		const VkAllocationCallbacks* pAllocator,
+		VkDebugUtilsMessengerEXT* pDebugMessenger)
+	{
+		if (const auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
+			vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT")))
+			return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
+		return VK_ERROR_EXTENSION_NOT_PRESENT;
+	}
+
+	void DestroyDebugUtilsMessengerEXT(const VkInstance instance,
+		const VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator)
+	{
+		if (const auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
+			vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT")))
+			func(instance, debugMessenger, pAllocator);
+		}
+
+	VkDebugUtilsMessengerEXT CreateDebugger(VkInstance instance)
+	{
+#ifdef NDEBUG
+		return;
+#endif
+
+		const auto createInfo = CreateDebugInfo();
+		VkDebugUtilsMessengerEXT debugger;
+		const auto result = CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &debugger);
+		assert(!result);
+		return debugger;
+	}
+
 	VulkanApp CreateApp(const Info& info)
 	{
 		VulkanApp app{};
 
 		const auto _ = info.tempArena->CreateScope();
-
-		// Add swap chain extension if not present.
-		bool swapChainExtensionPresent = false;
-		for (auto& deviceExtension : info.deviceExtensions)
-			if(deviceExtension == VK_KHR_SWAPCHAIN_EXTENSION_NAME)
-			{
-				swapChainExtensionPresent = true;
-				break;
-			}
 
 		bool debugExtensionPresent = true;
 #ifdef _DEBUG
@@ -152,15 +175,24 @@ namespace je::vkinit
 		const Array<StringView> instanceExtensions
 		{
 			*info.tempArena,
-			 static_cast<size_t>(!debugExtensionPresent)
+			 info.instanceExtensions.GetLength() + !debugExtensionPresent
 		};
 		if (!debugExtensionPresent)
 			instanceExtensions[instanceExtensions.GetLength() - 1] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
+		// Add swap chain extension if not present.
+		bool swapChainExtensionPresent = false;
+		for (auto& deviceExtension : info.deviceExtensions)
+			if(deviceExtension == VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+			{
+				swapChainExtensionPresent = true;
+				break;
+			}
+
 		const Array<StringView> deviceExtensions
 		{
 			*info.tempArena,
-			info.deviceExtensions.GetLength() + static_cast<size_t>(!swapChainExtensionPresent)
+			info.deviceExtensions.GetLength() + !swapChainExtensionPresent
 		};
 		if (!swapChainExtensionPresent)
 			deviceExtensions[deviceExtensions.GetLength() - 1] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
@@ -177,19 +209,28 @@ namespace je::vkinit
 		const Array<StringView> validationLayers
 		{
 			*info.tempArena,
-			info.validationLayers.GetLength() + static_cast<size_t>(!khronosValidationPresent)
+			info.validationLayers.GetLength() + !khronosValidationPresent
 		};
 		if (!khronosValidationPresent)
 			validationLayers[validationLayers.GetLength() - 1] = "VK_LAYER_KHRONOS_validation";
 
+		memcpy(validationLayers.GetData(), info.validationLayers.GetData(), sizeof(StringView) * info.validationLayers.GetLength());
+		memcpy(instanceExtensions.GetData(), info.instanceExtensions.GetData(), sizeof(StringView) * info.instanceExtensions.GetLength());
+		memcpy(deviceExtensions.GetData(), info.deviceExtensions.GetData(), sizeof(StringView) * info.deviceExtensions.GetLength());
+
 		CheckValidationSupport(*info.tempArena, validationLayers);
 		app.instance = CreateInstance(*info.tempArena, validationLayers, instanceExtensions);
-
-		return VulkanApp{};
+		app.debugger = CreateDebugger(app.instance);
+		app.surface = info.createSurface(app.instance);
+		return app;
 	}
 
 	void DestroyApp(const VulkanApp& app)
 	{
+		vkDestroySurfaceKHR(app.instance, app.surface, nullptr);
+#ifdef _DEBUG
+		DestroyDebugUtilsMessengerEXT(app.instance, app.debugger, nullptr);
+#endif
 		vkDestroyInstance(app.instance, nullptr);
 	}
 }

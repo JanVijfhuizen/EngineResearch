@@ -25,6 +25,7 @@ namespace je
 			bool(*isPhysicalDeviceValid)(const PhysicalDeviceInfo& info) = IsPhysicalDeviceValid;
 			size_t(*getPhysicalDeviceRating)(const PhysicalDeviceInfo& info) = GetPhysicalDeviceRating;
 			VkPhysicalDeviceFeatures(*getPhysicalDeviceFeatures)() = GetPhysicalDeviceFeatures;
+			VkSurfaceKHR(*createSurface)(VkInstance instance) = nullptr;
 		};
 		
 		[[nodiscard]] VulkanApp CreateApp(const Info& info);
