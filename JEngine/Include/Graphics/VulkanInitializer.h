@@ -17,9 +17,9 @@ namespace je
 
 		struct Info final
 		{
-			Arena* persistentArena = nullptr;
 			Arena* tempArena = nullptr;
 			View<StringView> validationLayers{};
+			View<StringView> instanceExtensions{};
 			View<StringView> deviceExtensions{};
 
 			bool(*isPhysicalDeviceValid)(const PhysicalDeviceInfo& info) = IsPhysicalDeviceValid;
@@ -28,6 +28,6 @@ namespace je
 		};
 		
 		[[nodiscard]] VulkanApp CreateApp(const Info& info);
-		void DestroyApp(VulkanApp& app);
+		void DestroyApp(const VulkanApp& app);
 	}
 }

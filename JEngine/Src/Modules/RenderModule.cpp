@@ -12,9 +12,15 @@ namespace je::engine
 		Module::OnInitialize(info);
 
 		vkinit::Info vkInfo{};
-		vkInfo.persistentArena = &info.persistentArena;
 		vkInfo.tempArena = &info.tempArena;
 
-		auto app = CreateApp(vkInfo);
+		_app = CreateApp(vkInfo);
+	}
+
+	void RenderModule::OnExit(Info& info)
+	{
+		vkinit::DestroyApp(_app);
+
+		Module::OnExit(info);
 	}
 }
