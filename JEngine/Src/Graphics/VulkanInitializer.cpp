@@ -3,14 +3,14 @@
 #include "Graphics/PhysicalDeviceInfo.h"
 #include "Graphics/VulkanApp.h"
 
-namespace je
+namespace je::vkinit
 {
-	bool vkinit::IsPhysicalDeviceValid(const PhysicalDeviceInfo& info)
+	bool IsPhysicalDeviceValid(const PhysicalDeviceInfo& info)
 	{
 		return true;
 	}
 
-	size_t vkinit::GetPhysicalDeviceRating(const PhysicalDeviceInfo& info)
+	size_t GetPhysicalDeviceRating(const PhysicalDeviceInfo& info)
 	{
 		size_t score = 0;
 		const auto& properties = info.properties;
@@ -20,7 +20,7 @@ namespace je
 		return score;
 	}
 
-	VkPhysicalDeviceFeatures vkinit::GetPhysicalDeviceFeatures()
+	VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures()
 	{
 		VkPhysicalDeviceFeatures deviceFeatures{};
 		deviceFeatures.samplerAnisotropy = VK_TRUE;
@@ -28,12 +28,66 @@ namespace je
 		return deviceFeatures;
 	}
 
-	VulkanApp vkinit::CreateApp(const Info& info)
+	void CheckValidationSupport(Arena& tempArena)
 	{
+#ifdef NDEBUG
+		return;
+#endif
+
+		const auto _ = tempArena.CreateScope();
+
+		uint32_t layerCount;
+		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+
+		const Array<VkLayerProperties> availableLayers{tempArena, layerCount};
+		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.GetData());
+	}
+
+	VulkanApp CreateApp(const Info& info)
+	{
+		const auto _ = info.tempArena->CreateScope();
+
+		// Add swap chain extension if not present.
+		bool swapChainExtensionPresent = false;
+		for (auto& deviceExtension : info.deviceExtensions)
+			if(deviceExtension == VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+			{
+				swapChainExtensionPresent = true;
+				break;
+			}
+
+		const Array<StringView> deviceExtensions
+		{
+			*info.tempArena,
+			info.deviceExtensions.GetLength() + static_cast<size_t>(!swapChainExtensionPresent)
+		};
+		if (!swapChainExtensionPresent)
+			deviceExtensions[deviceExtensions.GetLength() - 1] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+
+		// Add khronos validation if not present.
+		bool khronosValidationPresent = false;
+		for (auto& validationLayer : info.validationLayers)
+			if(validationLayer == "VK_LAYER_KHRONOS_validation")
+			{
+				khronosValidationPresent = true;
+				break;
+			}
+
+		const Array<StringView> validationLayers
+		{
+			*info.tempArena,
+			info.validationLayers.GetLength() + static_cast<size_t>(!khronosValidationPresent)
+		};
+		if (!khronosValidationPresent)
+			validationLayers[validationLayers.GetLength() - 1] = "VK_LAYER_KHRONOS_validation";
+
+		CheckValidationSupport(*info.tempArena);
+
 		return VulkanApp{};
 	}
 
-	void vkinit::DestroyApp(VulkanApp& app)
+	void DestroyApp(VulkanApp& app)
 	{
+		
 	}
 }

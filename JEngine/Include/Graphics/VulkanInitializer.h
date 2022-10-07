@@ -26,7 +26,7 @@ namespace je
 			size_t(*getPhysicalDeviceRating)(const PhysicalDeviceInfo& info) = GetPhysicalDeviceRating;
 			VkPhysicalDeviceFeatures(*getPhysicalDeviceFeatures)() = GetPhysicalDeviceFeatures;
 		};
-
+		
 		[[nodiscard]] VulkanApp CreateApp(const Info& info);
 		void DestroyApp(VulkanApp& app);
 	}
