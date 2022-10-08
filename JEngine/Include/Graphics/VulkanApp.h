@@ -17,5 +17,6 @@ namespace je
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 		VkDevice device = VK_NULL_HANDLE;
 		VkQueue queues[3]{};
+		VkCommandPool commandPool = VK_NULL_HANDLE;
 	};
 }

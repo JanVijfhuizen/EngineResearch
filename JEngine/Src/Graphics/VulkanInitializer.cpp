@@ -404,6 +404,22 @@ namespace je::vkinit
 		}
 	}
 
+	VkCommandPool CreateCommandPool(Arena& arena, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface, const VkDevice device)
+	{
+		const auto families = GetQueueFamilies(arena, physicalDevice, surface);
+
+		VkCommandPoolCreateInfo poolInfo{};
+		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		poolInfo.queueFamilyIndex = static_cast<uint32_t>(families.graphics);
+		poolInfo.flags = VK_COMMAND_POOL_CREATE_TRANSIENT_BIT | VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+		VkCommandPool commandPool;
+		const auto result = vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool);
+		assert(!result);
+
+		return commandPool;
+	}
+
 	VulkanApp CreateApp(const Info& info)
 	{
 		const auto _ = info.tempArena->CreateScope();
@@ -471,12 +487,15 @@ namespace je::vkinit
 		app.debugger = CreateDebugger(app.instance);
 		app.surface = info.createSurface(app.instance);
 		app.physicalDevice = SelectPhysicalDevice(info, app.instance, app.surface, deviceExtensions);
+		CreateLogicalDevice(app, info, *info.tempArena, app.physicalDevice, app.surface);
+		app.commandPool = CreateCommandPool(*info.tempArena, app.physicalDevice, app.surface, app.device);
 
 		return app;
 	}
 
 	void DestroyApp(const VulkanApp& app)
 	{
+		vkDestroyCommandPool(app.device, app.commandPool, nullptr);
 		vkDestroyDevice(app.device, nullptr);
 		vkDestroySurfaceKHR(app.instance, app.surface, nullptr);
 #ifdef _DEBUG

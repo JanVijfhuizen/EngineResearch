@@ -10,17 +10,19 @@ namespace je
 
 	namespace vkinit
 	{
+		// Vulkan physical device info.
 		struct PhysicalDeviceInfo final
 		{
 			VkPhysicalDevice device;
 			VkPhysicalDeviceProperties properties;
 			VkPhysicalDeviceFeatures features;
 		};
-
+		
 		[[nodiscard]] bool IsPhysicalDeviceValid(const PhysicalDeviceInfo& info);
 		[[nodiscard]] size_t GetPhysicalDeviceRating(const PhysicalDeviceInfo& info);
 		[[nodiscard]] VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures();
 
+		// Vulkan application create info.
 		struct Info final
 		{
 			Arena* tempArena = nullptr;
