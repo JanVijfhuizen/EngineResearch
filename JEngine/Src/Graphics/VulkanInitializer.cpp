@@ -4,6 +4,8 @@
 #include <iostream>
 #include "Graphics/VulkanApp.h"
 #include "Jlb/Heap.h"
+#include "Jlb/JMap.h"
+#include "Jlb/JVector.h"
 
 namespace je::vkinit
 {
@@ -340,6 +342,67 @@ namespace je::vkinit
 		assert(candidates.GetCount() > 0);
 		return candidates.Peek();
 	}
+	
+	void CreateLogicalDevice(VulkanApp& app, const Info& info, Arena& arena, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface)
+	{
+		const auto _ = arena.CreateScope();
+
+		const auto queueFamilies = GetQueueFamilies(arena, physicalDevice, surface);
+
+		constexpr size_t queueFamiliesCount = sizeof(size_t) * 3;
+		Vector<VkDeviceQueueCreateInfo> queueCreateInfos{arena, queueFamiliesCount};
+		Map<size_t> familyIndexes{arena, queueFamiliesCount};
+
+		const size_t queueFamiliesIndexes[3]
+		{
+			queueFamilies.graphics,
+			queueFamilies.present,
+			queueFamilies.transfer
+		};
+
+		constexpr float queuePriority = 1;
+		for (auto family : queueFamiliesIndexes)
+		{
+			if (familyIndexes.Contains(family))
+				continue;
+			familyIndexes.Insert(family, family);
+
+			VkDeviceQueueCreateInfo queueCreateInfo{};
+			queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			queueCreateInfo.queueFamilyIndex = static_cast<uint32_t>(family);
+			queueCreateInfo.queueCount = 1;
+			queueCreateInfo.pQueuePriorities = &queuePriority;
+			queueCreateInfos.Add(queueCreateInfo);
+		}
+
+		assert(info.getPhysicalDeviceFeatures);
+		const auto features = info.getPhysicalDeviceFeatures();
+
+		VkDeviceCreateInfo createInfo{};
+		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.GetCount());
+		createInfo.pQueueCreateInfos = queueCreateInfos.GetData();
+		createInfo.pEnabledFeatures = &features;
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(info.deviceExtensions.GetLength());
+		createInfo.ppEnabledExtensionNames = reinterpret_cast<const char**>(info.deviceExtensions.GetData());
+
+		createInfo.enabledLayerCount = 0;
+#ifdef _DEBUG
+		const auto& validationLayers = info.validationLayers;
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.GetLength());
+		createInfo.ppEnabledLayerNames = reinterpret_cast<const char**>(validationLayers.GetData());
+#endif
+		
+		const auto result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &app.device);
+		assert(!result);
+
+		uint32_t i = 0;
+		for (const auto& family : queueFamiliesIndexes)
+		{
+			vkGetDeviceQueue(app.device, static_cast<uint32_t>(family), 0, &app.queues[i]);
+			i++;
+		}
+	}
 
 	VulkanApp CreateApp(const Info& info)
 	{
@@ -414,6 +477,7 @@ namespace je::vkinit
 
 	void DestroyApp(const VulkanApp& app)
 	{
+		vkDestroyDevice(app.device, nullptr);
 		vkDestroySurfaceKHR(app.instance, app.surface, nullptr);
 #ifdef _DEBUG
 		DestroyDebugUtilsMessengerEXT(app.instance, app.debugger, nullptr);
