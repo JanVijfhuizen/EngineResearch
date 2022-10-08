@@ -135,15 +135,17 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\TimeModule.cpp" />
+    <ClCompile Include="Src\Graphics\VulkanInitializer.cpp" />
+    <ClCompile Include="Src\Modules\RenderModule.cpp" />
+    <ClCompile Include="Src\Modules\TimeModule.cpp" />
     <ClCompile Include="Src\Resource.cpp" />
-    <ClCompile Include="Src\ResourceModule.cpp" />
+    <ClCompile Include="Src\Modules\ResourceModule.cpp" />
     <ClCompile Include="Src\EngineInitializer.cpp" />
     <ClCompile Include="Src\Engine.cpp" />
     <ClCompile Include="Src\EngineInfo.cpp" />
     <ClCompile Include="Src\Module.cpp" />
     <ClCompile Include="Src\ModuleFinder.cpp" />
-    <ClCompile Include="Src\WindowModule.cpp" />
+    <ClCompile Include="Src\Modules\WindowModule.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -155,11 +157,14 @@
     <ClInclude Include="Include\EngineInfo.h" />
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\ModuleFinder.h" />
+    <ClInclude Include="Include\Modules\RenderModule.h" />
     <ClInclude Include="Include\Resource.h" />
-    <ClInclude Include="Include\ResourceModule.h" />
-    <ClInclude Include="Include\TimeModule.h" />
-    <ClInclude Include="Include\WindowModule.h" />
+    <ClInclude Include="Include\Modules\ResourceModule.h" />
+    <ClInclude Include="Include\Modules\TimeModule.h" />
+    <ClInclude Include="Include\Modules\WindowModule.h" />
     <ClInclude Include="Include\pch.h" />
+    <ClInclude Include="Include\Graphics\VulkanInitializer.h" />
+    <ClInclude Include="Include\Graphics\VulkanApp.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jlb\Jlb.vcxproj">

@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
-#include "ResourceModule.h"
+#include "Modules/ResourceModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
-#include "TimeModule.h"
+#include "Modules/TimeModule.h"
 
 namespace je
 {
@@ -25,7 +25,8 @@ namespace je
 			if (const auto subscriber = dynamic_cast<User*>(value))
 				subscriber->DefineResourceUsage(initializer);
 
-		_mapResources = info.persistentArena.New<Map<Resource*>>(1, info.persistentArena, _linkedResources->GetCount());
+		const size_t count = _linkedResources->GetCount();
+		_mapResources = info.persistentArena.New<Map<Resource*>>(1, info.persistentArena, count);
 		for (auto& resource : *_linkedResources)
 			_mapResources->Insert(resource, reinterpret_cast<size_t>(resource->GetPath()));
 	}

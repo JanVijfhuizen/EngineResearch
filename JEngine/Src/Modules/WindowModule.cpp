@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "WindowModule.h"
+#include "Modules/WindowModule.h"
 
 #include "EngineInfo.h"
 
@@ -40,9 +40,9 @@ namespace je::engine
 		bool running = false;
 	} internalWindow;
 
-	void WindowModule::OnBegin(Info& info)
+	void WindowModule::OnInitialize(Info& info)
 	{
-		Module::OnBegin(info);
+		Module::OnInitialize(info);
 
 		assert(!internalWindow.running);
 		internalWindow.running = true;
@@ -89,6 +89,14 @@ namespace je::engine
 		const auto buffer = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 		count = static_cast<size_t>(glfwExtensionCount);
 		return buffer;
+	}
+
+	VkSurfaceKHR WindowModule::CreateSurface(const VkInstance instance)
+	{
+		VkSurfaceKHR surface;
+		const auto result = glfwCreateWindowSurface(instance, internalWindow.window, nullptr, &surface);
+		assert(!result);
+		return surface;
 	}
 
 	void WindowModule::OnUpdate(Info& info)

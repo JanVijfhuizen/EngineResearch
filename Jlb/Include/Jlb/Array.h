@@ -41,7 +41,7 @@ namespace je
 	template <typename T>
 	Array<T>::~Array()
 	{
-		if(_arena)
+		if(!_arena)
 			_arena->Free(_data);
 		_arena = nullptr;
 	}

@@ -3,10 +3,11 @@
 #include "EngineInfo.h"
 #include "EngineInitializer.h"
 #include "ModuleFinder.h"
-#include "ResourceModule.h"
-#include "TimeModule.h"
-#include "WindowModule.h"
+#include "Modules/ResourceModule.h"
+#include "Modules/TimeModule.h"
+#include "Modules/WindowModule.h"
 #include "Jlb/LinkedList.h"
+#include "Modules/RenderModule.h"
 
 namespace je
 {
@@ -42,6 +43,7 @@ namespace je
 			initializer.AddModule<engine::ResourceModule>();
 			initializer.AddModule<engine::WindowModule>();
 			initializer.AddModule<engine::TimeModule>();
+			initializer.AddModule<engine::RenderModule>();
 			DefineAdditionalModules(initializer);
 			
 			for (auto& mod : initializer._linkedModules)

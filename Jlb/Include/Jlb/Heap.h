@@ -1,6 +1,7 @@
 #pragma once
 #include "Array.h"
 #include "KeyPair.h"
+#include "Utils.h"
 
 namespace je
 {
@@ -40,8 +41,8 @@ namespace je
 	template <typename T>
 	void Heap<T>::Insert(const T& value, const size_t key)
 	{
-		_count++;
 		assert(_count < Array<KeyPair<T>>::GetLength());
+		_count++;
 		const auto data = Array<KeyPair<T>>::GetData();
 
 		auto& keyPair = data[_count];

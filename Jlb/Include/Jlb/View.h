@@ -8,6 +8,7 @@ namespace je
 	template <typename T>
 	struct View
 	{
+		View() = default;
 		View(T& instance);
 		View(void* data, size_t length);
 		virtual ~View() = default;
@@ -18,11 +19,13 @@ namespace je
 		virtual Iterator<T> begin() const;
 		virtual Iterator<T> end() const;
 
+		[[nodiscard]] operator bool() const;
+
 		[[nodiscard]] T* GetData() const;
 
 	private:
 		T* _data = nullptr;
-		size_t _length = SIZE_MAX;
+		size_t _length = 0;
 	};
 
 	template <typename T>
@@ -67,6 +70,12 @@ namespace je
 		it.index = _length;
 		it.data = _data;
 		return it;
+	}
+
+	template <typename T>
+	View<T>::operator bool() const
+	{
+		return _length > 0;
 	}
 
 	template <typename T>

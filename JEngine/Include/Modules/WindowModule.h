@@ -20,9 +20,10 @@ namespace je::engine
 		void (*onScrollCallback)(glm::vec<2, double> offset) = nullptr;
 
 		[[nodiscard]] static const char** GetRequiredExtensions(size_t& count);
+		[[nodiscard]] static VkSurfaceKHR CreateSurface(VkInstance instance);
 
 	private:
-		void OnBegin(Info& info) override;
+		void OnInitialize(Info& info) override;
 		void OnUpdate(Info& info) override;
 		void OnExit(Info& info) override;
 	};

@@ -37,30 +37,23 @@ namespace je
 
 	Arena::~Arena()
 	{
-		// Only free the cascaded arenas.
-		const Arena* next = _next;
-		while(next)
+		if(_next)
 		{
-			void* ptr = next->_ptr;
-			free(ptr);
-
-			const Arena* current = next;
-			next = next->_next;
-
-			delete current;
+			free(_next->_ptr);
+			delete _next;
 		}
 	}
 
 	void* Arena::Alloc(size_t size)
 	{
-		size = math::Max(size, sizeof(size_t)) + sizeof(size_t);
+		size = math::Max(size, sizeof(size_t));
 
 		// If the arena doesn't have enough space, create a cascaded arena OR use an already available cascaded one.
-		if(size > _size - _current || _next && _next->_current > 0)
+		if(size + sizeof(size_t) > _size - _current || _next && _next->_current > 0)
 		{
 			if (!_next)
 			{
-				const size_t newSize = math::Max(_size, size);
+				const size_t newSize = math::Max(_size, size + sizeof(size_t));
 				void* ptr = malloc(newSize);
 				_next = new Arena(ptr, newSize);
 			}
@@ -70,22 +63,19 @@ namespace je
 
 		// Allocate new chunk of memory and change current pointer.
 		void* ptrSize = static_cast<unsigned char*>(_ptr) + _current;
-		*static_cast<size_t*>(ptrSize) = size;
+		*static_cast<size_t*>(ptrSize) = size + sizeof(size_t);
 		void* ptr = static_cast<unsigned char*>(ptrSize) + sizeof(size_t);
-		_current += size;
+		_current += size + sizeof(size_t);
 		return ptr;
 	}
 
-	void Arena::Free(void* ptr)
+	bool Arena::Free(void* ptr)
 	{
 		if (_scopeCount > 0)
-			return;
+			return false;
 
 		if(_next && _next->_current > 0)
-		{
-			_next->Free(ptr);
-			return;
-		}
+			return _next->Free(ptr);
 
 		void* ptrSize = static_cast<unsigned char*>(ptr) - sizeof(size_t);
 		const size_t size = *static_cast<size_t*>(ptrSize);
@@ -96,6 +86,7 @@ namespace je
 #endif
 		
 		_current -= size;
+		return true;
 	}
 
 	Arena::Scope Arena::CreateScope()
