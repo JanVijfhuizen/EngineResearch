@@ -37,17 +37,10 @@ namespace je
 
 	Arena::~Arena()
 	{
-		// Only free the cascaded arenas.
-		const Arena* next = _next;
-		while(next)
+		if(_next)
 		{
-			void* ptr = next->_ptr;
-			free(ptr);
-
-			const Arena* current = next;
-			next = next->_next;
-
-			delete current;
+			free(_next->_ptr);
+			delete _next;
 		}
 	}
 
