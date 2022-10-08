@@ -6,11 +6,17 @@
 namespace je
 {
 	class Arena;
-	struct PhysicalDeviceInfo;
 	struct VulkanApp;
 
 	namespace vkinit
 	{
+		struct PhysicalDeviceInfo final
+		{
+			VkPhysicalDevice device;
+			VkPhysicalDeviceProperties properties;
+			VkPhysicalDeviceFeatures features;
+		};
+
 		[[nodiscard]] bool IsPhysicalDeviceValid(const PhysicalDeviceInfo& info);
 		[[nodiscard]] size_t GetPhysicalDeviceRating(const PhysicalDeviceInfo& info);
 		[[nodiscard]] VkPhysicalDeviceFeatures GetPhysicalDeviceFeatures();

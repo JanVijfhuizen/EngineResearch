@@ -76,16 +76,13 @@ namespace je
 		return ptr;
 	}
 
-	void Arena::Free(void* ptr)
+	bool Arena::Free(void* ptr)
 	{
 		if (_scopeCount > 0)
-			return;
+			return false;
 
 		if(_next && _next->_current > 0)
-		{
-			_next->Free(ptr);
-			return;
-		}
+			return _next->Free(ptr);
 
 		void* ptrSize = static_cast<unsigned char*>(ptr) - sizeof(size_t);
 		const size_t size = *static_cast<size_t*>(ptrSize);
@@ -96,6 +93,7 @@ namespace je
 #endif
 		
 		_current -= size;
+		return true;
 	}
 
 	Arena::Scope Arena::CreateScope()

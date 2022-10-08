@@ -155,7 +155,6 @@
     <ClInclude Include="Include\EngineInitializer.h" />
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
-    <ClInclude Include="Include\Graphics\PhysicalDeviceInfo.h" />
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\ModuleFinder.h" />
     <ClInclude Include="Include\Modules\RenderModule.h" />

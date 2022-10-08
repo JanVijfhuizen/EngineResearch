@@ -95,8 +95,5 @@
     <ClInclude Include="Include\Graphics\VulkanApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\PhysicalDeviceInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

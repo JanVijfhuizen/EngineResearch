@@ -19,6 +19,8 @@ namespace je
 		virtual Iterator<T> begin() const;
 		virtual Iterator<T> end() const;
 
+		[[nodiscard]] operator bool() const;
+
 		[[nodiscard]] T* GetData() const;
 
 	private:
@@ -68,6 +70,12 @@ namespace je
 		it.index = _length;
 		it.data = _data;
 		return it;
+	}
+
+	template <typename T>
+	View<T>::operator bool() const
+	{
+		return _length > 0;
 	}
 
 	template <typename T>

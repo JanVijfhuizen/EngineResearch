@@ -2,12 +2,49 @@
 #include "Graphics/VulkanInitializer.h"
 #include <cstring>
 #include <iostream>
-
-#include "Graphics/PhysicalDeviceInfo.h"
 #include "Graphics/VulkanApp.h"
+#include "Jlb/Heap.h"
 
 namespace je::vkinit
 {
+	struct QueueFamilies final
+	{
+		size_t graphics;
+		size_t present;
+		size_t transfer;
+
+		[[nodiscard]] operator bool() const;
+	};
+
+	struct SwapChainSupportDetails final
+	{
+		VkSurfaceCapabilitiesKHR capabilities{};
+		View<VkSurfaceFormatKHR> formats{};
+		View<VkPresentModeKHR> presentModes{};
+
+		[[nodiscard]] operator bool() const;
+		[[nodiscard]] size_t GetRecommendedImageCount() const;
+	};
+
+	SwapChainSupportDetails::operator bool() const
+	{
+		return formats && presentModes;
+	}
+
+	size_t SwapChainSupportDetails::GetRecommendedImageCount() const
+	{
+		size_t imageCount = capabilities.minImageCount + 1;
+		const auto& maxImageCount = capabilities.maxImageCount;
+		if (maxImageCount > 0 && imageCount > maxImageCount)
+			imageCount = maxImageCount;
+		return imageCount;
+	}
+
+	QueueFamilies::operator bool() const
+	{
+		return graphics != SIZE_MAX && present != SIZE_MAX && transfer != SIZE_MAX;
+	}
+
 	bool IsPhysicalDeviceValid(const PhysicalDeviceInfo& info)
 	{
 		return true;
@@ -143,7 +180,7 @@ namespace je::vkinit
 			func(instance, debugMessenger, pAllocator);
 		}
 
-	VkDebugUtilsMessengerEXT CreateDebugger(VkInstance instance)
+	VkDebugUtilsMessengerEXT CreateDebugger(const VkInstance instance)
 	{
 #ifdef NDEBUG
 		return;
@@ -156,11 +193,159 @@ namespace je::vkinit
 		return debugger;
 	}
 
+	QueueFamilies GetQueueFamilies(Arena& arena, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface)
+	{
+		const auto _ = arena.CreateScope();
+
+		QueueFamilies families{};
+
+		uint32_t queueFamilyCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
+
+		const Array<VkQueueFamilyProperties> queueFamilies{arena, queueFamilyCount};
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.GetData());
+
+		uint32_t i = 0;
+		for (const auto& queueFamily : queueFamilies.GetView())
+		{
+			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+				families.graphics = i;
+
+			if (queueFamily.queueFlags & VK_QUEUE_TRANSFER_BIT)
+				families.transfer = i;
+
+			VkBool32 presentSupport = false;
+			vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, surface, &presentSupport);
+
+			if (presentSupport)
+				families.present = i;
+
+			if (families)
+				break;
+			++i;
+		}
+
+		return families;
+	}
+
+	bool CheckDeviceExtensionSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const View<StringView>&extensions)
+	{
+		uint32_t extensionCount;
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
+
+		const Array<VkExtensionProperties> availableExtensions{arena, extensionCount};
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.GetData());
+
+		const auto extensionsView = availableExtensions.GetView();
+
+		bool found = true;
+		for (const auto& extension : extensions)
+		{
+			found = false;
+			for (const auto& availableExtension : extensionsView)
+				if (strcmp(extension.GetData(), availableExtension.extensionName) == 0)
+				{
+					found = true;
+					break;
+				}
+
+			if (!found)
+				break;
+		}
+
+		return found;
+	}
+
+	SwapChainSupportDetails QuerySwapChainSupport(Arena& arena, const Arena::Scope& _, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface)
+	{
+		SwapChainSupportDetails details{};
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &details.capabilities);
+
+		uint32_t formatCount;
+		vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, nullptr);
+
+		if (formatCount != 0)
+		{
+			auto& formats = details.formats;
+			formats = Array<VkSurfaceFormatKHR>{ arena, formatCount }.GetView();
+			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, formats.GetData());
+		}
+
+		uint32_t presentModeCount;
+		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
+
+		if (presentModeCount != 0)
+		{
+			auto& presentModes = details.presentModes;
+			presentModes = Array<VkPresentModeKHR>{ arena, presentModeCount }.GetView();
+
+			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface,
+				&presentModeCount, presentModes.GetData());
+		}
+
+		return details;
+	}
+
+	VkPhysicalDevice SelectPhysicalDevice(const Info& info, const VkInstance instance, const VkSurfaceKHR surface, const View<StringView> extensions)
+	{
+		assert(info.isPhysicalDeviceValid);
+		assert(info.getPhysicalDeviceRating);
+
+		auto& arena = *info.tempArena;
+		const auto _ = arena.CreateScope();
+
+		uint32_t deviceCount = 0;
+		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
+		assert(deviceCount);
+
+		const Array<VkPhysicalDevice> devices{arena, deviceCount};
+		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.GetData());
+
+		Heap<VkPhysicalDevice> candidates{arena, deviceCount};
+		
+		for (const auto& device : devices.GetView())
+		{
+			VkPhysicalDeviceProperties deviceProperties;
+			vkGetPhysicalDeviceProperties(device, &deviceProperties);
+
+			VkPhysicalDeviceFeatures deviceFeatures;
+			vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+			const auto families = GetQueueFamilies(arena, device, surface);
+			if (!families)
+				continue;
+
+			if (!CheckDeviceExtensionSupport(arena, device, extensions))
+				continue;
+
+			{
+				const auto swapChainSupportScope = arena.CreateScope();
+				auto swapChainSupport = QuerySwapChainSupport(arena, swapChainSupportScope, device, surface);
+				const bool supportsSwapChain = swapChainSupport;
+				if (!swapChainSupport)
+					continue;
+			}
+
+			PhysicalDeviceInfo physicalDeviceInfo{};
+			physicalDeviceInfo.device = device;
+			physicalDeviceInfo.features = deviceFeatures;
+			physicalDeviceInfo.properties = deviceProperties;
+
+			if (!info.isPhysicalDeviceValid(physicalDeviceInfo))
+				continue;
+
+			candidates.Insert(device, info.getPhysicalDeviceRating(physicalDeviceInfo));
+		}
+
+		assert(candidates.GetCount() > 0);
+		return candidates.Peek();
+	}
+
 	VulkanApp CreateApp(const Info& info)
 	{
-		VulkanApp app{};
-
 		const auto _ = info.tempArena->CreateScope();
+
+		VulkanApp app{};
 
 		bool debugExtensionPresent = true;
 #ifdef _DEBUG
@@ -222,6 +407,8 @@ namespace je::vkinit
 		app.instance = CreateInstance(*info.tempArena, validationLayers, instanceExtensions);
 		app.debugger = CreateDebugger(app.instance);
 		app.surface = info.createSurface(app.instance);
+		app.physicalDevice = SelectPhysicalDevice(info, app.instance, app.surface, deviceExtensions);
+
 		return app;
 	}
 

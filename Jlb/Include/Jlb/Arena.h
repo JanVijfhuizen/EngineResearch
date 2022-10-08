@@ -31,8 +31,8 @@ namespace je
 		~Arena();
 		
 		[[nodiscard]] void* Alloc(size_t size);
-		// Does not call destructors.
-		void Free(void* ptr);
+		// Does not call destructors. Returns if the free was successful.
+		bool Free(void* ptr);
 
 		// Allocate N objects of type T. Calls default constructors.
 		template <typename T, typename ...Args>
