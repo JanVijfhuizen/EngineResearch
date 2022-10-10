@@ -6,11 +6,9 @@ namespace je::engine
 {
 	class RenderModule final : public Module
 	{
-	public:
+		VulkanApp _app{};
+
 		void OnInitialize(Info& info) override;
 		void OnExit(Info& info) override;
-
-	private:
-		VulkanApp _app{};
 	};
 }

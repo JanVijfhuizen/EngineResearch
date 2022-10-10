@@ -13,7 +13,7 @@ namespace je
 		View(void* data, size_t length);
 		virtual ~View() = default;
 
-		[[nodiscard]] T& operator [](size_t index);
+		[[nodiscard]] T& operator [](size_t index) const;
 		[[nodiscard]] size_t GetLength() const;
 
 		virtual Iterator<T> begin() const;
@@ -41,7 +41,7 @@ namespace je
 	}
 
 	template <typename T>
-	T& View<T>::operator[](size_t index)
+	T& View<T>::operator[](size_t index) const
 	{
 		assert(_length > index);
 		return _data[index];

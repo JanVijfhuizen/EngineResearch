@@ -18,6 +18,7 @@ protected:
 
 int main()
 {
+
 	MyEngine engine{};
 	return static_cast<int>(engine.Run());
 }
