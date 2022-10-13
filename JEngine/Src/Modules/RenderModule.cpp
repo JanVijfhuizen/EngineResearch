@@ -6,6 +6,7 @@
 #include "Graphics/VulkanApp.h"
 #include "Graphics/VulkanInitializer.h"
 #include "Modules/WindowModule.h"
+#include "Graphics/VulkanAllocator.h"
 
 namespace je::engine
 {
@@ -24,10 +25,12 @@ namespace je::engine
 		vkInfo.instanceExtensions = windowExtensionsArr;
 
 		_app = CreateApp(vkInfo);
+		_allocator = info.persistentArena.New<VulkanAllocator>(1, info.persistentArena, _app);
 	}
 
 	void RenderModule::OnExit(Info& info)
 	{
+		info.persistentArena.Delete(_allocator);
 		vkinit::DestroyApp(_app);
 
 		Module::OnExit(info);
