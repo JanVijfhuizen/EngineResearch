@@ -37,6 +37,8 @@ namespace je
 		// Allocate N objects of type T. Calls default constructors.
 		template <typename T, typename ...Args>
 		[[nodiscard]] T* New(size_t count = 1, Args&... args);
+		template <typename T>
+		bool Delete(T* ptr);
 
 		[[nodiscard]] Scope CreateScope();
 
@@ -59,6 +61,13 @@ namespace je
 		for (size_t i = 0; i < count; ++i)
 			new(&ptrType[i]) T(args...);
 		return ptrType;
+	}
+
+	template <typename T>
+	bool Arena::Delete(T* ptr)
+	{
+		ptr->~T();
+		return Free(ptr);
 	}
 }
 
