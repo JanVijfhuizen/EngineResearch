@@ -1,26 +1,26 @@
 ﻿#include "pch.h"
-#include "Graphics/RenderGraph.h"
+#include "Graphics/RenderGraph/RenderGraph.h"
 #include "Jlb/JMath.h"
 #include "Jlb/LinkedList.h"
 
-namespace je
+namespace je::render_graph
 {
 	struct NodeInfo final
 	{
-		RenderGraph::Node* node = nullptr;
-		View<RenderGraph::Resource> inputs{};
-		View<RenderGraph::Resource> outputs{};
+		Node* node = nullptr;
+		View<Resource> inputs{};
+		View<Resource> outputs{};
 		LinkedList<NodeInfo*>* children = nullptr;
 		size_t depth = 0;
 		bool visited = false;
 	};
 
-	Array<RenderGraph::Resource> RenderGraph::Node::DefineInputs(Arena& arena)
+	Array<Resource> Node::DefineInputs(Arena& arena)
 	{
 		return { arena, 0 };
 	}
 
-	Array<RenderGraph::Resource> RenderGraph::Node::DefineOutputs(Arena& arena)
+	Array<Resource> Node::DefineOutputs(Arena& arena)
 	{
 		return { arena, 0 };
 	}
@@ -55,7 +55,7 @@ namespace je
 		}
 	}
 
-	RenderGraph::RenderGraph(Arena& arena, Arena& tempArena, const View<Node>& nodes, Node& presentNode)
+	RenderGraph::RenderGraph(Arena& arena, Arena& tempArena, const View<Node*>& nodes, Node& presentNode)
 	{
 		{
 			// Link all nodes and define the depth of every node.
@@ -70,7 +70,7 @@ namespace je
 			for (size_t i = 0; i < length; ++i)
 			{
 				nodeInfos[i].children = tempArena.New<LinkedList<NodeInfo*>>(1, tempArena);
-				nodeInfos[i].node = &nodes[i];
+				nodeInfos[i].node = nodes[i];
 			}
 
 			root.inputs = presentNode.DefineInputs(tempArena).GetView();
