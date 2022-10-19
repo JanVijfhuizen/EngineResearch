@@ -26,4 +26,11 @@ namespace je::math
 		}
 		return length;
 	}
+
+	template <typename T>
+	[[nodiscard]] constexpr T Clamp(const T& t, const T& min, const T& max)
+	{
+		assert(min <= max);
+		return Max(min, Min(t, max));
+	}
 }

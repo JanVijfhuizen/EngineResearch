@@ -58,10 +58,9 @@ namespace je::engine
 
 		// Create window.
 		auto& window = internalWindow.window;
-		auto& overrideResolution = createInfo.overrideResolution;
-		const bool fullscreen = overrideResolution.x == 0 && overrideResolution.y == 0;
-		overrideResolution = fullscreen ? glm::ivec2{ mode->width, mode->height } : overrideResolution;
-		window = glfwCreateWindow(overrideResolution.x, overrideResolution.y, createInfo.name, fullscreen ? monitor : nullptr, nullptr);
+		const bool fullscreen = _resolution.x == 0 && _resolution.y == 0;
+		_resolution = fullscreen ? glm::ivec2{ mode->width, mode->height } : _resolution;
+		window = glfwCreateWindow(_resolution.x, _resolution.y, _name, fullscreen ? monitor : nullptr, nullptr);
 		assert(window);
 		glfwSetWindowUserPointer(window, this);
 
@@ -97,6 +96,23 @@ namespace je::engine
 		const auto result = glfwCreateWindowSurface(instance, internalWindow.window, nullptr, &surface);
 		assert(!result);
 		return surface;
+	}
+
+	glm::ivec2 WindowModule::GetResolution() const
+	{
+		return _resolution;
+	}
+
+	void WindowModule::SetResolution(const glm::ivec2& resolution)
+	{
+		assert(!internalWindow.running);
+		_resolution = resolution;
+	}
+
+	void WindowModule::SetName(const StringView& name)
+	{
+		assert(!internalWindow.running);
+		_name = name;
 	}
 
 	void WindowModule::OnUpdate(Info& info)

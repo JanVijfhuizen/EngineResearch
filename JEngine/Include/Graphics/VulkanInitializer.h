@@ -10,12 +10,30 @@ namespace je
 
 	namespace vkinit
 	{
-		// Vulkan physical device info.
+		struct QueueFamilies final
+		{
+			size_t graphics;
+			size_t present;
+			size_t transfer;
+
+			[[nodiscard]] operator bool() const;
+		};
+		
 		struct PhysicalDeviceInfo final
 		{
 			VkPhysicalDevice device;
 			VkPhysicalDeviceProperties properties;
 			VkPhysicalDeviceFeatures features;
+		};
+
+		struct SwapChainSupportDetails final
+		{
+			VkSurfaceCapabilitiesKHR capabilities{};
+			View<VkSurfaceFormatKHR> formats{};
+			View<VkPresentModeKHR> presentModes{};
+
+			[[nodiscard]] operator bool() const;
+			[[nodiscard]] size_t GetRecommendedImageCount() const;
 		};
 		
 		[[nodiscard]] bool IsPhysicalDeviceValid(const PhysicalDeviceInfo& info);
@@ -38,5 +56,8 @@ namespace je
 		
 		[[nodiscard]] VulkanApp CreateApp(const Info& info);
 		void DestroyApp(const VulkanApp& app);
+
+		[[nodiscard]] QueueFamilies GetQueueFamilies(Arena& arena, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
+		[[nodiscard]] SwapChainSupportDetails QuerySwapChainSupport(Arena& arena, VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface);
 	}
 }

@@ -135,9 +135,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Graphics\RenderGraph.cpp" />
     <ClCompile Include="Src\Graphics\VulkanAllocator.cpp" />
     <ClCompile Include="Src\Graphics\VulkanInitializer.cpp" />
+    <ClCompile Include="Src\Graphics\VulkanSwapChain.cpp" />
     <ClCompile Include="Src\Modules\RenderModule.cpp" />
     <ClCompile Include="Src\Modules\TimeModule.cpp" />
     <ClCompile Include="Src\Resource.cpp" />
@@ -157,9 +157,9 @@
     <ClInclude Include="Include\EngineInitializer.h" />
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
-    <ClInclude Include="Include\Graphics\RenderGraph.h" />
     <ClInclude Include="Include\Graphics\VulkanAllocator.h" />
     <ClInclude Include="Include\Graphics\VulkanMemory.h" />
+    <ClInclude Include="Include\Graphics\VulkanSwapChain.h" />
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\ModuleFinder.h" />
     <ClInclude Include="Include\Modules\RenderModule.h" />

@@ -2,11 +2,11 @@
 #include "Modules/RenderModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
-#include "Graphics/RenderGraph.h"
 #include "Graphics/VulkanApp.h"
 #include "Graphics/VulkanInitializer.h"
 #include "Modules/WindowModule.h"
 #include "Graphics/VulkanAllocator.h"
+#include "Graphics/VulkanSwapChain.h"
 
 namespace je::engine
 {
@@ -26,13 +26,27 @@ namespace je::engine
 
 		_app = CreateApp(vkInfo);
 		_allocator = info.persistentArena.New<VulkanAllocator>(1, info.persistentArena, _app);
+		_swapChain = info.persistentArena.New<VulkanSwapChain>(1, info.persistentArena, info.tempArena, _app, *info.finder.Get<WindowModule>());
 	}
 
 	void RenderModule::OnExit(Info& info)
 	{
+		info.persistentArena.Delete(_swapChain);
 		info.persistentArena.Delete(_allocator);
 		vkinit::DestroyApp(_app);
 
 		Module::OnExit(info);
+	}
+
+	void RenderModule::OnUpdate(Info& info)
+	{
+		Module::OnUpdate(info);
+		_swapChain->BeginFrame();
+	}
+
+	void RenderModule::OnPostUpdate(Info& info)
+	{
+		Module::OnPostUpdate(info);
+		_swapChain->EndFrame();
 	}
 }

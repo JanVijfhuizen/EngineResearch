@@ -4,6 +4,9 @@
 
 namespace je
 {
+	class VulkanSwapChain;
+	class Arena;
+
 	class VulkanAllocator;
 
 	namespace engine
@@ -12,9 +15,13 @@ namespace je
 		{
 			VulkanApp _app{};
 			VulkanAllocator* _allocator = nullptr;
+			VulkanSwapChain* _swapChain = nullptr;
 
 			void OnInitialize(Info& info) override;
 			void OnExit(Info& info) override;
+
+			void OnUpdate(Info& info) override;
+			void OnPostUpdate(Info& info) override;
 		};
 	}
 }

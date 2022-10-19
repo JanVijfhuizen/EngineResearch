@@ -9,25 +9,6 @@
 
 namespace je::vkinit
 {
-	struct QueueFamilies final
-	{
-		size_t graphics;
-		size_t present;
-		size_t transfer;
-
-		[[nodiscard]] operator bool() const;
-	};
-
-	struct SwapChainSupportDetails final
-	{
-		VkSurfaceCapabilitiesKHR capabilities{};
-		View<VkSurfaceFormatKHR> formats{};
-		View<VkPresentModeKHR> presentModes{};
-
-		[[nodiscard]] operator bool() const;
-		[[nodiscard]] size_t GetRecommendedImageCount() const;
-	};
-
 	SwapChainSupportDetails::operator bool() const
 	{
 		return formats && presentModes;
@@ -137,7 +118,7 @@ namespace je::vkinit
 		return info;
 	}
 
-	VkInstance CreateInstance(const Arena& arena, const Array<StringView>& validationLayers, const Array<StringView>& instanceExtensions)
+	VkInstance CreateInstance(const Array<StringView>& validationLayers, const Array<StringView>& instanceExtensions)
 	{
 		const auto appInfo = CreateApplicationInfo();
 
@@ -258,7 +239,7 @@ namespace je::vkinit
 		return found;
 	}
 
-	SwapChainSupportDetails QuerySwapChainSupport(Arena& arena, const Arena::Scope& _, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface)
+	SwapChainSupportDetails QuerySwapChainSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface)
 	{
 		SwapChainSupportDetails details{};
 		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &details.capabilities);
@@ -288,7 +269,7 @@ namespace je::vkinit
 		return details;
 	}
 
-	VkPhysicalDevice SelectPhysicalDevice(const Info& info, const VkInstance instance, const VkSurfaceKHR surface, const View<StringView> extensions)
+	VkPhysicalDevice SelectPhysicalDevice(const Info& info, const VkInstance instance, const VkSurfaceKHR surface)
 	{
 		assert(info.isPhysicalDeviceValid);
 		assert(info.getPhysicalDeviceRating);
@@ -317,13 +298,12 @@ namespace je::vkinit
 			if (!families)
 				continue;
 
-			if (!CheckDeviceExtensionSupport(arena, device, extensions))
+			if (!CheckDeviceExtensionSupport(arena, device, info.deviceExtensions))
 				continue;
 
 			{
 				const auto swapChainSupportScope = arena.CreateScope();
-				auto swapChainSupport = QuerySwapChainSupport(arena, swapChainSupportScope, device, surface);
-				const bool supportsSwapChain = swapChainSupport;
+				auto swapChainSupport = QuerySwapChainSupport(arena, device, surface);
 				if (!swapChainSupport)
 					continue;
 			}
@@ -482,13 +462,18 @@ namespace je::vkinit
 		memcpy(instanceExtensions.GetData(), info.instanceExtensions.GetData(), sizeof(StringView) * info.instanceExtensions.GetLength());
 		memcpy(deviceExtensions.GetData(), info.deviceExtensions.GetData(), sizeof(StringView) * info.deviceExtensions.GetLength());
 
-		CheckValidationSupport(*info.tempArena, validationLayers);
-		app.instance = CreateInstance(*info.tempArena, validationLayers, instanceExtensions);
+		Info updatedInfo = info;
+		updatedInfo.validationLayers = validationLayers;
+		updatedInfo.instanceExtensions = instanceExtensions;
+		updatedInfo.deviceExtensions = deviceExtensions;
+
+		CheckValidationSupport(*updatedInfo.tempArena, validationLayers);
+		app.instance = CreateInstance(validationLayers, instanceExtensions);
 		app.debugger = CreateDebugger(app.instance);
-		app.surface = info.createSurface(app.instance);
-		app.physicalDevice = SelectPhysicalDevice(info, app.instance, app.surface, deviceExtensions);
-		CreateLogicalDevice(app, info, *info.tempArena, app.physicalDevice, app.surface);
-		app.commandPool = CreateCommandPool(*info.tempArena, app.physicalDevice, app.surface, app.device);
+		app.surface = updatedInfo.createSurface(app.instance);
+		app.physicalDevice = SelectPhysicalDevice(updatedInfo, app.instance, app.surface);
+		CreateLogicalDevice(app, updatedInfo, *updatedInfo.tempArena, app.physicalDevice, app.surface);
+		app.commandPool = CreateCommandPool(*updatedInfo.tempArena, app.physicalDevice, app.surface, app.device);
 
 		return app;
 	}
