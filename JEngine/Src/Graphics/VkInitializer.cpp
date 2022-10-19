@@ -1,13 +1,13 @@
 ﻿#include "pch.h"
-#include "Graphics/VulkanInitializer.h"
+#include "Graphics/VkInitializer.h"
 #include <cstring>
 #include <iostream>
-#include "Graphics/VulkanApp.h"
+#include "Graphics/VkApp.h"
 #include "Jlb/Heap.h"
 #include "Jlb/JMap.h"
 #include "Jlb/JVector.h"
 
-namespace je::vkinit
+namespace je::vk::init
 {
 	SwapChainSupportDetails::operator bool() const
 	{
@@ -323,7 +323,7 @@ namespace je::vkinit
 		return candidates.Peek();
 	}
 	
-	void CreateLogicalDevice(VulkanApp& app, const Info& info, Arena& arena, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface)
+	void CreateLogicalDevice(App& app, const Info& info, Arena& arena, const VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface)
 	{
 		const auto _ = arena.CreateScope();
 
@@ -400,11 +400,11 @@ namespace je::vkinit
 		return commandPool;
 	}
 
-	VulkanApp CreateApp(const Info& info)
+	App CreateApp(const Info& info)
 	{
 		const auto _ = info.tempArena->CreateScope();
 
-		VulkanApp app{};
+		App app{};
 
 		bool debugExtensionPresent = true;
 #ifdef _DEBUG
@@ -478,7 +478,7 @@ namespace je::vkinit
 		return app;
 	}
 
-	void DestroyApp(const VulkanApp& app)
+	void DestroyApp(const App& app)
 	{
 		vkDestroyCommandPool(app.device, app.commandPool, nullptr);
 		vkDestroyDevice(app.device, nullptr);

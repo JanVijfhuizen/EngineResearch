@@ -1,11 +1,11 @@
 #include "pch.h"
-#include "Graphics/VulkanAllocator.h"
-#include "Graphics/VulkanApp.h"
+#include "Graphics/VkAllocator.h"
+#include "Graphics/VkApp.h"
 #include "Jlb/JMath.h"
 
-namespace je
+namespace je::vk
 {
-	VulkanAllocator::VulkanAllocator(Arena& arena, const VulkanApp& app, const size_t pageSize) : _arena(arena), _app(app), _pageSize(pageSize)
+	Allocator::Allocator(Arena& arena, const App& app, const size_t pageSize) : _arena(arena), _app(app), _pageSize(pageSize)
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(app.physicalDevice, &memProperties);
@@ -20,7 +20,7 @@ namespace je
 		}
 	}
 
-	VulkanAllocator::~VulkanAllocator()
+	Allocator::~Allocator()
 	{
 		for (int32_t i = static_cast<int32_t>(_pools->GetLength()) - 1; i >= 0; --i)
 		{
@@ -35,7 +35,7 @@ namespace je
 		return (size / alignment + (size % alignment > 0)) * alignment;
 	}
 
-	VulkanMemory VulkanAllocator::Alloc(const VkMemoryRequirements memRequirements, const VkMemoryPropertyFlags properties, const size_t count) const
+	Memory Allocator::Alloc(const VkMemoryRequirements memRequirements, const VkMemoryPropertyFlags properties, const size_t count) const
 	{
 		const size_t poolId = GetPoolId(memRequirements.memoryTypeBits, properties);
 		assert(poolId != SIZE_MAX);
@@ -72,7 +72,7 @@ namespace je
 		const VkDeviceSize offset = ptr->size - ptr->remaining;
 		ptr->remaining -= size;
 
-		VulkanMemory memory{};
+		Memory memory{};
 		memory.memory = ptr->memory;
 		memory.size = size;
 		memory.offset = offset;
@@ -80,7 +80,7 @@ namespace je
 		return memory;
 	}
 
-	bool VulkanAllocator::Free(const VulkanMemory& memory) const
+	bool Allocator::Free(const Memory& memory) const
 	{
 		const auto& pool = (*_pools)[memory.poolId];
 		for (auto& page : *pool.pages)
@@ -94,7 +94,7 @@ namespace je
 		return false;
 	}
 
-	size_t VulkanAllocator::GetPoolId(const uint32_t typeFilter, const VkMemoryPropertyFlags properties) const
+	size_t Allocator::GetPoolId(const uint32_t typeFilter, const VkMemoryPropertyFlags properties) const
 	{
 		size_t id = 0;
 		for (const auto& pool : _pools->GetView())

@@ -1,21 +1,24 @@
 ﻿#pragma once
 #include "Module.h"
-#include "Graphics/VulkanApp.h"
+#include "Graphics/VkApp.h"
 
 namespace je
 {
-	class VulkanSwapChain;
 	class Arena;
 
-	class VulkanAllocator;
+	namespace vk
+	{
+		class SwapChain;
+		class Allocator;
+	}
 
 	namespace engine
 	{
 		class RenderModule final : public Module
 		{
-			VulkanApp _app{};
-			VulkanAllocator* _allocator = nullptr;
-			VulkanSwapChain* _swapChain = nullptr;
+			vk::App _app{};
+			vk::Allocator* _allocator = nullptr;
+			vk::SwapChain* _swapChain = nullptr;
 
 			void OnInitialize(Info& info) override;
 			void OnExit(Info& info) override;

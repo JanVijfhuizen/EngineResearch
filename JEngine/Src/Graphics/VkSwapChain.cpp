@@ -1,12 +1,12 @@
 #include "pch.h"
-#include "Graphics/VulkanSwapChain.h"
-#include "Graphics/VulkanApp.h"
-#include "Graphics/VulkanInitializer.h"
+#include "Graphics/VkSwapChain.h"
+#include "Graphics/VkApp.h"
+#include "Graphics/VkInitializer.h"
 #include "Jlb/JMath.h"
 #include "Jlb/Arena.h"
 #include "Modules/WindowModule.h"
 
-namespace je
+namespace je::vk
 {
 	VkSurfaceFormatKHR ChooseSurfaceFormat(const View<VkSurfaceFormatKHR>& availableFormats)
 	{
@@ -49,12 +49,12 @@ namespace je
 		return actualExtent;
 	}
 
-	VulkanSwapChain::VulkanSwapChain(Arena& arena, Arena& tempArena, const VulkanApp& app, const engine::WindowModule& windowModule) :
+	SwapChain::SwapChain(Arena& arena, Arena& tempArena, const App& app, const engine::WindowModule& windowModule) :
 		_arena(arena), _tempArena(tempArena), _app(app), _windowModule(windowModule)
 	{
 		const auto _ = _tempArena.CreateScope();
 		
-		const auto support = vkinit::QuerySwapChainSupport(tempArena, app.physicalDevice, app.surface);
+		const auto support = init::QuerySwapChainSupport(tempArena, app.physicalDevice, app.surface);
 		const size_t imageCount = support.GetRecommendedImageCount();
 		_surfaceFormat = ChooseSurfaceFormat(support.formats);
 		_presentMode = ChoosePresentMode(support.presentModes);
@@ -65,14 +65,14 @@ namespace je
 		Recreate();
 	}
 
-	VulkanSwapChain::~VulkanSwapChain()
+	SwapChain::~SwapChain()
 	{
 		Cleanup();
 		_arena.Free(_frames);
 		_arena.Free(_images);
 	}
 
-	VkCommandBuffer VulkanSwapChain::BeginFrame()
+	VkCommandBuffer SwapChain::WaitForImage()
 	{
 		const auto& frame = (*_frames)[_frameIndex];
 
@@ -86,6 +86,15 @@ namespace je
 		if (image.fence)
 			vkWaitForFences(_app.device, 1, &image.fence, VK_TRUE, UINT64_MAX);
 		image.fence = frame.inFlightFence;
+		return image.cmdBuffer;
+	}
+
+	VkCommandBuffer SwapChain::BeginFrame(const bool manuallyCallWaitForImage)
+	{
+		if (!manuallyCallWaitForImage)
+			WaitForImage();
+
+		const auto& image = (*_images)[_imageIndex];
 
 		VkCommandBufferBeginInfo cmdBufferBeginInfo{};
 		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -93,7 +102,7 @@ namespace je
 		vkResetCommandBuffer(image.cmdBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 		vkBeginCommandBuffer(image.cmdBuffer, &cmdBufferBeginInfo);
 
-		const VkClearValue clearColor = { 1, 1, 1, 1 };
+		const VkClearValue clearColor = { 1.f, 1.f, 1.f, 1.f };
 
 		VkRenderPassBeginInfo renderPassBeginInfo{};
 		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -108,7 +117,7 @@ namespace je
 		return image.cmdBuffer;
 	}
 
-	void VulkanSwapChain::EndFrame(const View<VkSemaphore>& waitSemaphores)
+	void SwapChain::EndFrame(const View<VkSemaphore>& waitSemaphores)
 	{
 		auto& frame = (*_frames)[_frameIndex];
 		auto& image = (*_images)[_imageIndex];
@@ -134,7 +143,7 @@ namespace je
 		submitInfo.pWaitDstStageMask = &waitStage;
 
 		vkResetFences(_app.device, 1, &frame.inFlightFence);
-		result = vkQueueSubmit(_app.queues[VulkanApp::renderQueue], 1, &submitInfo, frame.inFlightFence);
+		result = vkQueueSubmit(_app.queues[App::renderQueue], 1, &submitInfo, frame.inFlightFence);
 		assert(!result);
 
 		VkPresentInfoKHR presentInfo{};
@@ -145,14 +154,14 @@ namespace je
 		presentInfo.pSwapchains = &_swapChain;
 		presentInfo.pImageIndices = &_imageIndex;
 
-		result = vkQueuePresentKHR(_app.queues[VulkanApp::presentQueue], &presentInfo);
+		result = vkQueuePresentKHR(_app.queues[App::presentQueue], &presentInfo);
 		_frameIndex = (_frameIndex + 1) % _frames->GetLength();
 
 		if(result)
 			Recreate();
 	}
 
-	void VulkanSwapChain::Cleanup() const
+	void SwapChain::Cleanup() const
 	{
 		if (!_swapChain)
 			return;
@@ -181,13 +190,13 @@ namespace je
 		vkDestroySwapchainKHR(_app.device, _swapChain, nullptr);
 	}
 
-	void VulkanSwapChain::Recreate()
+	void SwapChain::Recreate()
 	{
 		const auto _ = _tempArena.CreateScope();
-		const auto support = vkinit::QuerySwapChainSupport(_tempArena, _app.physicalDevice, _app.surface);
+		const auto support = init::QuerySwapChainSupport(_tempArena, _app.physicalDevice, _app.surface);
 		_extent = ChooseExtent(support.capabilities, _windowModule.GetResolution());
 
-		const auto families = vkinit::GetQueueFamilies(_tempArena, _app.physicalDevice, _app.surface);
+		const auto families = init::GetQueueFamilies(_tempArena, _app.physicalDevice, _app.surface);
 
 		const uint32_t queueFamilyIndices[] =
 		{

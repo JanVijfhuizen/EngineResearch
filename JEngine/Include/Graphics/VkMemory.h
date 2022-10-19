@@ -1,8 +1,8 @@
 #pragma once
 
-namespace je
+namespace je::vk
 {
-	struct VulkanMemory final
+	struct Memory final
 	{
 		VkDeviceMemory memory;
 		VkDeviceSize size;

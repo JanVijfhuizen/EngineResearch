@@ -1,8 +1,8 @@
 #pragma once
 
-namespace je
+namespace je::vk
 {
-	struct VulkanApp final
+	struct App final
 	{
 		enum Queue
 		{
