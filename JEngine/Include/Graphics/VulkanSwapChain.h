@@ -22,12 +22,18 @@ namespace je
 	private:
 		struct Image final
 		{
-			
+			VkImage image;
+			VkImageView view;
+			VkCommandBuffer cmdBuffer;
+			VkFramebuffer frameBuffer;
+			VkFence fence = VK_NULL_HANDLE;
 		};
 
 		struct Frame final
 		{
-			
+			VkSemaphore imageAvailableSemaphore;
+			VkSemaphore renderFinishedSemaphore;
+			VkFence inFlightFence;
 		};
 
 		Arena& _arena;

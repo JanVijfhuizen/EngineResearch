@@ -79,6 +79,23 @@ namespace je
 
 		const auto result = vkDeviceWaitIdle(_app.device);
 		assert(!result);
+
+		for (const auto& frame : _frames->GetView())
+		{
+			vkDestroySemaphore(_app.device, frame.imageAvailableSemaphore, nullptr);
+			vkDestroySemaphore(_app.device, frame.renderFinishedSemaphore, nullptr);
+			vkDestroyFence(_app.device, frame.inFlightFence, nullptr);
+		}
+
+		for (auto& image : _images->GetView())
+		{
+			vkDestroyImageView(_app.device, image.view, nullptr);
+			if (image.fence)
+				vkWaitForFences(_app.device, 1, &image.fence, VK_TRUE, UINT64_MAX);
+			image.fence = VK_NULL_HANDLE;
+			vkFreeCommandBuffers(_app.device, _app.commandPool, 1, &image.cmdBuffer);
+			vkDestroyFramebuffer(_app.device, image.frameBuffer, nullptr);
+		}
 		
 		vkDestroyRenderPass(_app.device, _renderPass, nullptr);
 		vkDestroySwapchainKHR(_app.device, _swapChain, nullptr);
@@ -181,5 +198,62 @@ namespace je
 
 		const auto renderPassResult = vkCreateRenderPass(_app.device, &renderPassCreateInfo, nullptr, &_renderPass);
 		assert(!renderPassResult);
+
+		VkImageViewCreateInfo viewCreateInfo{};
+		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewCreateInfo.subresourceRange.baseMipLevel = 0;
+		viewCreateInfo.subresourceRange.levelCount = 1;
+		viewCreateInfo.subresourceRange.baseArrayLayer = 0;
+		viewCreateInfo.subresourceRange.layerCount = 1;
+		viewCreateInfo.format = _surfaceFormat.format;
+
+		VkFramebufferCreateInfo frameBufferCreateInfo{};
+		frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+		frameBufferCreateInfo.layers = 1;
+		frameBufferCreateInfo.attachmentCount = 1;
+		frameBufferCreateInfo.renderPass = _renderPass;
+		frameBufferCreateInfo.width = _extent.width;
+		frameBufferCreateInfo.height = _extent.height;
+
+		// Create images.
+		for (uint32_t i = 0; i < length; ++i)
+		{
+			auto& image = (*_images)[i];
+			image.image = vkImages[i];
+
+			viewCreateInfo.image = image.image;
+			const auto viewResult = vkCreateImageView(_app.device, &viewCreateInfo, nullptr, &image.view);
+			assert(!viewResult);
+
+			image.cmdBuffer = cmdBuffers[i];
+			frameBufferCreateInfo.pAttachments = &image.view;
+			const auto frameBufferResult = vkCreateFramebuffer(_app.device, &frameBufferCreateInfo, nullptr, &image.frameBuffer);
+			assert(!frameBufferResult);
+		}
+
+		VkSemaphoreCreateInfo semaphoreCreateInfo{};
+		semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+		VkFenceCreateInfo fenceCreateInfo{};
+		fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+		// Create frames.
+		for (auto& frame : _frames->GetView())
+		{
+			auto semaphoreResult = vkCreateSemaphore(_app.device, &semaphoreCreateInfo, nullptr, &frame.imageAvailableSemaphore);
+			assert(!semaphoreResult);
+			semaphoreResult = vkCreateSemaphore(_app.device, &semaphoreCreateInfo, nullptr, &frame.renderFinishedSemaphore);
+			assert(!semaphoreResult);
+			
+			const auto fenceResult = vkCreateFence(_app.device, &fenceCreateInfo, nullptr, &frame.inFlightFence);
+			assert(!fenceResult);
+		}
 	}
 }
