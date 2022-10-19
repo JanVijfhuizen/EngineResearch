@@ -19,6 +19,9 @@ namespace je
 		VulkanSwapChain(Arena& arena, Arena& tempArena, const VulkanApp& app, const engine::WindowModule& windowModule);
 		~VulkanSwapChain();
 
+		VkCommandBuffer BeginFrame();
+		void EndFrame(const View<VkSemaphore>& waitSemaphores= {});
+
 	private:
 		struct Image final
 		{
@@ -51,7 +54,10 @@ namespace je
 		Array<Image>* _images = nullptr;
 		Array<Frame>* _frames = nullptr;
 
-		void Cleanup();
+		size_t _frameIndex = 0;
+		uint32_t _imageIndex;
+
+		void Cleanup() const;
 		void Recreate();
 	};
 }

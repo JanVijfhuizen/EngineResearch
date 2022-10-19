@@ -19,6 +19,9 @@ namespace je
 
 			void OnInitialize(Info& info) override;
 			void OnExit(Info& info) override;
+
+			void OnUpdate(Info& info) override;
+			void OnPostUpdate(Info& info) override;
 		};
 	}
 }

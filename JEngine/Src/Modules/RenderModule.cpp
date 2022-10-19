@@ -37,4 +37,16 @@ namespace je::engine
 
 		Module::OnExit(info);
 	}
+
+	void RenderModule::OnUpdate(Info& info)
+	{
+		Module::OnUpdate(info);
+		_swapChain->BeginFrame();
+	}
+
+	void RenderModule::OnPostUpdate(Info& info)
+	{
+		Module::OnPostUpdate(info);
+		_swapChain->EndFrame();
+	}
 }

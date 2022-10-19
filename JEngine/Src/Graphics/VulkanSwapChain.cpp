@@ -72,21 +72,94 @@ namespace je
 		_arena.Free(_images);
 	}
 
-	void VulkanSwapChain::Cleanup()
+	VkCommandBuffer VulkanSwapChain::BeginFrame()
+	{
+		const auto& frame = (*_frames)[_frameIndex];
+
+		auto result = vkWaitForFences(_app.device, 1, &frame.inFlightFence, VK_TRUE, UINT64_MAX);
+		assert(!result);
+		result = vkAcquireNextImageKHR(_app.device,
+			_swapChain, UINT64_MAX, frame.imageAvailableSemaphore, VK_NULL_HANDLE, &_imageIndex);
+		assert(!result);
+
+		auto& image = (*_images)[_imageIndex];
+		if (image.fence)
+			vkWaitForFences(_app.device, 1, &image.fence, VK_TRUE, UINT64_MAX);
+		image.fence = frame.inFlightFence;
+
+		VkCommandBufferBeginInfo cmdBufferBeginInfo{};
+		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		cmdBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		vkResetCommandBuffer(image.cmdBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+		vkBeginCommandBuffer(image.cmdBuffer, &cmdBufferBeginInfo);
+
+		const VkClearValue clearColor = { 1, 1, 1, 1 };
+
+		VkRenderPassBeginInfo renderPassBeginInfo{};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.renderArea.offset = { 0, 0 };
+		renderPassBeginInfo.renderPass = _renderPass;
+		renderPassBeginInfo.framebuffer = image.frameBuffer;
+		renderPassBeginInfo.renderArea.extent = _extent;
+		renderPassBeginInfo.clearValueCount = 1;
+		renderPassBeginInfo.pClearValues = &clearColor;
+
+		vkCmdBeginRenderPass(image.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+		return image.cmdBuffer;
+	}
+
+	void VulkanSwapChain::EndFrame(const View<VkSemaphore>& waitSemaphores)
+	{
+		auto& frame = (*_frames)[_frameIndex];
+		auto& image = (*_images)[_imageIndex];
+
+		vkCmdEndRenderPass(image.cmdBuffer);
+		auto result = vkEndCommandBuffer(image.cmdBuffer);
+		assert(!result);
+
+		const auto _ = _tempArena.CreateScope();
+		const Array<VkSemaphore> allWaitSemaphores{_tempArena, waitSemaphores.GetLength() + 1};
+		memcpy(allWaitSemaphores.GetData(), waitSemaphores.GetData(), sizeof(VkSemaphore) * waitSemaphores.GetLength());
+		allWaitSemaphores[waitSemaphores.GetLength()] = frame.imageAvailableSemaphore;
+
+		constexpr VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &image.cmdBuffer;
+		submitInfo.waitSemaphoreCount = static_cast<uint32_t>(allWaitSemaphores.GetLength());
+		submitInfo.pWaitSemaphores = allWaitSemaphores;
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = &frame.renderFinishedSemaphore;
+		submitInfo.pWaitDstStageMask = &waitStage;
+
+		vkResetFences(_app.device, 1, &frame.inFlightFence);
+		result = vkQueueSubmit(_app.queues[VulkanApp::renderQueue], 1, &submitInfo, frame.inFlightFence);
+		assert(!result);
+
+		VkPresentInfoKHR presentInfo{};
+		presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+		presentInfo.waitSemaphoreCount = 1;
+		presentInfo.pWaitSemaphores = &frame.renderFinishedSemaphore;
+		presentInfo.swapchainCount = 1;
+		presentInfo.pSwapchains = &_swapChain;
+		presentInfo.pImageIndices = &_imageIndex;
+
+		result = vkQueuePresentKHR(_app.queues[VulkanApp::presentQueue], &presentInfo);
+		_frameIndex = (_frameIndex + 1) % _frames->GetLength();
+
+		if(result)
+			Recreate();
+	}
+
+	void VulkanSwapChain::Cleanup() const
 	{
 		if (!_swapChain)
 			return;
 
 		const auto result = vkDeviceWaitIdle(_app.device);
 		assert(!result);
-
-		for (const auto& frame : _frames->GetView())
-		{
-			vkDestroySemaphore(_app.device, frame.imageAvailableSemaphore, nullptr);
-			vkDestroySemaphore(_app.device, frame.renderFinishedSemaphore, nullptr);
-			vkDestroyFence(_app.device, frame.inFlightFence, nullptr);
-		}
-
+		
 		for (auto& image : _images->GetView())
 		{
 			vkDestroyImageView(_app.device, image.view, nullptr);
@@ -95,6 +168,13 @@ namespace je
 			image.fence = VK_NULL_HANDLE;
 			vkFreeCommandBuffers(_app.device, _app.commandPool, 1, &image.cmdBuffer);
 			vkDestroyFramebuffer(_app.device, image.frameBuffer, nullptr);
+		}
+
+		for (const auto& frame : _frames->GetView())
+		{
+			vkDestroySemaphore(_app.device, frame.imageAvailableSemaphore, nullptr);
+			vkDestroySemaphore(_app.device, frame.renderFinishedSemaphore, nullptr);
+			vkDestroyFence(_app.device, frame.inFlightFence, nullptr);
 		}
 		
 		vkDestroyRenderPass(_app.device, _renderPass, nullptr);
