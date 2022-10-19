@@ -2,12 +2,11 @@
 #include "Modules/RenderModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
-#include "Graphics/RenderGraph/RenderGraph.h"
 #include "Graphics/VulkanApp.h"
 #include "Graphics/VulkanInitializer.h"
 #include "Modules/WindowModule.h"
 #include "Graphics/VulkanAllocator.h"
-#include "Graphics/RenderGraph/SwapChainNode.h"
+#include "Graphics/VulkanSwapChain.h"
 
 namespace je::engine
 {
@@ -27,23 +26,15 @@ namespace je::engine
 
 		_app = CreateApp(vkInfo);
 		_allocator = info.persistentArena.New<VulkanAllocator>(1, info.persistentArena, _app);
-
-		render_graph::Node* presentNode;
-		const auto nodes = DefineDefaultGraphNodes(info.persistentArena, presentNode);
-		_renderGraph = info.persistentArena.New<render_graph::RenderGraph>(1, info.persistentArena, info.tempArena, nodes, *presentNode);
+		_swapChain = info.persistentArena.New<VulkanSwapChain>(1, info.persistentArena, info.tempArena, _app, *info.finder.Get<WindowModule>());
 	}
 
 	void RenderModule::OnExit(Info& info)
 	{
+		info.persistentArena.Delete(_swapChain);
 		info.persistentArena.Delete(_allocator);
 		vkinit::DestroyApp(_app);
 
 		Module::OnExit(info);
-	}
-
-	View<render_graph::Node*> RenderModule::DefineDefaultGraphNodes(Arena& arena, render_graph::Node*& outPresentNode)
-	{
-		outPresentNode = arena.New<render_graph::SwapChainNode>();
-		return {};
 	}
 }

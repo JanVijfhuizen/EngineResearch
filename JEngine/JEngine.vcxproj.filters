@@ -54,13 +54,10 @@
     <ClCompile Include="Src\Graphics\VulkanInitializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\RenderGraph\RenderGraph.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Graphics\VulkanAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\RenderGraph\SwapChainNode.cpp">
+    <ClCompile Include="Src\Graphics\VulkanSwapChain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -104,16 +101,13 @@
     <ClInclude Include="Include\Graphics\VulkanApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\RenderGraph\RenderGraph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Graphics\VulkanAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VulkanMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\RenderGraph\SwapChainNode.h">
+    <ClInclude Include="Include\Graphics\VulkanSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -8,12 +8,6 @@ namespace je::engine
 	class WindowModule final : public Module
 	{
 	public:
-		struct CreateInfo final
-		{
-			StringView name = "Window";
-			glm::ivec2 overrideResolution{800, 600};
-		} createInfo{};
-
 		void (*onWindowResized)(glm::ivec2 resolution) = nullptr;
 		void (*onKeyCallback)(size_t key, size_t action) = nullptr;
 		void (*onMouseCallback)(size_t key, size_t action) = nullptr;
@@ -22,7 +16,14 @@ namespace je::engine
 		[[nodiscard]] static const char** GetRequiredExtensions(size_t& count);
 		[[nodiscard]] static VkSurfaceKHR CreateSurface(VkInstance instance);
 
+		[[nodiscard]] glm::ivec2 GetResolution() const;
+		void SetResolution(const glm::ivec2& resolution);
+		void SetName(const StringView& name);
+
 	private:
+		StringView _name = "JEngine";
+		glm::ivec2 _resolution{800, 600};
+
 		void OnInitialize(Info& info) override;
 		void OnUpdate(Info& info) override;
 		void OnExit(Info& info) override;
