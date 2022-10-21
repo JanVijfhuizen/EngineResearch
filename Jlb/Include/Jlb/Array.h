@@ -9,8 +9,10 @@ namespace je
 	class Array
 	{
 	public:
+		Array() = default;
 		Array(Arena& arena, size_t length);
 		Array(Array&& other) noexcept;
+		Array& operator=(Array&& other) noexcept;
 		virtual ~Array();
 
 		virtual View<T> GetView() const;
@@ -39,9 +41,19 @@ namespace je
 	}
 
 	template <typename T>
+	Array<T>& Array<T>::operator=(Array&& other) noexcept
+	{
+		_arena = other._arena;
+		_data = other._data;
+		_length = other._length;
+		other._arena = nullptr;
+		return *this;
+	}
+
+	template <typename T>
 	Array<T>::~Array()
 	{
-		if(!_arena)
+		if(_arena)
 			_arena->Free(_data);
 		_arena = nullptr;
 	}

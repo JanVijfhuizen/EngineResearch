@@ -10,6 +10,7 @@ namespace je
 	public:
 		Vector(Arena& arena, size_t length);
 		Vector(Vector<T>&& other) noexcept;
+		Vector& operator=(Vector&& other) noexcept;
 
 		T& Add(const T& instance = {});
 		void Remove(size_t index);
@@ -31,6 +32,14 @@ namespace je
 	Vector<T>::Vector(Vector<T>&& other) noexcept : Array<T>(Move(other))
 	{
 		_count = other._count;
+	}
+
+	template <typename T>
+	Vector<T>& Vector<T>::operator=(Vector&& other) noexcept
+	{
+		_count = other._count;
+		Array<T>::operator=(Move(other));
+		return *this;
 	}
 
 	template <typename T>

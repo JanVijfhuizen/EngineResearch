@@ -8,8 +8,10 @@ namespace je
 	class Stack final : public Array<T>
 	{
 	public:
+		Stack() = default;
 		Stack(Arena& arena, size_t length);
 		Stack(Stack<T>&& other) noexcept;
+		Stack<T>& operator=(Stack<T>&& other) noexcept;
 
 		void Push(const T& instance = {});
 		[[nodiscard]] T& Peek();
@@ -30,6 +32,14 @@ namespace je
 	Stack<T>::Stack(Stack<T>&& other) noexcept : Array<T>(Move(other)), _count(other._count)
 	{
 		
+	}
+
+	template <typename T>
+	Stack<T>& Stack<T>::operator=(Stack<T>&& other) noexcept
+	{
+		_count = other._count;
+		Array<T>::operator=(Move(other));
+		return *this;
 	}
 
 	template <typename T>

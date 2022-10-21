@@ -51,13 +51,19 @@
     <ClCompile Include="Src\Modules\RenderModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\VulkanInitializer.cpp">
+    <ClCompile Include="Src\Graphics\VkInitializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\VulkanAllocator.cpp">
+    <ClCompile Include="Src\Graphics\VkAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\VulkanSwapChain.cpp">
+    <ClCompile Include="Src\Graphics\VkSwapChain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\VkRenderGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\Graphics\VkShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -95,19 +101,34 @@
     <ClInclude Include="Include\Modules\RenderModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VulkanInitializer.h">
+    <ClInclude Include="Include\Graphics\VkInitializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VulkanApp.h">
+    <ClInclude Include="Include\Graphics\VkApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VulkanAllocator.h">
+    <ClInclude Include="Include\Graphics\VkAllocator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VulkanMemory.h">
+    <ClInclude Include="Include\Graphics\VkMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VulkanSwapChain.h">
+    <ClInclude Include="Include\Graphics\VkSwapChain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\VkRenderGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\VkTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\VkMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\VkBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\VkShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

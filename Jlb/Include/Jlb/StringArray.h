@@ -12,6 +12,7 @@ namespace je
 	class StringArray final : public Array<T>
 	{
 	public:
+		StringArray() = default;
 		StringArray(Arena& arena, size_t number);
 		StringArray(Arena& arena, const StringView& view);
 

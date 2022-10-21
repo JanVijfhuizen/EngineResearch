@@ -8,8 +8,10 @@ namespace je
 	class Queue final : public Array<T>
 	{
 	public:
+		Queue() = default;
 		Queue(Arena& arena, size_t length);
 		Queue(Queue<T>&& other) noexcept;
+		Queue<T>& operator=(Queue<T>&& other) noexcept;
 
 		void Enqueue(const T& instance = {});
 		[[nodiscard]] T& Peek();
@@ -32,6 +34,14 @@ namespace je
 	Queue<T>::Queue(Queue<T>&& other) noexcept : Array<T>(Move(other)), _count(other._count), _begin(other._begin)
 	{
 
+	}
+
+	template <typename T>
+	Queue<T>& Queue<T>::operator=(Queue<T>&& other) noexcept
+	{
+		_count = other._count;
+		Array<T>::operator=(Move(other));
+		return *this;
 	}
 
 	template <typename T>
