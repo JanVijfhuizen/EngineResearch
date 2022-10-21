@@ -6,6 +6,8 @@
 #include "Graphics/VkInitializer.h"
 #include "Modules/WindowModule.h"
 #include "Graphics/VkAllocator.h"
+#include "Graphics/VkPipeline.h"
+#include "Graphics/VkShader.h"
 #include "Graphics/VkSwapChain.h"
 
 namespace je::engine
@@ -27,6 +29,18 @@ namespace je::engine
 		_app = CreateApp(vkInfo);
 		_allocator = info.persistentArena.New<vk::Allocator>(1, info.persistentArena, _app);
 		_swapChain = info.persistentArena.New<vk::SwapChain>(1, info.persistentArena, info.tempArena, _app, *info.finder.Get<WindowModule>());
+
+		// Temp.
+		vk::Shader shader{info.tempArena, _app, "Shaders/vert.spv", "Shaders/frag.spv"};
+
+		vk::PipelineCreateInfo createInfo{};
+		createInfo.tempArena = &info.tempArena;
+		createInfo.app = &_app;
+		createInfo.layouts = {};
+		createInfo.renderPass = _swapChain->GetRenderPass();
+		createInfo.shader = &shader;
+		createInfo.resolution = _swapChain->GetResolution();
+		vk::Pipeline pipeline{createInfo};
 	}
 
 	void RenderModule::OnExit(Info& info)

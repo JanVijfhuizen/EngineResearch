@@ -166,6 +166,16 @@ namespace je::vk
 		return _images.GetLength();
 	}
 
+	VkRenderPass SwapChain::GetRenderPass() const
+	{
+		return _renderPass;
+	}
+
+	glm::ivec2 SwapChain::GetResolution() const
+	{
+		return {_extent.width, _extent.height };
+	}
+
 	void SwapChain::Cleanup() const
 	{
 		if (!_swapChain)

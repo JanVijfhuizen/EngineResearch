@@ -27,6 +27,8 @@ namespace je
 			void EndFrame(const View<VkSemaphore>& waitSemaphores = {});
 
 			[[nodiscard]] size_t GetLength() const;
+			[[nodiscard]] VkRenderPass GetRenderPass() const;
+			[[nodiscard]] glm::ivec2 GetResolution() const;
 
 		private:
 			struct Image final
