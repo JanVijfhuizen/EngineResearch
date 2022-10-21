@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\VkShape.cpp" />
     <ClCompile Include="Src\Graphics\Vertex.cpp" />
     <ClCompile Include="Src\Graphics\VkMesh.cpp" />
     <ClCompile Include="Src\Graphics\VkPipeline.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="Include\Graphics\VkPipeline.h" />
     <ClInclude Include="Include\Graphics\VkRenderGraph.h" />
     <ClInclude Include="Include\Graphics\VkShader.h" />
+    <ClInclude Include="Include\Graphics\VkShape.h" />
     <ClInclude Include="Include\Graphics\VkSwapChain.h" />
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\ModuleFinder.h" />
