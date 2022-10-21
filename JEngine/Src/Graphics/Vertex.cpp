@@ -27,7 +27,7 @@ namespace je::vk
 		texCoords.binding = 0;
 		texCoords.location = 1;
 		texCoords.format = VK_FORMAT_R32G32_SFLOAT;
-		texCoords.offset = offsetof(Vertex, texCoords);
+		texCoords.offset = offsetof(Vertex, textureCoordinates);
 
 		return Move(ret);
 	}

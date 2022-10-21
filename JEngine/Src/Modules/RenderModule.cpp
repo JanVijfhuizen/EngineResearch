@@ -2,12 +2,15 @@
 #include "Modules/RenderModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
+#include "Graphics/Vertex.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkInitializer.h"
 #include "Modules/WindowModule.h"
 #include "Graphics/VkAllocator.h"
+#include "Graphics/VkMesh.h"
 #include "Graphics/VkPipeline.h"
 #include "Graphics/VkShader.h"
+#include "Graphics/VkShape.h"
 #include "Graphics/VkSwapChain.h"
 
 namespace je::engine
@@ -41,6 +44,14 @@ namespace je::engine
 		createInfo.shader = &shader;
 		createInfo.resolution = _swapChain->GetResolution();
 		vk::Pipeline pipeline{createInfo};
+
+		vk::Mesh mesh;
+		{
+			Array<vk::Vertex> verts{};
+			Array<vk::Vertex::Index> inds{};
+			CreateQuadShape(info.tempArena, verts, inds);
+			mesh = vk::Mesh{_app, *_allocator, verts, inds};
+		}
 	}
 
 	void RenderModule::OnExit(Info& info)

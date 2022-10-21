@@ -11,6 +11,7 @@ namespace je::vk
 	class Mesh final
 	{
 	public:
+		Mesh() = default;
 		Mesh(const App& app, Allocator& allocator, const View<Vertex>& vertices, const View<Vertex::Index>& indices);
 		Mesh(Mesh&& other) noexcept;
 		Mesh& operator=(Mesh&& other) noexcept;
