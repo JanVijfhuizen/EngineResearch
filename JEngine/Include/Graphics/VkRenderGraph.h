@@ -7,20 +7,6 @@ namespace je::vk
 {
 	struct RenderGraphResource final
 	{
-		enum class Type
-		{
-			texture,
-			buffer,
-			mesh
-		} type;
-
-		enum class Usage
-		{
-			read,
-			write,
-			all
-		} usage;
-
 		StringView name;
 	};
 

@@ -161,6 +161,11 @@ namespace je::vk
 			Recreate();
 	}
 
+	size_t SwapChain::GetLength() const
+	{
+		return _images.GetLength();
+	}
+
 	void SwapChain::Cleanup() const
 	{
 		if (!_swapChain)

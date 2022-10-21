@@ -26,6 +26,8 @@ namespace je
 			[[nodiscard]] VkCommandBuffer BeginFrame(bool manuallyCallWaitForImage = false);
 			void EndFrame(const View<VkSemaphore>& waitSemaphores = {});
 
+			[[nodiscard]] size_t GetLength() const;
+
 		private:
 			struct Image final
 			{

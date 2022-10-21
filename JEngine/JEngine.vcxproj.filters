@@ -66,6 +66,9 @@
     <ClCompile Include="Src\Graphics\VkShader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Graphics\VkPipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\pch.h">
@@ -119,16 +122,16 @@
     <ClInclude Include="Include\Graphics\VkRenderGraph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VkTexture.h">
+    <ClInclude Include="Include\Graphics\VkShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\VkPipeline.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VkMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VkBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkShader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

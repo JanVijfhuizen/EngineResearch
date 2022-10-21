@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\VkPipeline.cpp" />
     <ClCompile Include="Src\Graphics\VkShader.cpp" />
     <ClCompile Include="Src\Graphics\VkRenderGraph.cpp" />
     <ClCompile Include="Src\Graphics\VkAllocator.cpp" />
@@ -159,14 +160,14 @@
     <ClInclude Include="Include\EngineInitializer.h" />
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
-    <ClInclude Include="Include\Graphics\VkMesh.h" />
     <ClInclude Include="Include\Graphics\VkAllocator.h" />
     <ClInclude Include="Include\Graphics\VkBuffer.h" />
     <ClInclude Include="Include\Graphics\VkMemory.h" />
+    <ClInclude Include="Include\Graphics\VkMesh.h" />
+    <ClInclude Include="Include\Graphics\VkPipeline.h" />
     <ClInclude Include="Include\Graphics\VkRenderGraph.h" />
     <ClInclude Include="Include\Graphics\VkShader.h" />
     <ClInclude Include="Include\Graphics\VkSwapChain.h" />
-    <ClInclude Include="Include\Graphics\VkTexture.h" />
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\ModuleFinder.h" />
     <ClInclude Include="Include\Modules\RenderModule.h" />
