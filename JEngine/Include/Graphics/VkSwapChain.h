@@ -55,8 +55,8 @@ namespace je
 			VkSwapchainKHR _swapChain = VK_NULL_HANDLE;
 			VkRenderPass _renderPass = VK_NULL_HANDLE;
 
-			Array<Image>* _images = nullptr;
-			Array<Frame>* _frames = nullptr;
+			Array<Image> _images;
+			Array<Frame> _frames;
 
 			size_t _frameIndex = 0;
 			uint32_t _imageIndex;

@@ -24,7 +24,7 @@ namespace je::engine
 		vkInfo.createSurface = WindowModule::CreateSurface;
 		vkInfo.instanceExtensions = windowExtensionsArr;
 
-		_app = vk::init::CreateApp(vkInfo);
+		_app = CreateApp(vkInfo);
 		_allocator = info.persistentArena.New<vk::Allocator>(1, info.persistentArena, _app);
 		_swapChain = info.persistentArena.New<vk::SwapChain>(1, info.persistentArena, info.tempArena, _app, *info.finder.Get<WindowModule>());
 	}

@@ -8,9 +8,10 @@ namespace je
 	class Stack final : public Array<T>
 	{
 	public:
+		Stack() = default;
 		Stack(Arena& arena, size_t length);
 		Stack(Stack<T>&& other) noexcept;
-		[[nodiscard]] Stack<T>& operator=(Stack<T>&& other) noexcept;
+		Stack<T>& operator=(Stack<T>&& other) noexcept;
 
 		void Push(const T& instance = {});
 		[[nodiscard]] T& Peek();

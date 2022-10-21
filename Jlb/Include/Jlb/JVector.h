@@ -10,7 +10,7 @@ namespace je
 	public:
 		Vector(Arena& arena, size_t length);
 		Vector(Vector<T>&& other) noexcept;
-		[[nodiscard]] Vector& operator=(Vector&& other) noexcept;
+		Vector& operator=(Vector&& other) noexcept;
 
 		T& Add(const T& instance = {});
 		void Remove(size_t index);

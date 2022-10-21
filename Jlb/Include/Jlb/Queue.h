@@ -8,9 +8,10 @@ namespace je
 	class Queue final : public Array<T>
 	{
 	public:
+		Queue() = default;
 		Queue(Arena& arena, size_t length);
 		Queue(Queue<T>&& other) noexcept;
-		[[nodiscard]] Queue<T>& operator=(Queue<T>&& other) noexcept;
+		Queue<T>& operator=(Queue<T>&& other) noexcept;
 
 		void Enqueue(const T& instance = {});
 		[[nodiscard]] T& Peek();

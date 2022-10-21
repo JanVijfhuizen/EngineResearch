@@ -59,8 +59,8 @@ namespace je::vk
 		_surfaceFormat = ChooseSurfaceFormat(support.formats);
 		_presentMode = ChoosePresentMode(support.presentModes);
 
-		_images = arena.New<Array<Image>>(1, arena, imageCount);
-		_frames = arena.New<Array<Frame>>(1, arena, SWAPCHAIN_MAX_FRAMES_IN_FLIGHT);
+		_images = Array<Image>(arena, imageCount);
+		_frames = Array<Frame>(arena, SWAPCHAIN_MAX_FRAMES_IN_FLIGHT);
 
 		Recreate();
 	}
@@ -74,7 +74,7 @@ namespace je::vk
 
 	VkCommandBuffer SwapChain::WaitForImage()
 	{
-		const auto& frame = (*_frames)[_frameIndex];
+		const auto& frame = _frames[_frameIndex];
 
 		auto result = vkWaitForFences(_app.device, 1, &frame.inFlightFence, VK_TRUE, UINT64_MAX);
 		assert(!result);
@@ -82,7 +82,7 @@ namespace je::vk
 			_swapChain, UINT64_MAX, frame.imageAvailableSemaphore, VK_NULL_HANDLE, &_imageIndex);
 		assert(!result);
 
-		auto& image = (*_images)[_imageIndex];
+		auto& image = _images[_imageIndex];
 		if (image.fence)
 			vkWaitForFences(_app.device, 1, &image.fence, VK_TRUE, UINT64_MAX);
 		image.fence = frame.inFlightFence;
@@ -94,7 +94,7 @@ namespace je::vk
 		if (!manuallyCallWaitForImage)
 			WaitForImage();
 
-		const auto& image = (*_images)[_imageIndex];
+		const auto& image = _images[_imageIndex];
 
 		VkCommandBufferBeginInfo cmdBufferBeginInfo{};
 		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -119,8 +119,8 @@ namespace je::vk
 
 	void SwapChain::EndFrame(const View<VkSemaphore>& waitSemaphores)
 	{
-		auto& frame = (*_frames)[_frameIndex];
-		auto& image = (*_images)[_imageIndex];
+		auto& frame = _frames[_frameIndex];
+		auto& image = _images[_imageIndex];
 
 		vkCmdEndRenderPass(image.cmdBuffer);
 		auto result = vkEndCommandBuffer(image.cmdBuffer);
@@ -155,7 +155,7 @@ namespace je::vk
 		presentInfo.pImageIndices = &_imageIndex;
 
 		result = vkQueuePresentKHR(_app.queues[App::presentQueue], &presentInfo);
-		_frameIndex = (_frameIndex + 1) % _frames->GetLength();
+		_frameIndex = (_frameIndex + 1) % _frames.GetLength();
 
 		if(result)
 			Recreate();
@@ -169,7 +169,7 @@ namespace je::vk
 		const auto result = vkDeviceWaitIdle(_app.device);
 		assert(!result);
 		
-		for (auto& image : _images->GetView())
+		for (auto& image : _images.GetView())
 		{
 			vkDestroyImageView(_app.device, image.view, nullptr);
 			if (image.fence)
@@ -179,7 +179,7 @@ namespace je::vk
 			vkDestroyFramebuffer(_app.device, image.frameBuffer, nullptr);
 		}
 
-		for (const auto& frame : _frames->GetView())
+		for (const auto& frame : _frames.GetView())
 		{
 			vkDestroySemaphore(_app.device, frame.imageAvailableSemaphore, nullptr);
 			vkDestroySemaphore(_app.device, frame.renderFinishedSemaphore, nullptr);
@@ -207,7 +207,7 @@ namespace je::vk
 		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		createInfo.surface = _app.surface;
-		createInfo.minImageCount = static_cast<uint32_t>(_images->GetLength());
+		createInfo.minImageCount = static_cast<uint32_t>(_images.GetLength());
 		createInfo.imageFormat = _surfaceFormat.format;
 		createInfo.imageColorSpace = _surfaceFormat.colorSpace;
 		createInfo.imageExtent = _extent;
@@ -235,7 +235,7 @@ namespace je::vk
 		Cleanup();
 		_swapChain = newSwapChain;
 
-		auto length = static_cast<uint32_t>(_images->GetLength());
+		auto length = static_cast<uint32_t>(_images.GetLength());
 		const Array<VkImage> vkImages{_tempArena, length};
 		vkGetSwapchainImagesKHR(_app.device, _swapChain, &length, vkImages.GetData());
 
@@ -313,7 +313,7 @@ namespace je::vk
 		// Create images.
 		for (uint32_t i = 0; i < length; ++i)
 		{
-			auto& image = (*_images)[i];
+			auto& image = _images[i];
 			image.image = vkImages[i];
 
 			viewCreateInfo.image = image.image;
@@ -334,7 +334,7 @@ namespace je::vk
 		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 		// Create frames.
-		for (auto& frame : _frames->GetView())
+		for (auto& frame : _frames.GetView())
 		{
 			auto semaphoreResult = vkCreateSemaphore(_app.device, &semaphoreCreateInfo, nullptr, &frame.imageAvailableSemaphore);
 			assert(!semaphoreResult);

@@ -10,8 +10,10 @@ namespace je
 	class Map final : public Array<KeyPair<T>>
 	{
 	public:
+		Map() = default;
 		Map(Arena& arena, size_t length);
 		Map(Map<T>&& other) noexcept;
+		Map<T>& operator=(Map<T>&& other) noexcept;
 
 		void Insert(const T& instance, size_t key);
 
@@ -67,6 +69,14 @@ namespace je
 	Map<T>::Map(Map<T>&& other) noexcept : Array<KeyPair<T>>(Move(other)), _count(other._count)
 	{
 
+	}
+
+	template <typename T>
+	Map<T>& Map<T>::operator=(Map<T>&& other) noexcept
+	{
+		_count = other._count;
+		Array<T>::operator=(Move(other));
+		return *this;
 	}
 
 	template <typename T>

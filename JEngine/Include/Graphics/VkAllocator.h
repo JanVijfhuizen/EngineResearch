@@ -38,7 +38,7 @@ namespace je
 			Arena& _arena;
 			const App& _app;
 			size_t _pageSize;
-			Array<Pool>* _pools = nullptr;
+			Array<Pool> _pools{};
 
 			[[nodiscard]] size_t GetPoolId(uint32_t typeFilter, VkMemoryPropertyFlags properties) const;
 		};

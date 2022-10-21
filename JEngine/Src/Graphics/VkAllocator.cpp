@@ -9,11 +9,11 @@ namespace je::vk
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(app.physicalDevice, &memProperties);
-		_pools = arena.New<Array<Pool>>(1, arena, memProperties.memoryTypeCount);
+		_pools = Array<Pool>(arena, memProperties.memoryTypeCount);
 
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
 		{
-			auto& pool = (*_pools)[i];
+			auto& pool = _pools[i];
 			const auto& memType = memProperties.memoryTypes[i];
 			pool.memPropertyFlags = memType.propertyFlags;
 			pool.pages = arena.New<LinkedList<Page>>(1, arena);
@@ -22,9 +22,9 @@ namespace je::vk
 
 	Allocator::~Allocator()
 	{
-		for (int32_t i = static_cast<int32_t>(_pools->GetLength()) - 1; i >= 0; --i)
+		for (int32_t i = static_cast<int32_t>(_pools.GetLength()) - 1; i >= 0; --i)
 		{
-			const auto& pool = (*_pools)[i];
+			const auto& pool = _pools[i];
 			_arena.Free(pool.pages);
 		}
 		_arena.Free(_pools);
@@ -43,7 +43,7 @@ namespace je::vk
 		const size_t size = CalculateBufferSize(memRequirements.size * count, memRequirements.alignment);
 		Page* ptr = nullptr;
 
-		const auto& pool = (*_pools)[poolId];
+		const auto& pool = _pools[poolId];
 		for (auto& page : *pool.pages)
 			if (page.remaining >= size && page.alignment == memRequirements.alignment)
 			{
@@ -82,7 +82,7 @@ namespace je::vk
 
 	bool Allocator::Free(const Memory& memory) const
 	{
-		const auto& pool = (*_pools)[memory.poolId];
+		const auto& pool = _pools[memory.poolId];
 		for (auto& page : *pool.pages)
 		{
 			if (page.memory != memory.memory)
@@ -97,7 +97,7 @@ namespace je::vk
 	size_t Allocator::GetPoolId(const uint32_t typeFilter, const VkMemoryPropertyFlags properties) const
 	{
 		size_t id = 0;
-		for (const auto& pool : _pools->GetView())
+		for (const auto& pool : _pools.GetView())
 		{
 			if (typeFilter & 1 << id)
 			{
