@@ -1,28 +1,34 @@
 ﻿#pragma once
-#include "Jlb/Arena.h"
 #include "Jlb/StringView.h"
 
-namespace je::vk
+namespace je
 {
-	struct App;
+	class Arena;
 
-	class Shader final
+	namespace vk
 	{
-	public:
-		enum class Stage
+		struct App;
+
+		class Shader final
 		{
-			vertex,
-			fragment
+		public:
+			enum class Stage
+			{
+				vertex,
+				fragment
+			};
+
+			[[nodiscard]] VkShaderModule operator[](Stage stage) const;
+
+			Shader() = default;
+			Shader(Arena& tempArena, const App& app, StringView vertexPath, StringView fragmentPath);
+			Shader(Shader&& other) noexcept;
+			Shader& operator=(Shader&& other) noexcept;
+			~Shader();
+
+		private:
+			VkShaderModule _modules[2];
+			const App* _app = nullptr;
 		};
-
-		[[nodiscard]] VkShaderModule operator[](Stage stage) const;
-
-		Shader(Arena& arena, const App& app, StringView vertexPath, StringView fragmentPath);
-		Shader(Shader&& other) noexcept;
-		~Shader();
-
-	private:
-		VkShaderModule _modules[2];
-		const App* _app;
-	};
+	}
 }

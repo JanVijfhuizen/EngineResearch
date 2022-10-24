@@ -26,6 +26,11 @@ namespace je
 			[[nodiscard]] VkCommandBuffer BeginFrame(bool manuallyCallWaitForImage = false);
 			void EndFrame(const View<VkSemaphore>& waitSemaphores = {});
 
+			[[nodiscard]] size_t GetLength() const;
+			[[nodiscard]] VkRenderPass GetRenderPass() const;
+			[[nodiscard]] glm::ivec2 GetResolution() const;
+			[[nodiscard]] VkCommandBuffer GetCmdBuffer() const;
+
 		private:
 			struct Image final
 			{

@@ -87,7 +87,7 @@ namespace je::vk
 		{
 			if (page.memory != memory.memory)
 				continue;
-			assert(page.size - page.remaining == memory.offset);
+			assert(page.size - page.remaining == memory.offset + memory.size);
 			page.remaining = page.size - memory.offset;
 			return true;
 		}
@@ -100,13 +100,8 @@ namespace je::vk
 		for (const auto& pool : _pools.GetView())
 		{
 			if (typeFilter & 1 << id)
-			{
-				const bool requiredPropertiesPresent = (pool.memPropertyFlags & properties) == properties;
-				if (!requiredPropertiesPresent)
-					continue;
-				return id;
-			}
-
+				if ((pool.memPropertyFlags & properties) == properties)
+					return id;
 			++id;
 		}
 

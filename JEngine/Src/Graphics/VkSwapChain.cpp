@@ -161,6 +161,26 @@ namespace je::vk
 			Recreate();
 	}
 
+	size_t SwapChain::GetLength() const
+	{
+		return _images.GetLength();
+	}
+
+	VkRenderPass SwapChain::GetRenderPass() const
+	{
+		return _renderPass;
+	}
+
+	glm::ivec2 SwapChain::GetResolution() const
+	{
+		return {_extent.width, _extent.height };
+	}
+
+	VkCommandBuffer SwapChain::GetCmdBuffer() const
+	{
+		return _images[_imageIndex].cmdBuffer;
+	}
+
 	void SwapChain::Cleanup() const
 	{
 		if (!_swapChain)
