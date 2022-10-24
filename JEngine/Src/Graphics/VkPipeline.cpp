@@ -166,4 +166,9 @@ namespace je::vk
 		vkDestroyPipeline(_app->device, _pipeline, nullptr);
 		vkDestroyPipelineLayout(_app->device, _layout, nullptr);
 	}
+
+	void Pipeline::Bind(const VkCommandBuffer cmd) const
+	{
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
+	}
 }

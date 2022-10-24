@@ -37,6 +37,8 @@ namespace je
 			Pipeline& operator=(Pipeline&& other) noexcept;
 			~Pipeline();
 
+			void Bind(VkCommandBuffer cmd) const;
+
 		private:
 			VkPipelineLayout _layout;
 			VkPipeline _pipeline;

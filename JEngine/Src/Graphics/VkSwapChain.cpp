@@ -176,6 +176,11 @@ namespace je::vk
 		return {_extent.width, _extent.height };
 	}
 
+	VkCommandBuffer SwapChain::GetCmdBuffer() const
+	{
+		return _images[_imageIndex].cmdBuffer;
+	}
+
 	void SwapChain::Cleanup() const
 	{
 		if (!_swapChain)

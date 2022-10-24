@@ -17,6 +17,8 @@ namespace je::vk
 		Mesh& operator=(Mesh&& other) noexcept;
 		~Mesh();
 
+		void Bind(VkCommandBuffer cmd) const;
+
 	private:
 		Buffer _vertexBuffer;
 		Buffer _indexBuffer;
@@ -45,7 +47,7 @@ namespace je::vk
 		VkMemoryRequirements stagingMemRequirements;
 		vkGetBufferMemoryRequirements(app.device, stagingBuffer, &stagingMemRequirements);
 
-		const auto stagingMem = allocator.Alloc(stagingMemRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, data.GetLength());
+		const auto stagingMem = allocator.Alloc(stagingMemRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		result = vkBindBufferMemory(app.device, stagingBuffer, stagingMem.memory, stagingMem.offset);
 		assert(!result);
 
@@ -64,13 +66,10 @@ namespace je::vk
 		VkMemoryRequirements memRequirements;
 		vkGetBufferMemoryRequirements(app.device, buffer, &memRequirements);
 
-		const auto mem = allocator.Alloc(memRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, data.GetLength());
+		const auto mem = allocator.Alloc(memRequirements, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT);
 		result = vkBindBufferMemory(app.device, buffer, mem.memory, mem.offset);
 		assert(!result);
-
-		result = vkBindBufferMemory(app.device, buffer, mem.memory, mem.offset);
-		assert(!result);
-
+		
 		// Record and execute copy. 
 		VkCommandBuffer cmdBuffer;
 		VkCommandBufferAllocateInfo cmdBufferAllocInfo{};

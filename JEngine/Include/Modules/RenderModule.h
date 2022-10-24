@@ -8,6 +8,9 @@ namespace je
 
 	namespace vk
 	{
+		class Pipeline;
+		class Shader;
+		class Mesh;
 		class SwapChain;
 		class Allocator;
 	}
@@ -19,6 +22,10 @@ namespace je
 			vk::App _app{};
 			vk::Allocator* _allocator = nullptr;
 			vk::SwapChain* _swapChain = nullptr;
+
+			vk::Mesh* _mesh = nullptr;
+			vk::Shader* _shader = nullptr;
+			vk::Pipeline* _pipeline = nullptr;
 
 			void OnInitialize(Info& info) override;
 			void OnExit(Info& info) override;

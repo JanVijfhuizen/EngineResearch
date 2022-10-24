@@ -34,28 +34,27 @@ namespace je::engine
 		_swapChain = info.persistentArena.New<vk::SwapChain>(1, info.persistentArena, info.tempArena, _app, *info.finder.Get<WindowModule>());
 
 		// Temp.
-		vk::Shader shader{info.tempArena, _app, "Shaders/vert.spv", "Shaders/frag.spv"};
+		_shader = info.persistentArena.New<vk::Shader>(1, info.tempArena, _app, "Shaders/vert.spv", "Shaders/frag.spv");
 
 		vk::PipelineCreateInfo createInfo{};
 		createInfo.tempArena = &info.tempArena;
 		createInfo.app = &_app;
 		createInfo.layouts = {};
 		createInfo.renderPass = _swapChain->GetRenderPass();
-		createInfo.shader = &shader;
+		createInfo.shader = _shader;
 		createInfo.resolution = _swapChain->GetResolution();
-		vk::Pipeline pipeline{createInfo};
-
-		vk::Mesh mesh;
-		{
-			Array<vk::Vertex> verts{};
-			Array<vk::Vertex::Index> inds{};
-			CreateQuadShape(info.tempArena, verts, inds);
-			mesh = vk::Mesh{_app, *_allocator, verts, inds};
-		}
+		_pipeline = info.persistentArena.New<vk::Pipeline>(1, createInfo);
+		
+		Array<vk::Vertex> verts{};
+		Array<vk::Vertex::Index> inds{};
+		CreateQuadShape(info.tempArena, verts, inds);
+		_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
 	}
 
 	void RenderModule::OnExit(Info& info)
 	{
+		info.persistentArena.Delete(_mesh);
+		info.persistentArena.Delete(_shader);
 		info.persistentArena.Delete(_swapChain);
 		info.persistentArena.Delete(_allocator);
 		vk::init::DestroyApp(_app);
@@ -66,7 +65,12 @@ namespace je::engine
 	void RenderModule::OnUpdate(Info& info)
 	{
 		Module::OnUpdate(info);
-		_swapChain->BeginFrame();
+		const auto cmd = _swapChain->BeginFrame();
+		
+		_pipeline->Bind(cmd);
+		_mesh->Bind(cmd);
+
+		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 	}
 
 	void RenderModule::OnPostUpdate(Info& info)

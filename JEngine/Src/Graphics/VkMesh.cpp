@@ -39,4 +39,10 @@ namespace je::vk
 		vkDestroyBuffer(_app->device, _indexBuffer.buffer, nullptr);
 		vkDestroyBuffer(_app->device, _vertexBuffer.buffer, nullptr);
 	}
+
+	void Mesh::Bind(const VkCommandBuffer cmd) const
+	{
+		vkCmdBindVertexBuffers(cmd, 0, 1, &_vertexBuffer.buffer, &_vertexBuffer.memory.offset);
+		vkCmdBindIndexBuffer(cmd, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
+	}
 }
