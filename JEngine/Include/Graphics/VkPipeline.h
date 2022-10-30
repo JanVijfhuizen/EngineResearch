@@ -39,6 +39,9 @@ namespace je
 
 			void Bind(VkCommandBuffer cmd) const;
 
+			[[nodiscard]] operator VkPipeline() const;
+			[[nodiscard]] VkPipelineLayout GetLayout() const;
+
 		private:
 			VkPipelineLayout _layout;
 			VkPipeline _pipeline;

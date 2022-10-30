@@ -5,7 +5,7 @@
 
 namespace je::vk
 {
-	VkLayout::VkLayout(App& app, Arena& tempArena, const View<Binding>& bindings) : _app(&app)
+	Layout::Layout(App& app, Arena& tempArena, const View<Binding>& bindings) : _app(&app)
 	{
 		const Array<VkDescriptorSetLayoutBinding> sets{tempArena, bindings.GetLength()};
 		for (size_t i = 0; i < bindings.GetLength(); ++i)
@@ -30,12 +30,12 @@ namespace je::vk
 		assert(!result);
 	}
 
-	VkLayout::VkLayout(VkLayout&& other) noexcept : _layout(other._layout), _app(other._app)
+	Layout::Layout(Layout&& other) noexcept : _layout(other._layout), _app(other._app)
 	{
 		other._app = nullptr;
 	}
 
-	VkLayout& VkLayout::operator=(VkLayout&& other) noexcept
+	Layout& Layout::operator=(Layout&& other) noexcept
 	{
 		_app = other._app;
 		_layout = other._layout;
@@ -43,7 +43,7 @@ namespace je::vk
 		return *this;
 	}
 
-	VkLayout::~VkLayout()
+	Layout::~Layout()
 	{
 		if (!_app)
 			return;
@@ -51,7 +51,7 @@ namespace je::vk
 		vkDestroyDescriptorSetLayout(_app->device, _layout, nullptr);
 	}
 
-	VkLayout::operator VkDescriptorSetLayout() const
+	Layout::operator VkDescriptorSetLayout() const
 	{
 		return _layout;
 	}

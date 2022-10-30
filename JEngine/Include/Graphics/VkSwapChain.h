@@ -30,6 +30,7 @@ namespace je
 			[[nodiscard]] VkRenderPass GetRenderPass() const;
 			[[nodiscard]] glm::ivec2 GetResolution() const;
 			[[nodiscard]] VkCommandBuffer GetCmdBuffer() const;
+			[[nodiscard]] size_t GetIndex() const;
 
 		private:
 			struct Image final

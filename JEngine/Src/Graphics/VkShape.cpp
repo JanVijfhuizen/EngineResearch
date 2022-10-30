@@ -3,7 +3,7 @@
 
 namespace je::vk
 {
-	void CreateQuadShape(Arena& arena, Array<Vertex>& outVertices, Array<Vertex::Index>& outIndices)
+	void CreateQuadShape(Arena& arena, Array<Vertex>& outVertices, Array<Vertex::Index>& outIndices, const float scale)
 	{
 		outVertices = { arena, 4 };
 		outIndices = {arena, 6 };
@@ -24,5 +24,8 @@ namespace je::vk
 		outIndices[3] = 0;
 		outIndices[4] = 2;
 		outIndices[5] = 3;
+
+		for (auto& vertex : outVertices.GetView())
+			vertex.position *= scale;
 	}
 }

@@ -9,7 +9,7 @@ namespace je
 	{
 		struct App;
 
-		class VkLayout final
+		class Layout final
 		{
 		public:
 			struct Binding final
@@ -20,10 +20,10 @@ namespace je
 				VkShaderStageFlagBits flag;
 			};
 
-			explicit VkLayout(App& app, Arena& tempArena, const View<Binding>& bindings);
-			VkLayout(VkLayout&& other) noexcept;
-			VkLayout& operator=(VkLayout&& other) noexcept;
-			~VkLayout();
+			explicit Layout(App& app, Arena& tempArena, const View<Binding>& bindings);
+			Layout(Layout&& other) noexcept;
+			Layout& operator=(Layout&& other) noexcept;
+			~Layout();
 
 			[[nodiscard]] operator VkDescriptorSetLayout() const;
 
