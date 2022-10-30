@@ -50,6 +50,7 @@ namespace je::vk
 						if (input == output.name)
 						{
 							tempNode.parents.Add(&other);
+							other.isLeaf = false;
 							goto NEXT;
 						}
 
@@ -112,17 +113,45 @@ namespace je::vk
 				}
 			}
 		}
+
+		// Find amount of leafs and collect their semaphores as outputs.
+		size_t leafCount = 0;
+		for (const auto& tempNode : tempNodes.GetView())
+			leafCount += tempNode.isLeaf;
+
+		_output = Array<Array<VkSemaphore>*>(arena, frameCount);
+		for (auto& semaphores : _output.GetView())
+			semaphores = arena.New<Array<VkSemaphore>>(1, arena, leafCount);
+
+		for (size_t i = 0; i < length; ++i)
+		{
+			const auto& node = _nodes[i];
+			auto& tempNode = tempNodes[i];
+
+			if (!tempNode.isLeaf)
+				continue;
+
+			for (size_t j = 0; j < frameCount; ++j)
+			{
+				const auto frame = node.frames->GetView()[j];
+				_output[j]->GetView()[i] = frame.semaphore;
+			}
+		}
 	}
 
 	RenderGraph::~RenderGraph()
 	{
+		for (int32_t i = static_cast<int32_t>(_output.GetLength()) - 1; i >= 0; --i)
+		{
+			const auto& output = _output[i];
+			_arena.Delete(output);
+		}
+
 		for (int32_t i = static_cast<int32_t>(_nodes.GetLength()) - 1; i >= 0; --i)
 		{
-			auto& node = _nodes[i];
+			const auto& node = _nodes[i];
 			for (const auto& frame : node.frames->GetView())
-			{
 				vkDestroySemaphore(_app.device, frame.semaphore, nullptr);
-			}
 			_arena.Delete(node.frames);
 		}
 	}

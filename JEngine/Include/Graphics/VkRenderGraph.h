@@ -40,6 +40,7 @@ namespace je::vk
 		struct TempNode final
 		{
 			size_t index = SIZE_MAX;
+			bool isLeaf = true;
 			const RenderNode* node = nullptr;
 			LinkedList<TempNode*> parents{};
 			Array<StringView> inputs{};
@@ -58,9 +59,11 @@ namespace je::vk
 			Array<Frame>* frames;
 		};
 
-		Array<Node> _nodes{};
 		App& _app;
 		Arena& _arena;
 		SwapChain& _swapChain;
+
+		Array<Node> _nodes{};
+		Array<Array<VkSemaphore>*> _output{};
 	};
 }
