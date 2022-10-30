@@ -7,6 +7,8 @@
 #include "Graphics/VkInitializer.h"
 #include "Modules/WindowModule.h"
 #include "Graphics/VkAllocator.h"
+#include "Graphics/VkImage.h"
+#include "Graphics/VkLayout.h"
 #include "Graphics/VkMesh.h"
 #include "Graphics/VkPipeline.h"
 #include "Graphics/VkShader.h"
@@ -36,10 +38,16 @@ namespace je::engine
 		// Temp.
 		_shader = info.persistentArena.New<vk::Shader>(1, info.tempArena, _app, "Shaders/vert.spv", "Shaders/frag.spv");
 
+		vk::Layout::Binding binding;
+		binding.flag = VK_SHADER_STAGE_FRAGMENT_BIT;
+		binding.type = VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE;
+		_layout = info.persistentArena.New<vk::Layout>(1, _app, info.tempArena, binding);
+		auto vkLayout = static_cast<VkDescriptorSetLayout>(*_layout);
+
 		vk::PipelineCreateInfo createInfo{};
 		createInfo.tempArena = &info.tempArena;
 		createInfo.app = &_app;
-		createInfo.layouts = {};
+		createInfo.layouts = vkLayout;
 		createInfo.renderPass = _swapChain->GetRenderPass();
 		createInfo.shader = _shader;
 		createInfo.resolution = _swapChain->GetResolution();
@@ -49,6 +57,25 @@ namespace je::engine
 		Array<vk::Vertex::Index> inds{};
 		CreateQuadShape(info.tempArena, verts, inds);
 		_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
+		_image = info.persistentArena.New<vk::Image>(1, _app, *_allocator, "Textures/test.jpg");
+
+		VkImageViewCreateInfo viewCreateInfo{};
+		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewCreateInfo.subresourceRange.baseMipLevel = 0;
+		viewCreateInfo.subresourceRange.levelCount = 1;
+		viewCreateInfo.subresourceRange.baseArrayLayer = 0;
+		viewCreateInfo.subresourceRange.layerCount = 1;
+		viewCreateInfo.image = *_image;
+		viewCreateInfo.format = _image->GetFormat();
+
+		const auto result = vkCreateImageView(_app.device, &viewCreateInfo, nullptr, &_view);
+		assert(!result);
 	}
 
 	void RenderModule::OnExit(Info& info)
@@ -56,8 +83,12 @@ namespace je::engine
 		const auto result = vkDeviceWaitIdle(_app.device);
 		assert(!result);
 
+		vkDestroyImageView(_app.device, _view, nullptr);
+
+		info.persistentArena.Delete(_image);
 		info.persistentArena.Delete(_mesh);
 		info.persistentArena.Delete(_pipeline);
+		info.persistentArena.Delete(_layout);
 		info.persistentArena.Delete(_shader);
 		info.persistentArena.Delete(_swapChain);
 		info.persistentArena.Delete(_allocator);

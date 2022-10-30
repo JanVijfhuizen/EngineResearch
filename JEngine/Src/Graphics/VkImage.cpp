@@ -12,23 +12,32 @@
 
 namespace je::vk
 {
-	Image::Image(const App& app, const Allocator& allocator, const View<unsigned char>& pixels, const glm::ivec2 resolution) : _app(&app)
+	Image::Image(const App& app, const Allocator& allocator, const View<unsigned char>& pixels, 
+		const glm::ivec3 resolution, const VkFormat format, const VkImageAspectFlagBits flag) :
+		_app(&app), _format(format), _flag(flag), _resolution(resolution)
 	{
 		Load(app, allocator, pixels, resolution);
 	}
 
-	Image::Image(const App& app, const Allocator& allocator, const StringView& path) : _app(&app)
+	Image::Image(const App& app, const Allocator& allocator, const StringView& path, const VkImageAspectFlagBits flag) :
+		_app(&app), _format(VK_FORMAT_R8G8B8A8_SRGB), _flag(flag)
 	{
 		// Load pixels.
 		int texWidth, texHeight, texChannels;
 		stbi_uc* pixels = stbi_load(path.GetData(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
 		const VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4;
 		assert(pixels);
+		_resolution = {texWidth, texHeight, 4 };
 
-		View<stbi_uc> view{pixels, imageSize};
+		const View<stbi_uc> view{pixels, imageSize};
 
 		Load(app, allocator, view, { texWidth, texHeight });
 		stbi_image_free(pixels);
+	}
+
+	Image::~Image()
+	{
+		vkDestroyImage(_app->device, _image, nullptr);
 	}
 
 	void GetLayoutMasks(const VkImageLayout layout, VkAccessFlags& outAccessFlags,
@@ -89,6 +98,21 @@ namespace je::vk
 		_layout = newLayout;
 	}
 
+	glm::ivec3 Image::GetResolution() const
+	{
+		return _resolution;
+	}
+
+	VkFormat Image::GetFormat() const
+	{
+		return _format;
+	}
+
+	Image::operator VkImage() const
+	{
+		return _image;
+	}
+
 	void Image::Load(const App& app, const Allocator& allocator, 
 		const View<unsigned char>& pixels, const glm::ivec2 resolution)
 	{
@@ -124,7 +148,7 @@ namespace je::vk
 		imageCreateInfo.extent.depth = 1;
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
-		imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+		imageCreateInfo.format = _format;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
 		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
@@ -166,5 +190,60 @@ namespace je::vk
 		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 		vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
+
+		TransitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _flag);
+
+		VkBufferImageCopy region{};
+		region.bufferOffset = 0;
+		region.bufferRowLength = 0;
+		region.bufferImageHeight = 0;
+
+		region.imageSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		region.imageSubresource.mipLevel = 0;
+		region.imageSubresource.baseArrayLayer = 0;
+		region.imageSubresource.layerCount = 1;
+
+		region.imageOffset = { 0, 0, 0 };
+		region.imageExtent =
+		{
+			static_cast<uint32_t>(resolution.x),
+			static_cast<uint32_t>(resolution.y),
+			1
+		};
+
+		vkCmdCopyBufferToImage(
+			cmdBuffer,
+			stagingBuffer,
+			_image,
+			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+			1,
+			&region
+		);
+
+		TransitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, _flag);
+
+		// End recording.
+		result = vkEndCommandBuffer(cmdBuffer);
+		assert(!result);
+
+		VkSubmitInfo cmdSubmitInfo{};
+		cmdSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		cmdSubmitInfo.commandBufferCount = 1;
+		cmdSubmitInfo.pCommandBuffers = &cmdBuffer;
+		cmdSubmitInfo.waitSemaphoreCount = 0;
+		cmdSubmitInfo.pWaitSemaphores = nullptr;
+		cmdSubmitInfo.signalSemaphoreCount = 0;
+		cmdSubmitInfo.pSignalSemaphores = nullptr;
+		cmdSubmitInfo.pWaitDstStageMask = nullptr;
+		result = vkQueueSubmit(app.queues[App::Queue::renderQueue], 1, &cmdSubmitInfo, fence);
+		assert(!result);
+
+		result = vkWaitForFences(app.device, 1, &fence, VK_TRUE, UINT64_MAX);
+		assert(!result);
+
+		vkDestroyFence(app.device, fence, nullptr);
+		vkDestroyBuffer(app.device, stagingBuffer, nullptr);
+		const bool freeResult = allocator.Free(stagingMem);
+		assert(freeResult);
 	}
 }
