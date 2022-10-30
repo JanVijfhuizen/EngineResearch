@@ -2,6 +2,7 @@
 #include "Module.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
+#include "Jlb/Array.h"
 
 namespace je
 {
@@ -32,6 +33,9 @@ namespace je
 			vk::Mesh* _mesh = nullptr;
 			vk::Image* _image = nullptr;
 			VkImageView _view;
+			VkDescriptorPool _descriptorPool;
+			Array<VkDescriptorSet> _descriptorSets{};
+			VkSampler _sampler;
 
 			void OnInitialize(Info& info) override;
 			void OnExit(Info& info) override;

@@ -23,6 +23,7 @@ namespace je::vk
 		void TransitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout, VkImageAspectFlags aspectFlags);
 		[[nodiscard]] glm::ivec3 GetResolution() const;
 		[[nodiscard]] VkFormat GetFormat() const;
+		[[nodiscard]] VkImageLayout GetLayout() const;
 		[[nodiscard]] operator VkImage() const;
 
 	private:

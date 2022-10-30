@@ -181,6 +181,11 @@ namespace je::vk
 		return _images[_imageIndex].cmdBuffer;
 	}
 
+	size_t SwapChain::GetIndex() const
+	{
+		return _imageIndex;
+	}
+
 	void SwapChain::Cleanup() const
 	{
 		if (!_swapChain)

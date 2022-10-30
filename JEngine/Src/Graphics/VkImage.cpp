@@ -108,6 +108,11 @@ namespace je::vk
 		return _format;
 	}
 
+	VkImageLayout Image::GetLayout() const
+	{
+		return _layout;
+	}
+
 	Image::operator VkImage() const
 	{
 		return _image;

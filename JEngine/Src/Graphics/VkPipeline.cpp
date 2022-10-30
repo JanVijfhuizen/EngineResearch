@@ -171,4 +171,14 @@ namespace je::vk
 	{
 		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
 	}
+
+	Pipeline::operator VkPipeline() const
+	{
+		return _pipeline;
+	}
+
+	VkPipelineLayout Pipeline::GetLayout() const
+	{
+		return _layout;
+	}
 }

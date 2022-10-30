@@ -4,5 +4,5 @@
 
 namespace je::vk
 {
-	void CreateQuadShape(Arena& arena, Array<Vertex>& outVertices, Array<Vertex::Index>& outIndices);
+	void CreateQuadShape(Arena& arena, Array<Vertex>& outVertices, Array<Vertex::Index>& outIndices, float scale = 1);
 }
