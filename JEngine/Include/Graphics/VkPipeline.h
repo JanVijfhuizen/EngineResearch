@@ -17,7 +17,7 @@ namespace je
 			Shader* shader;
 			glm::ivec2 resolution;
 			VkRenderPass renderPass;
-			View<VkDescriptorSetLayout> layouts;
+			View<VkDescriptorSetLayout> layouts{};
 
 			bool shaderSamplingEnabled = false;
 			VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;

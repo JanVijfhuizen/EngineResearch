@@ -25,6 +25,8 @@ namespace je::vk
 		for (int32_t i = static_cast<int32_t>(_pools.GetLength()) - 1; i >= 0; --i)
 		{
 			const auto& pool = _pools[i];
+			for (const auto& page : *pool.pages)
+				vkFreeMemory(_app.device, page.memory, nullptr);
 			_arena.Free(pool.pages);
 		}
 		_arena.Free(_pools);
