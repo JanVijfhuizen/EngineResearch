@@ -27,7 +27,7 @@ namespace je::vk
 		const Allocator* _allocator = nullptr;
 
 		template <typename T>
-		[[nodiscard]] Buffer CreateBuffer(const App& app, Allocator& allocator, const View<T>& data, VkBufferUsageFlags usageFlags);
+		[[nodiscard]] static Buffer CreateBuffer(const App& app, Allocator& allocator, const View<T>& data, VkBufferUsageFlags usageFlags);
 	};
 
 	template <typename T>

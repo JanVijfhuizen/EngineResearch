@@ -1,6 +1,7 @@
 ﻿#include "jpch.h"
 #include "Jlb/Arena.h"
 #include "Jlb/JMath.h"
+#include "Jlb/JMove.h"
 
 namespace je
 {

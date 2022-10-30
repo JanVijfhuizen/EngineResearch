@@ -2,6 +2,8 @@
 #include "Jlb/FileLoader.h"
 #include <fstream>
 
+#include "Jlb/JMove.h"
+
 namespace je::file
 {
 	Array<char> Load(Arena& arena, const StringView path)

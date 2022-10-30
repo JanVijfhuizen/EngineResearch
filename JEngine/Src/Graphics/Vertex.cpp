@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Graphics/Vertex.h"
+#include "Jlb/JMove.h"
 
 namespace je::vk
 {

@@ -1,25 +1,24 @@
 ﻿#pragma once
-#include "Jlb/Array.h"
-#include "Jlb/StringView.h"
 #include "Jlb/View.h"
 
 namespace je::vk
 {
-	struct RenderGraphResource final
+	class RenderNode
 	{
-		StringView name;
-	};
+		friend class RenderGraph;
 
-	struct RenderGraphNode
-	{
-		[[nodiscard]] virtual Array<RenderGraphResource> DefineInputs(Arena& arena);
-		[[nodiscard]] virtual Array<RenderGraphResource> DefineOutputs(Arena& arena);
+	protected:
+		struct UpdateInfo final
+		{
+			View<VkSemaphore> waitSemaphores;
+			VkSemaphore renderFinishedSemaphore;
+		};
+
+		virtual void Render(const UpdateInfo& info) = 0;
 	};
 
 	class RenderGraph final
 	{
-	public:
-		RenderGraph(Arena& arena, Arena& tempArena, const View<RenderGraphNode*>& nodes, const View<RenderGraphResource>& externalResources);
-		~RenderGraph();
+	
 	};
 }
