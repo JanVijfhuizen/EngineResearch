@@ -53,7 +53,11 @@ namespace je::engine
 
 	void RenderModule::OnExit(Info& info)
 	{
+		const auto result = vkDeviceWaitIdle(_app.device);
+		assert(!result);
+
 		info.persistentArena.Delete(_mesh);
+		info.persistentArena.Delete(_pipeline);
 		info.persistentArena.Delete(_shader);
 		info.persistentArena.Delete(_swapChain);
 		info.persistentArena.Delete(_allocator);
