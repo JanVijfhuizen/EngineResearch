@@ -5,5 +5,6 @@
 #include <cstdlib>
 #include <cassert>
 #include <climits>
+#include <cstdint>
 
 #endif
