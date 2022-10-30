@@ -13,31 +13,10 @@ namespace je::vk
 			const auto& binding = bindings[i];
 			auto& set = sets[i];
 
+			set.stageFlags = binding.flag;
 			set.binding = static_cast<uint32_t>(i);
 			set.descriptorCount = binding.count;
-
-			switch (binding.stage)
-			{
-			case Binding::Stage::vertex:
-				set.stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-				break;
-			case Binding::Stage::fragment:
-				set.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
-				break;
-			}
-
-			switch (binding.type)
-			{
-				case Binding::Type::buffer:
-					set.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-					break;
-				case Binding::Type::storageBuffer:
-					set.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-					break;
-				case Binding::Type::image:
-					set.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-					break;
-			}
+			set.descriptorType = binding.type;
 		}
 
 		VkDescriptorSetLayoutCreateInfo layoutInfo{};
@@ -51,7 +30,7 @@ namespace je::vk
 		assert(!result);
 	}
 
-	VkLayout::VkLayout(VkLayout&& other) noexcept : _app(other._app), _layout(other._layout)
+	VkLayout::VkLayout(VkLayout&& other) noexcept : _layout(other._layout), _app(other._app)
 	{
 		other._app = nullptr;
 	}

@@ -14,21 +14,10 @@ namespace je
 		public:
 			struct Binding final
 			{
-				enum class Type
-				{
-					buffer,
-					storageBuffer,
-					image
-				} type;
-
-				enum class Stage
-				{
-					vertex,
-					fragment
-				} stage;
-
+				VkDescriptorType type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
 				size_t size = sizeof(int32_t);
 				uint32_t count = 1;
+				VkShaderStageFlagBits flag;
 			};
 
 			explicit VkLayout(App& app, Arena& tempArena, const View<Binding>& bindings);
