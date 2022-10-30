@@ -38,7 +38,7 @@ namespace je
 		LinkedList() = default;
 		explicit LinkedList(Arena& arena);
 		LinkedList(LinkedList<T>&& other) noexcept;
-		[[nodiscard]] LinkedList<T>& operator=(LinkedList<T>&& other) noexcept;
+		LinkedList<T>& operator=(LinkedList<T>&& other) noexcept;
 		~LinkedList();
 
 		T& Add(const T& instance = {});
