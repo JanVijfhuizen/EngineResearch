@@ -72,7 +72,7 @@ namespace je::vk
 		_arena.Free(_images);
 	}
 
-	VkCommandBuffer SwapChain::WaitForImage()
+	void SwapChain::WaitForImage()
 	{
 		const auto& frame = _frames[_frameIndex];
 
@@ -86,7 +86,6 @@ namespace je::vk
 		if (image.fence)
 			vkWaitForFences(_app.device, 1, &image.fence, VK_TRUE, UINT64_MAX);
 		image.fence = frame.inFlightFence;
-		return image.cmdBuffer;
 	}
 
 	VkCommandBuffer SwapChain::BeginFrame(const bool manuallyCallWaitForImage)

@@ -2,6 +2,7 @@
 #include "Module.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
+#include "Graphics/VkRenderGraph.h"
 #include "Jlb/Array.h"
 
 namespace je
@@ -32,6 +33,8 @@ namespace je
 
 			vk::Mesh* _mesh = nullptr;
 			vk::Image* _image = nullptr;
+			vk::RenderGraph* _renderGraph;
+
 			VkImageView _view;
 			VkDescriptorPool _descriptorPool;
 			Array<VkDescriptorSet> _descriptorSets{};
@@ -41,7 +44,6 @@ namespace je
 			void OnExit(Info& info) override;
 
 			void OnUpdate(Info& info) override;
-			void OnPostUpdate(Info& info) override;
 		};
 	}
 }

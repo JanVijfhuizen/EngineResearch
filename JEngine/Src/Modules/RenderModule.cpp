@@ -11,6 +11,7 @@
 #include "Graphics/VkLayout.h"
 #include "Graphics/VkMesh.h"
 #include "Graphics/VkPipeline.h"
+#include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkShader.h"
 #include "Graphics/VkShape.h"
 #include "Graphics/VkSwapChain.h"
@@ -164,6 +165,9 @@ namespace je::engine
 
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
+
+		View<vk::RenderNode*> nodes{};
+		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, _app, info.persistentArena, info.tempArena, *_swapChain, nodes);
 	}
 
 	void RenderModule::OnExit(Info& info)
@@ -175,6 +179,7 @@ namespace je::engine
 		vkDestroyDescriptorPool(_app.device, _descriptorPool, nullptr);
 		vkDestroyImageView(_app.device, _view, nullptr);
 
+		info.persistentArena.Delete(_renderGraph);
 		info.persistentArena.Delete(_image);
 		info.persistentArena.Delete(_mesh);
 		info.persistentArena.Delete(_pipeline);
@@ -190,7 +195,11 @@ namespace je::engine
 	void RenderModule::OnUpdate(Info& info)
 	{
 		Module::OnUpdate(info);
-		const auto cmd = _swapChain->BeginFrame();
+
+		_swapChain->WaitForImage();
+
+		const auto renderGraphWaitSemaphores = _renderGraph->Update();
+		const auto cmd = _swapChain->BeginFrame(true);
 		
 		_pipeline->Bind(cmd);
 		_mesh->Bind(cmd);
@@ -199,11 +208,7 @@ namespace je::engine
 			0, 1, &_descriptorSets[_swapChain->GetIndex()], 0, nullptr);
 
 		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
-	}
 
-	void RenderModule::OnPostUpdate(Info& info)
-	{
-		Module::OnPostUpdate(info);
 		_swapChain->EndFrame();
 	}
 }

@@ -16,6 +16,7 @@ namespace je::vk
 	protected:
 		struct UpdateInfo final
 		{
+			VkCommandBuffer cmdBuffer;
 			View<VkSemaphore> waitSemaphores;
 			VkSemaphore renderFinishedSemaphore;
 		};
@@ -33,8 +34,10 @@ namespace je::vk
 	class RenderGraph final
 	{
 	public:
-		RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode>& nodes);
+		RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode*>& nodes);
 		~RenderGraph();
+
+		[[nodiscard]] View<VkSemaphore> Update() const;
 
 	private:
 		struct TempNode final
@@ -56,6 +59,7 @@ namespace je::vk
 				Array<VkSemaphore>* waitSemaphores = nullptr;
 			};
 
+			RenderNode* target = nullptr;
 			Array<Frame>* frames;
 		};
 

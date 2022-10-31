@@ -15,7 +15,7 @@ namespace je::vk
 		return {};
 	}
 
-	RenderGraph::RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode>& nodes) :
+	RenderGraph::RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode*>& nodes) :
 		_app(app), _arena(arena), _swapChain(swapChain)
 	{
 		const auto _ = tempArena.CreateScope();
@@ -30,10 +30,10 @@ namespace je::vk
 			auto& tempNode = tempNodes[i];
 
 			tempNode.index = i;
-			tempNode.node = &node;
+			tempNode.node = node;
 			tempNode.parents = LinkedList<TempNode*>{tempArena};
-			tempNode.inputs = node.DefineInputs(tempArena);
-			tempNode.outputs = node.DefineOutputs(tempArena);
+			tempNode.inputs = node->DefineInputs(tempArena);
+			tempNode.outputs = node->DefineOutputs(tempArena);
 		}
 
 		// Link parents by comparing inputs and outputs.
@@ -66,6 +66,8 @@ namespace je::vk
 
 			for (auto& node : _nodes.GetView())
 			{
+				node.target = nodes[index];
+
 				node.frames = arena.New<Array<Node::Frame>>(1, arena, frameCount);
 				for (auto& frame : node.frames->GetView())
 				{
@@ -133,7 +135,7 @@ namespace je::vk
 
 			for (size_t j = 0; j < frameCount; ++j)
 			{
-				const auto frame = node.frames->GetView()[j];
+				const auto& frame = node.frames->GetView()[j];
 				_output[j]->GetView()[i] = frame.semaphore;
 			}
 		}
@@ -154,5 +156,23 @@ namespace je::vk
 				vkDestroySemaphore(_app.device, frame.semaphore, nullptr);
 			_arena.Delete(node.frames);
 		}
+	}
+
+	View<VkSemaphore> RenderGraph::Update() const
+	{
+		const size_t idx = _swapChain.GetIndex();
+		for (const auto& node : _nodes.GetView())
+		{
+			const auto& frame = node.frames->GetView()[idx];
+
+			RenderNode::UpdateInfo updateInfo{};
+			updateInfo.cmdBuffer = frame.cmdBuffer;
+			updateInfo.waitSemaphores = frame.waitSemaphores->GetView();
+			updateInfo.renderFinishedSemaphore = frame.semaphore;
+
+			node.target->Render(updateInfo);
+		}
+
+		return _output.GetView()[idx]->GetView();
 	}
 }
