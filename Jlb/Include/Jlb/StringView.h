@@ -17,6 +17,7 @@ namespace je
 		[[nodiscard]] bool operator!=(const char* other) const;
 		
 		[[nodiscard]] operator const char* () const;
+		[[nodiscard]] operator bool() const;
 
 	private:
 		const char* _strLit = nullptr;

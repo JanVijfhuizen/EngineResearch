@@ -59,7 +59,12 @@ namespace je::engine
 		Array<vk::Vertex::Index> inds{};
 		CreateQuadShape(info.tempArena, verts, inds, .5f);
 		_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
-		_image = info.persistentArena.New<vk::Image>(1, _app, *_allocator, "Textures/test.jpg");
+
+		vk::Image::CreateInfo imageCreateInfo{};
+		imageCreateInfo.app = &_app;
+		imageCreateInfo.allocator = _allocator;
+		imageCreateInfo.path = "Textures/test.jpg";
+		_image = info.persistentArena.New<vk::Image>(1, imageCreateInfo);
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

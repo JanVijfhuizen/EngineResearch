@@ -1,4 +1,6 @@
 ﻿#pragma once
+#include "VkMemory.h"
+#include "Jlb/StringView.h"
 #include "Jlb/View.h"
 
 namespace je
@@ -14,10 +16,22 @@ namespace je::vk
 	class Image final
 	{
 	public:
-		Image(const App& app, const Allocator& allocator, glm::ivec3 resolution, const View<unsigned char>& pixels = {},
-			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB, VkImageAspectFlagBits flag = VK_IMAGE_ASPECT_COLOR_BIT);
-		Image(const App& app, const Allocator& allocator, const StringView& path, 
-			VkImageAspectFlagBits flag = VK_IMAGE_ASPECT_COLOR_BIT);
+		struct CreateInfo final
+		{
+			App* app;
+			Allocator* allocator;
+
+			View<unsigned char> pixels{};
+			glm::ivec3 resolution;
+			StringView path{};
+
+			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
+			VkImageAspectFlagBits flag = VK_IMAGE_ASPECT_COLOR_BIT;
+			VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+			VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		};
+
+		explicit Image(const CreateInfo& info);
 		~Image();
 
 		void TransitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout, VkImageAspectFlags aspectFlags);
@@ -28,13 +42,15 @@ namespace je::vk
 
 	private:
 		const App* _app = nullptr;
+		Allocator* _allocator;
 		VkImage _image;
 		VkImageLayout _layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkFormat _format;
 		VkImageAspectFlagBits _flag;
 		glm::ivec3 _resolution;
+		Memory _memory;
 
-		void Load(const App& app, const Allocator& allocator, const View<unsigned char>& pixels, glm::ivec2 resolution);
-		void CreateImage(const App& app, const Allocator& allocator, glm::ivec2 resolution);
+		void Load(const View<unsigned char>& pixels, VkImageUsageFlags usageFlags, VkImageLayout layout);
+		void CreateImage(VkImageUsageFlags usageFlags);
 	};
 }

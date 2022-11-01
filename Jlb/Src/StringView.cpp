@@ -46,4 +46,9 @@ namespace je
 	{
 		return _strLit;
 	}
+
+	StringView::operator bool() const
+	{
+		return _strLit;
+	}
 }

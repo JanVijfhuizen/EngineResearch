@@ -13,8 +13,12 @@ namespace je::vk
 		~TestRenderNode();
 
 	private:
-		Image* _image;
 		Arena& _arena;
+		App& _app;
+		Image* _image;
+		VkRenderPass _renderPass;
+		VkImageView _view;
+		VkFramebuffer _frameBuffer;
 
 		void Render(const UpdateInfo& info) override;
 	};
