@@ -116,10 +116,10 @@ namespace je::vk
 		return image.cmdBuffer;
 	}
 
-	void SwapChain::EndFrame(const View<VkSemaphore>& waitSemaphores)
+	void SwapChain::EndFrame(Arena& tempArena, const View<VkSemaphore>& waitSemaphores)
 	{
-		auto& frame = _frames[_frameIndex];
-		auto& image = _images[_imageIndex];
+		const auto& frame = _frames[_frameIndex];
+		const auto& image = _images[_imageIndex];
 
 		vkCmdEndRenderPass(image.cmdBuffer);
 		auto result = vkEndCommandBuffer(image.cmdBuffer);
@@ -130,7 +130,10 @@ namespace je::vk
 		memcpy(allWaitSemaphores.GetData(), waitSemaphores.GetData(), sizeof(VkSemaphore) * waitSemaphores.GetLength());
 		allWaitSemaphores[waitSemaphores.GetLength()] = frame.imageAvailableSemaphore;
 
-		constexpr VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+		const Array<VkPipelineStageFlags> waitStages{ tempArena, allWaitSemaphores.GetLength() };
+		for (auto& waitStage : waitStages.GetView())
+			waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
@@ -139,7 +142,7 @@ namespace je::vk
 		submitInfo.pWaitSemaphores = allWaitSemaphores;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &frame.renderFinishedSemaphore;
-		submitInfo.pWaitDstStageMask = &waitStage;
+		submitInfo.pWaitDstStageMask = waitStages;
 
 		vkResetFences(_app.device, 1, &frame.inFlightFence);
 		result = vkQueueSubmit(_app.queues[App::renderQueue], 1, &submitInfo, frame.inFlightFence);

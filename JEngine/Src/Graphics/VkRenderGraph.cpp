@@ -158,7 +158,7 @@ namespace je::vk
 		}
 	}
 
-	View<VkSemaphore> RenderGraph::Update() const
+	View<VkSemaphore> RenderGraph::Update(Arena& tempArena) const
 	{
 		const size_t idx = _swapChain.GetIndex();
 		for (const auto& node : _nodes.GetView())
@@ -169,6 +169,7 @@ namespace je::vk
 			updateInfo.cmdBuffer = frame.cmdBuffer;
 			updateInfo.waitSemaphores = frame.waitSemaphores->GetView();
 			updateInfo.renderFinishedSemaphore = frame.semaphore;
+			updateInfo.tempArena = &tempArena;
 
 			node.target->Render(updateInfo);
 		}

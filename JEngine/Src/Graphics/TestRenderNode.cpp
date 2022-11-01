@@ -96,6 +96,49 @@ namespace je::vk
 
 	void TestRenderNode::Render(const UpdateInfo& info)
 	{
+		VkCommandBufferBeginInfo cmdBufferBeginInfo{};
+		cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+		cmdBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+		vkResetCommandBuffer(info.cmdBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+		vkBeginCommandBuffer(info.cmdBuffer, &cmdBufferBeginInfo);
+
+		const VkClearValue clearColor = { 1.f, 1.f, 1.f, 1.f };
+
+		VkExtent2D extent{};
+		extent.width = _image->GetResolution().x;
+		extent.height = _image->GetResolution().y;
+
+		VkRenderPassBeginInfo renderPassBeginInfo{};
+		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+		renderPassBeginInfo.renderArea.offset = { 0, 0 };
+		renderPassBeginInfo.renderPass = _renderPass;
+		renderPassBeginInfo.framebuffer = _frameBuffer;
+		renderPassBeginInfo.renderArea.extent = extent;
+		renderPassBeginInfo.clearValueCount = 1;
+		renderPassBeginInfo.pClearValues = &clearColor;
+
+		vkCmdBeginRenderPass(info.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+		// Render.
+		vkCmdEndRenderPass(info.cmdBuffer);
+		auto result = vkEndCommandBuffer(info.cmdBuffer);
+		assert(!result);
+
+		const Array<VkPipelineStageFlags> waitStages{*info.tempArena, info.waitSemaphores.GetLength() };
+		for (auto& waitStage : waitStages.GetView())
+			waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 		
+		VkSubmitInfo submitInfo{};
+		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+		submitInfo.commandBufferCount = 1;
+		submitInfo.pCommandBuffers = &info.cmdBuffer;
+		submitInfo.waitSemaphoreCount = static_cast<uint32_t>(info.waitSemaphores.GetLength());
+		submitInfo.pWaitSemaphores = info.waitSemaphores.GetData();
+		submitInfo.signalSemaphoreCount = 1;
+		submitInfo.pSignalSemaphores = &info.renderFinishedSemaphore;
+		submitInfo.pWaitDstStageMask = waitStages;
+		
+		result = vkQueueSubmit(_app.queues[App::renderQueue], 1, &submitInfo, nullptr);
+		assert(!result);
 	}
 }

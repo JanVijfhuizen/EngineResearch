@@ -19,6 +19,7 @@ namespace je::vk
 			VkCommandBuffer cmdBuffer;
 			View<VkSemaphore> waitSemaphores;
 			VkSemaphore renderFinishedSemaphore;
+			Arena* tempArena;
 		};
 
 		struct Output final
@@ -37,7 +38,7 @@ namespace je::vk
 		RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode*>& nodes);
 		~RenderGraph();
 
-		[[nodiscard]] View<VkSemaphore> Update() const;
+		[[nodiscard]] View<VkSemaphore> Update(Arena& tempArena) const;
 
 	private:
 		struct TempNode final
