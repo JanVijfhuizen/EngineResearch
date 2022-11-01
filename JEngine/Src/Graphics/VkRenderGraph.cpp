@@ -39,7 +39,6 @@ namespace je::vk
 
 			tempNode.index = i;
 			tempNode.node = node;
-			tempNode.parents = LinkedList<TempNode*>{tempArena};
 			tempNode.children = LinkedList<TempNode*>{tempArena};
 			tempNode.inputs = node->DefineInputs(tempArena);
 			tempNode.outputs = node->DefineOutputs(tempArena);
@@ -65,7 +64,7 @@ namespace je::vk
 					for (auto& output : outputView)
 						if (input == output.name)
 						{
-							tempNode.parents.Add(&other);
+							tempNode.isRoot = false;
 							other.children.Add(&tempNode);
 							goto NEXT;
 						}
@@ -77,11 +76,8 @@ namespace je::vk
 
 		// Define depth of every node.
 		for (auto& tempNode : view)
-		{
-			if (tempNode.parents.GetCount() > 0)
-				continue;
-			DefineDepth(tempNode, 0);
-		}
+			if (tempNode.isRoot)
+				DefineDepth(tempNode, 0);
 
 		// Sort based on depth.
 		Array<TempNode*> depthSorted{ tempArena, length };
@@ -172,7 +168,22 @@ namespace je::vk
 			}
 		}
 
+		// Find maximum parallel usage.
+		size_t current = 0;
+		for (const auto& layer : _layers.GetView())
+		{
+			for (auto& tempResource : tempResources)
+				tempResource.currentDepthUsages = 0;
+
+			while(current < layer.index)
+			{
+				// First find input types.
+				++current;
+			}
+		}
+
 		// ...
+		// Create corresponding images and link them to the nodes.
 	}
 
 	RenderGraph::~RenderGraph()

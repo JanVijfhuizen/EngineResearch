@@ -48,8 +48,8 @@ namespace je::vk
 		{
 			size_t index = SIZE_MAX;
 			size_t depth = 0;
+			bool isRoot = true;
 			RenderNode* node = nullptr;
-			LinkedList<TempNode*> parents{};
 			LinkedList<TempNode*> children{};
 			Array<StringView> inputs{};
 			Array<RenderNode::Output> outputs{};
