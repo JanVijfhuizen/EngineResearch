@@ -47,13 +47,20 @@ namespace je::vk
 		// Link parents by comparing inputs and outputs.
 		const auto view = tempNodes.GetView();
 		for (auto& tempNode : view)
+		{
+			const auto inputView = tempNode.inputs.GetView();
+			if (!inputView)
+				continue;
+
 			for (auto& other : view)
 			{
 				if (&tempNode == &other)
 					continue;
 
 				const auto outputView = other.outputs.GetView();
-				for (auto& input : tempNode.inputs.GetView())
+				if (!outputView)
+					continue;
+				for (auto& input : inputView)
 					for (auto& output : outputView)
 						if (input == output.name)
 						{
@@ -66,6 +73,7 @@ namespace je::vk
 			NEXT:
 				continue;
 			}
+		}
 
 		// Define nodes and sync structs for individual frames.
 		_nodes = Array<Node>(arena, length);
@@ -142,6 +150,8 @@ namespace je::vk
 		for (auto& tempNode : view)
 		{
 			const auto outputView = tempNode.outputs.GetView();
+			if (!outputView)
+				continue;
 
 			for (auto& output : outputView)
 			{
@@ -161,6 +171,9 @@ namespace je::vk
 				}
 			}
 		}
+
+		// Define parallel usage.
+
 
 		const auto nodesView = _nodes.GetView();
 
