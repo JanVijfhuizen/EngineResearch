@@ -12,11 +12,14 @@
 
 namespace je::vk
 {
-	Image::Image(const App& app, const Allocator& allocator, const View<unsigned char>& pixels, 
-		const glm::ivec3 resolution, const VkFormat format, const VkImageAspectFlagBits flag) :
+	Image::Image(const App& app, const Allocator& allocator, const glm::ivec3 resolution, 
+		const View<unsigned char>& pixels, const VkFormat format, const VkImageAspectFlagBits flag) :
 		_app(&app), _format(format), _flag(flag), _resolution(resolution)
 	{
-		Load(app, allocator, pixels, resolution);
+		if (pixels)
+			Load(app, allocator, pixels, resolution);
+		else
+			CreateImage(app, allocator, resolution);
 	}
 
 	Image::Image(const App& app, const Allocator& allocator, const StringView& path, const VkImageAspectFlagBits flag) :
@@ -145,30 +148,7 @@ namespace je::vk
 		memcpy(data, pixels.GetData(), imageSize);
 		vkUnmapMemory(app.device, stagingMem.memory);
 
-		VkImageCreateInfo imageCreateInfo{};
-		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.extent.width = resolution.x;
-		imageCreateInfo.extent.height = resolution.y;
-		imageCreateInfo.extent.depth = 1;
-		imageCreateInfo.mipLevels = 1;
-		imageCreateInfo.arrayLayers = 1;
-		imageCreateInfo.format = _format;
-		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
-		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-		result = vkCreateImage(app.device, &imageCreateInfo, nullptr, &_image);
-		assert(!result);
-
-		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(app.device, _image, &memRequirements);
-
-		const auto mem = allocator.Alloc(stagingMemRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		result = vkBindImageMemory(app.device, _image, mem.memory, mem.offset);
-		assert(!result);
+		CreateImage(app, allocator, resolution);
 
 		// Record and execute copy. 
 		VkCommandBuffer cmdBuffer;
@@ -250,5 +230,33 @@ namespace je::vk
 		vkDestroyBuffer(app.device, stagingBuffer, nullptr);
 		const bool freeResult = allocator.Free(stagingMem);
 		assert(freeResult);
+	}
+
+	void Image::CreateImage(const App& app, const Allocator& allocator, const glm::ivec2 resolution)
+	{
+		VkImageCreateInfo imageCreateInfo{};
+		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageCreateInfo.extent.width = resolution.x;
+		imageCreateInfo.extent.height = resolution.y;
+		imageCreateInfo.extent.depth = 1;
+		imageCreateInfo.mipLevels = 1;
+		imageCreateInfo.arrayLayers = 1;
+		imageCreateInfo.format = _format;
+		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
+		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+
+		auto result = vkCreateImage(app.device, &imageCreateInfo, nullptr, &_image);
+		assert(!result);
+
+		VkMemoryRequirements memRequirements;
+		vkGetImageMemoryRequirements(app.device, _image, &memRequirements);
+
+		const auto mem = allocator.Alloc(memRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		result = vkBindImageMemory(app.device, _image, mem.memory, mem.offset);
+		assert(!result);
 	}
 }

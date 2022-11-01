@@ -14,7 +14,7 @@ namespace je::vk
 	class Image final
 	{
 	public:
-		Image(const App& app, const Allocator& allocator, const View<unsigned char>& pixels, glm::ivec3 resolution, 
+		Image(const App& app, const Allocator& allocator, glm::ivec3 resolution, const View<unsigned char>& pixels = {},
 			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB, VkImageAspectFlagBits flag = VK_IMAGE_ASPECT_COLOR_BIT);
 		Image(const App& app, const Allocator& allocator, const StringView& path, 
 			VkImageAspectFlagBits flag = VK_IMAGE_ASPECT_COLOR_BIT);
@@ -35,5 +35,6 @@ namespace je::vk
 		glm::ivec3 _resolution;
 
 		void Load(const App& app, const Allocator& allocator, const View<unsigned char>& pixels, glm::ivec2 resolution);
+		void CreateImage(const App& app, const Allocator& allocator, glm::ivec2 resolution);
 	};
 }

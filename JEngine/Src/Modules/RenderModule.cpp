@@ -15,6 +15,7 @@
 #include "Graphics/VkShader.h"
 #include "Graphics/VkShape.h"
 #include "Graphics/VkSwapChain.h"
+#include "Graphics/TestRenderNode.h"
 
 namespace je::engine
 {
@@ -166,7 +167,8 @@ namespace je::engine
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
 
-		View<vk::RenderNode*> nodes{};
+		_testRenderNode = info.persistentArena.New<vk::TestRenderNode>(1, info.persistentArena, _app, *_allocator);
+		vk::RenderNode* nodes = _testRenderNode;
 		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, _app, info.persistentArena, info.tempArena, *_swapChain, nodes);
 	}
 
@@ -180,6 +182,7 @@ namespace je::engine
 		vkDestroyImageView(_app.device, _view, nullptr);
 
 		info.persistentArena.Delete(_renderGraph);
+		info.persistentArena.Delete(_testRenderNode);
 		info.persistentArena.Delete(_image);
 		info.persistentArena.Delete(_mesh);
 		info.persistentArena.Delete(_pipeline);
