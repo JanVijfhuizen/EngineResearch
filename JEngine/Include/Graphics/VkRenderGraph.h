@@ -17,6 +17,16 @@ namespace je::vk
 		struct Output final
 		{
 			StringView name;
+
+			struct Settings final
+			{
+				glm::ivec3 resolution;
+				VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
+				VkImageAspectFlagBits flag = VK_IMAGE_ASPECT_COLOR_BIT;
+				VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+				[[nodiscard]] bool operator==(const Settings& other) const;
+			} settings;
 		};
 
 		virtual void Render(VkCommandBuffer cmdBuffer) = 0;
@@ -37,8 +47,10 @@ namespace je::vk
 		{
 			size_t index = SIZE_MAX;
 			bool isLeaf = true;
+			size_t depth = 0;
 			const RenderNode* node = nullptr;
 			LinkedList<TempNode*> parents{};
+			LinkedList<TempNode*> children{};
 			Array<StringView> inputs{};
 			Array<RenderNode::Output> outputs{};
 		};
@@ -62,5 +74,7 @@ namespace je::vk
 
 		Array<Node> _nodes{};
 		Array<Array<VkSemaphore>*> _output{};
+
+		static void DefineDepth(TempNode& node, size_t depth);
 	};
 }

@@ -5,6 +5,11 @@
 
 namespace je::vk
 {
+	bool RenderNode::Output::Settings::operator==(const Settings& other) const
+	{
+		return resolution == other.resolution && format == other.format && flag == other.flag && usageFlags == other.usageFlags;
+	}
+
 	Array<StringView> RenderNode::DefineInputs(Arena& arena) const
 	{
 		return {};
@@ -32,6 +37,7 @@ namespace je::vk
 			tempNode.index = i;
 			tempNode.node = node;
 			tempNode.parents = LinkedList<TempNode*>{tempArena};
+			tempNode.children = LinkedList<TempNode*>{tempArena};
 			tempNode.inputs = node->DefineInputs(tempArena);
 			tempNode.outputs = node->DefineOutputs(tempArena);
 		}
@@ -50,6 +56,7 @@ namespace je::vk
 						if (input == output.name)
 						{
 							tempNode.parents.Add(&other);
+							other.children.Add(&tempNode);
 							other.isLeaf = false;
 							goto NEXT;
 						}
@@ -93,6 +100,14 @@ namespace je::vk
 			}
 		}
 
+		// Define depth of every node.
+		for (auto& tempNode : view)
+		{
+			if (tempNode.parents.GetCount() > 0)
+				continue;
+			DefineDepth(tempNode, 0);
+		}
+
 		const auto nodesView = _nodes.GetView();
 
 		// Link nodes through sync structs.
@@ -118,7 +133,7 @@ namespace je::vk
 
 		// Find amount of leafs and collect their semaphores as outputs.
 		size_t leafCount = 0;
-		for (const auto& tempNode : tempNodes.GetView())
+		for (const auto& tempNode : view)
 			leafCount += tempNode.isLeaf;
 
 		_output = Array<Array<VkSemaphore>*>(arena, frameCount);
@@ -196,5 +211,15 @@ namespace je::vk
 		}
 
 		return _output.GetView()[idx]->GetView();
+	}
+
+	void RenderGraph::DefineDepth(TempNode& node, const size_t depth)
+	{
+		if (node.depth >= depth)
+			return;
+
+		node.depth = depth;
+		for (const auto& child : node.children)
+			DefineDepth(*child, depth + 1);
 	}
 }
