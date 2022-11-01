@@ -86,8 +86,31 @@ namespace je::vk
 		}
 	}
 
+	Image::Image(Image&& other) noexcept :
+		_app(other._app), _allocator(other._allocator), _image(other._image), _layout(other._layout),
+		_format(other._format), _flag(other._flag), _resolution(other._resolution), _memory(other._memory)
+	{
+		other._app = nullptr;
+	}
+
+	Image& Image::operator=(Image&& other) noexcept
+	{
+		_app = other._app;
+		_allocator = other._allocator;
+		_image = other._image;
+		_layout = other._layout;
+		_format = other._format;
+		_flag = other._flag;
+		_resolution = other._resolution;
+		_memory = other._memory;
+		other._app = nullptr;
+		return *this;
+	}
+
 	Image::~Image()
 	{
+		if (!_app)
+			return;
 		vkDestroyImage(_app->device, _image, nullptr);
 		const bool freeResult = _allocator->Free(_memory);
 		assert(freeResult);

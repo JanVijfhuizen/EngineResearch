@@ -31,7 +31,10 @@ namespace je::vk
 			VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		};
 
+		Image() = default;
 		explicit Image(const CreateInfo& info);
+		Image(Image&& other) noexcept;
+		Image& operator=(Image&& other) noexcept;
 		~Image();
 
 		void TransitionLayout(VkCommandBuffer cmd, VkImageLayout newLayout, VkImageAspectFlags aspectFlags);
