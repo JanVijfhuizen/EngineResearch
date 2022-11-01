@@ -165,13 +165,34 @@ namespace je::vk
 		{
 			const auto& frame = node.frames->GetView()[idx];
 
-			RenderNode::UpdateInfo updateInfo{};
-			updateInfo.cmdBuffer = frame.cmdBuffer;
-			updateInfo.waitSemaphores = frame.waitSemaphores->GetView();
-			updateInfo.renderFinishedSemaphore = frame.semaphore;
-			updateInfo.tempArena = &tempArena;
+			VkCommandBufferBeginInfo cmdBufferBeginInfo{};
+			cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			cmdBufferBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			vkResetCommandBuffer(frame.cmdBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
+			vkBeginCommandBuffer(frame.cmdBuffer, &cmdBufferBeginInfo);
 
-			node.target->Render(updateInfo);
+			node.target->Render(frame.cmdBuffer);
+
+			auto result = vkEndCommandBuffer(frame.cmdBuffer);
+			assert(!result);
+
+			const auto waitSemaphores = frame.waitSemaphores->GetView();
+			const Array<VkPipelineStageFlags> waitStages{ tempArena, waitSemaphores.GetLength() };
+			for (auto& waitStage : waitStages.GetView())
+				waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+
+			VkSubmitInfo submitInfo{};
+			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			submitInfo.commandBufferCount = 1;
+			submitInfo.pCommandBuffers = &frame.cmdBuffer;
+			submitInfo.waitSemaphoreCount = static_cast<uint32_t>(waitSemaphores.GetLength());
+			submitInfo.pWaitSemaphores = waitSemaphores.GetData();
+			submitInfo.signalSemaphoreCount = 1;
+			submitInfo.pSignalSemaphores = &frame.semaphore;
+			submitInfo.pWaitDstStageMask = waitStages;
+
+			result = vkQueueSubmit(_app.queues[App::renderQueue], 1, &submitInfo, nullptr);
+			assert(!result);
 		}
 
 		return _output.GetView()[idx]->GetView();

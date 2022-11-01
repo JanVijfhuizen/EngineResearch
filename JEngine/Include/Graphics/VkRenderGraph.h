@@ -14,20 +14,12 @@ namespace je::vk
 		friend class RenderGraph;
 
 	protected:
-		struct UpdateInfo final
-		{
-			VkCommandBuffer cmdBuffer;
-			View<VkSemaphore> waitSemaphores;
-			VkSemaphore renderFinishedSemaphore;
-			Arena* tempArena;
-		};
-
 		struct Output final
 		{
 			StringView name;
 		};
 
-		virtual void Render(const UpdateInfo& info) = 0;
+		virtual void Render(VkCommandBuffer cmdBuffer) = 0;
 		[[nodiscard]] virtual Array<StringView> DefineInputs(Arena& arena) const;
 		[[nodiscard]] virtual Array<Output> DefineOutputs(Arena& arena) const;
 	};

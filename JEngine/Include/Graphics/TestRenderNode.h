@@ -20,6 +20,6 @@ namespace je::vk
 		VkImageView _view;
 		VkFramebuffer _frameBuffer;
 
-		void Render(const UpdateInfo& info) override;
+		void Render(VkCommandBuffer cmdBuffer) override;
 	};
 }
