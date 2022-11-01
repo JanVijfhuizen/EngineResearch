@@ -76,5 +76,6 @@ namespace je::vk
 		Array<Array<VkSemaphore>*> _output{};
 
 		static void DefineDepth(TempNode& node, size_t depth);
+		static bool SortDepthNodes(TempNode*& a, TempNode*& b);
 	};
 }

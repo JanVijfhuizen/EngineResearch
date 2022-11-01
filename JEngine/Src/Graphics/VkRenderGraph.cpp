@@ -2,6 +2,8 @@
 #include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkSwapChain.h"
+#include "Jlb/JMath.h"
+#include "Jlb/LinSort.h"
 
 namespace je::vk
 {
@@ -107,6 +109,35 @@ namespace je::vk
 				continue;
 			DefineDepth(tempNode, 0);
 		}
+
+		// Sort based on depth.
+		Array<TempNode*> depthSorted{ tempArena, length };
+		for (size_t i = 0; i < length; ++i)
+		{
+			auto& tempNode = tempNodes[i];
+			depthSorted[i] = &tempNode;
+		}
+		LinSort(depthSorted.GetData(), depthSorted.GetLength(), SortDepthNodes);
+
+		// Find the amount of batches.
+		size_t batchCount = 0;
+		for (auto& depthNode : depthSorted.GetView())
+			batchCount = math::Max(batchCount, depthNode->depth);
+		++batchCount;
+
+		// Define batch indices.
+		Array<size_t> indices{ tempArena, batchCount };
+		{
+			size_t idx = 0;
+			for (auto& depthNode : depthSorted.GetView())
+			{
+				const size_t newBatch = depthNode->depth > idx;
+				idx += newBatch;
+				++indices[idx];
+			}
+		}
+
+		// Find all resources and define the maximum parallel usage.
 
 		const auto nodesView = _nodes.GetView();
 
@@ -221,5 +252,10 @@ namespace je::vk
 		node.depth = depth;
 		for (const auto& child : node.children)
 			DefineDepth(*child, depth + 1);
+	}
+
+	bool RenderGraph::SortDepthNodes(TempNode*& a, TempNode*& b)
+	{
+		return true;
 	}
 }
