@@ -55,5 +55,7 @@ namespace je::vk
 
 		void Load(const View<unsigned char>& pixels, VkImageUsageFlags usageFlags, VkImageLayout layout);
 		void CreateImage(VkImageUsageFlags usageFlags);
+
+		void DeepCopy(Image&& other);
 	};
 }

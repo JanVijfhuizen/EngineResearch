@@ -9,6 +9,8 @@
 #include <exception>
 #include <stb_image_write.h>
 
+#include "Jlb/JMove.h"
+
 namespace je::vk
 {
 	Image::Image(const CreateInfo& info) :
@@ -86,24 +88,14 @@ namespace je::vk
 		}
 	}
 
-	Image::Image(Image&& other) noexcept :
-		_app(other._app), _allocator(other._allocator), _image(other._image), _layout(other._layout),
-		_format(other._format), _flag(other._flag), _resolution(other._resolution), _memory(other._memory)
+	Image::Image(Image&& other) noexcept
 	{
-		other._app = nullptr;
+		DeepCopy(Move(other));
 	}
 
 	Image& Image::operator=(Image&& other) noexcept
 	{
-		_app = other._app;
-		_allocator = other._allocator;
-		_image = other._image;
-		_layout = other._layout;
-		_format = other._format;
-		_flag = other._flag;
-		_resolution = other._resolution;
-		_memory = other._memory;
-		other._app = nullptr;
+		DeepCopy(Move(other));
 		return *this;
 	}
 
@@ -336,5 +328,18 @@ namespace je::vk
 		_memory = _allocator->Alloc(memRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 		result = vkBindImageMemory(_app->device, _image, _memory.memory, _memory.offset);
 		assert(!result);
+	}
+
+	void Image::DeepCopy(Image&& other)
+	{
+		_app = other._app;
+		_allocator = other._allocator;
+		_image = other._image;
+		_layout = other._layout;
+		_format = other._format;
+		_flag = other._flag;
+		_resolution = other._resolution;
+		_memory = other._memory;
+		other._app = nullptr;
 	}
 }
