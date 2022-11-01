@@ -41,15 +41,14 @@ namespace je::vk
 		RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode*>& nodes);
 		~RenderGraph();
 
-		[[nodiscard]] View<VkSemaphore> Update(Arena& tempArena) const;
+		[[nodiscard]] VkSemaphore Update() const;
 
 	private:
 		struct TempNode final
 		{
 			size_t index = SIZE_MAX;
-			bool isLeaf = true;
 			size_t depth = 0;
-			const RenderNode* node = nullptr;
+			RenderNode* node = nullptr;
 			LinkedList<TempNode*> parents{};
 			LinkedList<TempNode*> children{};
 			Array<StringView> inputs{};
@@ -60,27 +59,27 @@ namespace je::vk
 		{
 			RenderNode::Resource resource;
 			size_t parallelUsages = 0;
+			size_t currentDepthUsages = 0;
 		};
 
-		struct Node final
+		struct Layer final
 		{
 			struct Frame final
 			{
 				VkCommandBuffer cmdBuffer = VK_NULL_HANDLE;
 				VkSemaphore semaphore = VK_NULL_HANDLE;
-				Array<VkSemaphore>* waitSemaphores = nullptr;
 			};
 
-			RenderNode* target = nullptr;
-			Array<Frame>* frames;
+			size_t index;
+			Array<Frame>* frames = nullptr;
 		};
 
 		App& _app;
 		Arena& _arena;
 		SwapChain& _swapChain;
 
-		Array<Node> _nodes{};
-		Array<Array<VkSemaphore>*> _output{};
+		Array<RenderNode*> _nodes{};
+		Array<Layer> _layers{};
 
 		static void DefineDepth(TempNode& node, size_t depth);
 		static bool SortDepthNodes(TempNode*& a, TempNode*& b);

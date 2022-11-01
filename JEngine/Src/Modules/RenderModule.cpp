@@ -206,7 +206,7 @@ namespace je::engine
 
 		_swapChain->WaitForImage();
 
-		const auto renderGraphWaitSemaphores = _renderGraph->Update(info.tempArena);
+		auto renderGraphSemaphore = _renderGraph->Update();
 		const auto cmd = _swapChain->BeginFrame(true);
 		
 		_pipeline->Bind(cmd);
@@ -217,6 +217,6 @@ namespace je::engine
 
 		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 
-		_swapChain->EndFrame(info.tempArena, renderGraphWaitSemaphores);
+		_swapChain->EndFrame(info.tempArena, renderGraphSemaphore);
 	}
 }
