@@ -39,12 +39,6 @@
     <ClCompile Include="Src\EngineInitializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Modules\ResourceModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Resource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Modules\TimeModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -84,6 +78,9 @@
     <ClCompile Include="Src\Graphics\VkLayout.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Graphics\TestRenderNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\pch.h">
@@ -105,12 +102,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\EngineInitializer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Modules\ResourceModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Modules\TimeModule.h">
@@ -159,6 +150,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VkLayout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\Graphics\TestRenderNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

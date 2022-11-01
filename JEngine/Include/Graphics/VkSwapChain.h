@@ -22,9 +22,9 @@ namespace je
 			SwapChain(Arena& arena, Arena& tempArena, const App& app, const engine::WindowModule& windowModule);
 			~SwapChain();
 
-			VkCommandBuffer WaitForImage();
+			void WaitForImage();
 			[[nodiscard]] VkCommandBuffer BeginFrame(bool manuallyCallWaitForImage = false);
-			void EndFrame(const View<VkSemaphore>& waitSemaphores = {});
+			void EndFrame(Arena& tempArena, const View<VkSemaphore>& waitSemaphores = {});
 
 			[[nodiscard]] size_t GetLength() const;
 			[[nodiscard]] VkRenderPass GetRenderPass() const;

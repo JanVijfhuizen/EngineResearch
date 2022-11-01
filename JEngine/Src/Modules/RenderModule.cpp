@@ -11,9 +11,11 @@
 #include "Graphics/VkLayout.h"
 #include "Graphics/VkMesh.h"
 #include "Graphics/VkPipeline.h"
+#include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkShader.h"
 #include "Graphics/VkShape.h"
 #include "Graphics/VkSwapChain.h"
+#include "Graphics/TestRenderNode.h"
 
 namespace je::engine
 {
@@ -57,7 +59,12 @@ namespace je::engine
 		Array<vk::Vertex::Index> inds{};
 		CreateQuadShape(info.tempArena, verts, inds, .5f);
 		_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
-		_image = info.persistentArena.New<vk::Image>(1, _app, *_allocator, "Textures/test.jpg");
+
+		vk::Image::CreateInfo imageCreateInfo{};
+		imageCreateInfo.app = &_app;
+		imageCreateInfo.allocator = _allocator;
+		imageCreateInfo.path = "Textures/test.jpg";
+		_image = info.persistentArena.New<vk::Image>(1, imageCreateInfo);
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -164,6 +171,10 @@ namespace je::engine
 
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
+
+		_testRenderNode = info.persistentArena.New<vk::TestRenderNode>(1, info.persistentArena, _app, *_allocator);
+		vk::RenderNode* nodes = _testRenderNode;
+		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, _app, info.persistentArena, info.tempArena, *_swapChain, nodes);
 	}
 
 	void RenderModule::OnExit(Info& info)
@@ -175,6 +186,8 @@ namespace je::engine
 		vkDestroyDescriptorPool(_app.device, _descriptorPool, nullptr);
 		vkDestroyImageView(_app.device, _view, nullptr);
 
+		info.persistentArena.Delete(_renderGraph);
+		info.persistentArena.Delete(_testRenderNode);
 		info.persistentArena.Delete(_image);
 		info.persistentArena.Delete(_mesh);
 		info.persistentArena.Delete(_pipeline);
@@ -190,7 +203,11 @@ namespace je::engine
 	void RenderModule::OnUpdate(Info& info)
 	{
 		Module::OnUpdate(info);
-		const auto cmd = _swapChain->BeginFrame();
+
+		_swapChain->WaitForImage();
+
+		const auto renderGraphWaitSemaphores = _renderGraph->Update(info.tempArena);
+		const auto cmd = _swapChain->BeginFrame(true);
 		
 		_pipeline->Bind(cmd);
 		_mesh->Bind(cmd);
@@ -199,11 +216,7 @@ namespace je::engine
 			0, 1, &_descriptorSets[_swapChain->GetIndex()], 0, nullptr);
 
 		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
-	}
 
-	void RenderModule::OnPostUpdate(Info& info)
-	{
-		Module::OnPostUpdate(info);
-		_swapChain->EndFrame();
+		_swapChain->EndFrame(info.tempArena, renderGraphWaitSemaphores);
 	}
 }
