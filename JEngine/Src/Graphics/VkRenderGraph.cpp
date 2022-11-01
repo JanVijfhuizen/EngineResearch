@@ -7,7 +7,7 @@
 
 namespace je::vk
 {
-	bool RenderNode::Output::Settings::operator==(const Settings& other) const
+	bool RenderNode::Resource::operator==(const Resource& other) const
 	{
 		return resolution == other.resolution && format == other.format && flag == other.flag && usageFlags == other.usageFlags;
 	}
@@ -137,7 +137,30 @@ namespace je::vk
 			}
 		}
 
-		// Find all resources and define the maximum parallel usage.
+		// Find all different resource types.
+		LinkedList<TempResource> tempResources{tempArena};
+		for (auto& tempNode : view)
+		{
+			const auto outputView = tempNode.outputs.GetView();
+
+			for (auto& output : outputView)
+			{
+				bool contained = false;
+
+				for (auto& tempResource : tempResources)
+					if(tempResource.resource == output.resource)
+					{
+						contained = true;
+						break;
+					}
+
+				if (!contained)
+				{
+					auto& tempResource = tempResources.Add();
+					tempResource.resource = output.resource;
+				}
+			}
+		}
 
 		const auto nodesView = _nodes.GetView();
 
