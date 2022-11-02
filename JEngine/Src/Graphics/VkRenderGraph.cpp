@@ -154,6 +154,27 @@ namespace je::vk
 				}
 		}
 
+		// Find maximum parallel usage for this 
+		for (auto& tempResource : tempResources)
+		{
+			size_t usage = 0;
+			size_t maxUsage = 0;
+
+			size_t deepestLayer = 0;
+			for (auto& variation : *tempResource.variations)
+				deepestLayer = math::Max(variation.lifeTimeEnd, length);
+
+			for (size_t i = 0; i < deepestLayer; ++i)
+			{
+				usage = 0;
+				for (auto& variation : *tempResource.variations)
+					usage += variation.lifeTimeStart <= i && variation.lifeTimeEnd <= i;
+				maxUsage = math::Max(maxUsage, usage);
+			}
+
+			tempResource.count = maxUsage;
+		}
+
 		// Define nodes and sync structs for individual frames.
 		_nodes = Array<RenderNode*>(arena, length);
 		{

@@ -56,6 +56,7 @@ namespace je::vk
 
 			RenderNode::Resource resource{};
 			LinkedList<Variation>* variations = nullptr;
+			size_t count = 0;
 		};
 
 		struct TempNode final
