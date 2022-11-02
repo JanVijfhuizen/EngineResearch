@@ -42,10 +42,45 @@ namespace je::vk
 			tempNode.children = LinkedList<TempNode*>{tempArena};
 			tempNode.inputs = node->DefineInputs(tempArena);
 			tempNode.outputs = node->DefineOutputs(tempArena);
+			tempNode.inputResources = LinkedList<TempResource*>(tempArena);
+			tempNode.outputResources = LinkedList<TempResource*>(tempArena);
+		}
+
+		const auto view = tempNodes.GetView();
+
+		// Find all different resource types.
+		LinkedList<TempResource> tempResources{ tempArena };
+		for (auto& tempNode : view)
+		{
+			const auto outputView = tempNode.outputs.GetView();
+			if (!outputView)
+				continue;
+
+			for (auto& output : outputView)
+			{
+				bool contained = false;
+
+				TempResource* resource = nullptr;
+
+				for (auto& tempResource : tempResources)
+					if (tempResource.resource == output.resource)
+					{
+						resource = &tempResource;
+						contained = true;
+						break;
+					}
+
+				if (!contained)
+				{
+					resource = &tempResources.Add();
+					resource->resource = output.resource;
+				}
+
+				tempNode.outputResources.Add(resource);
+			}
 		}
 
 		// Link parents by comparing inputs and outputs.
-		const auto view = tempNodes.GetView();
 		for (auto& tempNode : view)
 		{
 			const auto inputView = tempNode.inputs.GetView();
@@ -61,13 +96,20 @@ namespace je::vk
 				if (!outputView)
 					continue;
 				for (auto& input : inputView)
+				{
+					size_t index = 0;
 					for (auto& output : outputView)
+					{
 						if (input == output.name)
 						{
 							tempNode.isRoot = false;
+							tempNode.inputResources.Add(other.outputResources[index]);
 							other.children.Add(&tempNode);
 							goto NEXT;
 						}
+						++index;
+					}
+				}
 
 			NEXT:
 				continue;
@@ -119,119 +161,6 @@ namespace je::vk
 			}
 		}
 
-
-		// Find all different resource types.
-		LinkedList<TempResource> tempResources{ tempArena };
-		for (auto& tempNode : view)
-		{
-			const auto outputView = tempNode.outputs.GetView();
-			if (!outputView)
-				continue;
-
-			for (auto& output : outputView)
-			{
-				bool contained = false;
-
-				TempResource* resource = nullptr;
-
-				for (auto& tempResource : tempResources)
-					if (tempResource.resource == output.resource)
-					{
-						resource = &tempResource;
-						contained = true;
-						break;
-					}
-
-				if (!contained)
-				{
-					resource = &tempResources.Add();
-					resource->resource = output.resource;
-					resource->users = tempArena.New<LinkedList<TempNode*>>(1, tempArena);
-				}
-
-				resource->users->Add(&tempNode);
-			}
-		}
-
-		// Sort users for resources.
-		for (auto& tempResource : tempResources)
-			tempResource.users->Sort(SortResourceUsers);
-
-		// Find maximum parallel resource usage.
-		for (auto& tempResource : tempResources)
-		{
-			size_t layer = 0;
-			size_t usages = 0;
-			size_t previousUsages = 0;
-
-			for (auto& user : *tempResource.users)
-			{
-				if (user->depth != layer)
-				{
-					layer = user->depth;
-					tempResource.parallelUsages = math::Max(tempResource.parallelUsages, usages + previousUsages);
-					previousUsages = usages;
-					usages = 0;
-				}
-
-				++usages;
-			}
-
-			tempResource.parallelUsages = math::Max(tempResource.parallelUsages, usages + previousUsages);
-		}
-
-		// Find total image count.
-		size_t imageCount = 0;
-		for (auto& tempResource : tempResources)
-			imageCount += tempResource.parallelUsages;
-		imageCount *= frameCount;
-		_images = Array<Image*>(arena, imageCount);
-
-		{
-			Image::CreateInfo imageCreateInfo{};
-			imageCreateInfo.app = &app;
-			imageCreateInfo.allocator = &allocator;
-			imageCreateInfo.layout = VK_IMAGE_LAYOUT_UNDEFINED;
-
-			size_t index = 0;
-			for (auto& tempResource : tempResources)
-			{
-				auto& resource = tempResource.resource;
-				imageCreateInfo.resolution = resource.resolution;
-				imageCreateInfo.format = resource.format;
-				imageCreateInfo.flag = resource.flag;
-				imageCreateInfo.usageFlags = resource.usageFlags;
-
-				size_t amount = tempResource.parallelUsages * frameCount;
-				for (size_t i = 0; i < amount; ++i)
-				{
-					auto& image = _images[i + index];
-					image = arena.New<Image>(1, imageCreateInfo);
-				}
-
-				index += amount;
-			}
-		}
-
-		// Create resource pools.
-		_resources = Array<Resource>(arena, tempResources.GetCount());
-		{
-			size_t index = 0;
-			size_t imageIndex = 0;
-			for (auto& resource : _resources.GetView())
-			{
-				resource.frames = arena.New<Array<Resource::Frame>>(1, arena, frameCount);
-				for (auto& frame : resource.frames->GetView())
-				{
-					frame.images = arena.New<Pool<Image*>>(1, arena, tempResources[index].parallelUsages);
-					for (auto& image : frame.images->GetView())
-						image.value = _images[imageIndex++];
-				}
-
-				++index;
-			}
-		}
-
 		// Create command buffers and semaphores for the individual layers.
 		for (auto& layer : _layers.GetView())
 		{
@@ -265,17 +194,6 @@ namespace je::vk
 				vkDestroySemaphore(_app.device, frame.semaphore, nullptr);
 			_arena.Delete(layer.frames);
 		}
-
-		for (int32_t i = static_cast<int32_t>(_resources.GetLength()) - 1; i >= 0; --i)
-		{
-			const auto& resource = _resources[i];
-			for (const auto& frame : resource.frames->GetView())
-				_arena.Delete(frame.images);
-			_arena.Delete(resource.frames);
-		}
-
-		for (int32_t i = static_cast<int32_t>(_images.GetLength()) - 1; i >= 0; --i)
-			_arena.Delete(_images[i]);
 	}
 
 	VkSemaphore RenderGraph::Update() const
