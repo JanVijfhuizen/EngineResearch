@@ -213,22 +213,26 @@ namespace je::vk
 			}
 		}
 
-		// Create resources.
+		// Create resource pools.
 		_resources = Array<Resource>(arena, tempResources.GetCount());
 		{
 			size_t index = 0;
+			size_t imageIndex = 0;
 			for (auto& resource : _resources.GetView())
 			{
 				resource.frames = arena.New<Array<Resource::Frame>>(1, arena, frameCount);
 				for (auto& frame : resource.frames->GetView())
 				{
 					frame.images = arena.New<Pool<Image*>>(1, arena, tempResources[index].parallelUsages);
+					for (auto& image : frame.images->GetView())
+						image.value = _images[imageIndex++];
 				}
 
 				++index;
 			}
 		}
 
+		// Create command buffers and semaphores for the individual layers.
 		for (auto& layer : _layers.GetView())
 		{
 			layer.frames = arena.New<Array<Layer::Frame>>(1, arena, frameCount);
@@ -250,9 +254,6 @@ namespace je::vk
 				assert(!result);
 			}
 		}
-
-		// ...
-		// Create corresponding images and link them to the nodes.
 	}
 
 	RenderGraph::~RenderGraph()
