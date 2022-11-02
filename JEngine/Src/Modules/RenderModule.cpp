@@ -174,7 +174,7 @@ namespace je::engine
 
 		_testRenderNode = info.persistentArena.New<vk::TestRenderNode>(1, info.persistentArena, _app, *_allocator);
 		vk::RenderNode* nodes = _testRenderNode;
-		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, _app, info.persistentArena, info.tempArena, *_swapChain, nodes);
+		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, nodes);
 	}
 
 	void RenderModule::OnExit(Info& info)

@@ -1,11 +1,14 @@
 ﻿#pragma once
 #include "Jlb/Array.h"
 #include "Jlb/LinkedList.h"
+#include "Jlb/Pool.h"
 #include "Jlb/StringView.h"
 #include "Jlb/View.h"
 
 namespace je::vk
 {
+	class Allocator;
+	class Image;
 	class SwapChain;
 	struct App;
 
@@ -38,7 +41,7 @@ namespace je::vk
 	class RenderGraph final
 	{
 	public:
-		RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode*>& nodes);
+		RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode*>& nodes);
 		~RenderGraph();
 
 		[[nodiscard]] VkSemaphore Update() const;
@@ -74,12 +77,25 @@ namespace je::vk
 			Array<Frame>* frames = nullptr;
 		};
 
-		App& _app;
+		struct Resource final
+		{
+			struct Frame final
+			{
+				Pool<Image*>* images = nullptr;
+			};
+
+			Array<Frame>* frames = nullptr;
+		};
+
 		Arena& _arena;
+		App& _app;
+		Allocator& _allocator;
 		SwapChain& _swapChain;
 
 		Array<RenderNode*> _nodes{};
 		Array<Layer> _layers{};
+		Array<Image*> _images{};
+		Array<Resource> _resources{};
 
 		static void DefineDepth(TempNode& node, size_t depth);
 		static bool SortDepthNodes(TempNode*& a, TempNode*& b);

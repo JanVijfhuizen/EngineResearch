@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkApp.h"
+#include "Graphics/VkImage.h"
 #include "Graphics/VkSwapChain.h"
 #include "Jlb/JMath.h"
 #include "Jlb/LinSort.h"
@@ -22,8 +23,8 @@ namespace je::vk
 		return {};
 	}
 
-	RenderGraph::RenderGraph(App& app, Arena& arena, Arena& tempArena, SwapChain& swapChain, const View<RenderNode*>& nodes) :
-		_app(app), _arena(arena), _swapChain(swapChain)
+	RenderGraph::RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode*>& nodes) :
+		_arena(arena), _app(app), _allocator(allocator), _swapChain(swapChain)
 	{
 		const auto _ = tempArena.CreateScope();
 
@@ -118,30 +119,9 @@ namespace je::vk
 			}
 		}
 
-		for (auto& layer : _layers.GetView())
-		{
-			layer.frames = arena.New<Array<Layer::Frame>>(1, arena, frameCount);
-
-			for (auto& frame : layer.frames->GetView())
-			{
-				VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
-				cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-				cmdBufferAllocInfo.commandPool = app.commandPool;
-				cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-				cmdBufferAllocInfo.commandBufferCount = 1;
-
-				auto result = vkAllocateCommandBuffers(app.device, &cmdBufferAllocInfo, &frame.cmdBuffer);
-				assert(!result);
-
-				VkSemaphoreCreateInfo semaphoreCreateInfo{};
-				semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-				result = vkCreateSemaphore(_app.device, &semaphoreCreateInfo, nullptr, &frame.semaphore);
-				assert(!result);
-			}
-		}
 
 		// Find all different resource types.
-		LinkedList<TempResource> tempResources{tempArena};
+		LinkedList<TempResource> tempResources{ tempArena };
 		for (auto& tempNode : view)
 		{
 			const auto outputView = tempNode.outputs.GetView();
@@ -155,7 +135,7 @@ namespace je::vk
 				TempResource* resource = nullptr;
 
 				for (auto& tempResource : tempResources)
-					if(tempResource.resource == output.resource)
+					if (tempResource.resource == output.resource)
 					{
 						resource = &tempResource;
 						contained = true;
@@ -186,7 +166,7 @@ namespace je::vk
 
 			for (auto& user : *tempResource.users)
 			{
-				if(user->depth != layer)
+				if (user->depth != layer)
 				{
 					layer = user->depth;
 					tempResource.parallelUsages = math::Max(tempResource.parallelUsages, usages + previousUsages);
@@ -198,6 +178,77 @@ namespace je::vk
 			}
 
 			tempResource.parallelUsages = math::Max(tempResource.parallelUsages, usages + previousUsages);
+		}
+
+		// Find total image count.
+		size_t imageCount = 0;
+		for (auto& tempResource : tempResources)
+			imageCount += tempResource.parallelUsages;
+		imageCount *= frameCount;
+		_images = Array<Image*>(arena, imageCount);
+
+		{
+			Image::CreateInfo imageCreateInfo{};
+			imageCreateInfo.app = &app;
+			imageCreateInfo.allocator = &allocator;
+			imageCreateInfo.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+			size_t index = 0;
+			for (auto& tempResource : tempResources)
+			{
+				auto& resource = tempResource.resource;
+				imageCreateInfo.resolution = resource.resolution;
+				imageCreateInfo.format = resource.format;
+				imageCreateInfo.flag = resource.flag;
+				imageCreateInfo.usageFlags = resource.usageFlags;
+
+				size_t amount = tempResource.parallelUsages * frameCount;
+				for (size_t i = 0; i < amount; ++i)
+				{
+					auto& image = _images[i + index];
+					image = arena.New<Image>(1, imageCreateInfo);
+				}
+
+				index += amount;
+			}
+		}
+
+		// Create resources.
+		_resources = Array<Resource>(arena, tempResources.GetCount());
+		{
+			size_t index = 0;
+			for (auto& resource : _resources.GetView())
+			{
+				resource.frames = arena.New<Array<Resource::Frame>>(1, arena, frameCount);
+				for (auto& frame : resource.frames->GetView())
+				{
+					frame.images = arena.New<Pool<Image*>>(1, arena, tempResources[index].parallelUsages);
+				}
+
+				++index;
+			}
+		}
+
+		for (auto& layer : _layers.GetView())
+		{
+			layer.frames = arena.New<Array<Layer::Frame>>(1, arena, frameCount);
+
+			for (auto& frame : layer.frames->GetView())
+			{
+				VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
+				cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+				cmdBufferAllocInfo.commandPool = app.commandPool;
+				cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+				cmdBufferAllocInfo.commandBufferCount = 1;
+
+				auto result = vkAllocateCommandBuffers(app.device, &cmdBufferAllocInfo, &frame.cmdBuffer);
+				assert(!result);
+
+				VkSemaphoreCreateInfo semaphoreCreateInfo{};
+				semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+				result = vkCreateSemaphore(_app.device, &semaphoreCreateInfo, nullptr, &frame.semaphore);
+				assert(!result);
+			}
 		}
 
 		// ...
@@ -213,6 +264,17 @@ namespace je::vk
 				vkDestroySemaphore(_app.device, frame.semaphore, nullptr);
 			_arena.Delete(layer.frames);
 		}
+
+		for (int32_t i = static_cast<int32_t>(_resources.GetLength()) - 1; i >= 0; --i)
+		{
+			const auto& resource = _resources[i];
+			for (const auto& frame : resource.frames->GetView())
+				_arena.Delete(frame.images);
+			_arena.Delete(resource.frames);
+		}
+
+		for (int32_t i = static_cast<int32_t>(_images.GetLength()) - 1; i >= 0; --i)
+			_arena.Delete(_images[i]);
 	}
 
 	VkSemaphore RenderGraph::Update() const
