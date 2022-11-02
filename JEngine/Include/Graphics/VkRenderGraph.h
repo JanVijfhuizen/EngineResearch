@@ -57,9 +57,9 @@ namespace je::vk
 
 		struct TempResource final
 		{
-			RenderNode::Resource resource;
+			RenderNode::Resource resource{};
 			size_t parallelUsages = 0;
-			size_t currentDepthUsages = 0;
+			LinkedList<TempNode*>* users = nullptr;
 		};
 
 		struct Layer final
@@ -83,5 +83,6 @@ namespace je::vk
 
 		static void DefineDepth(TempNode& node, size_t depth);
 		static bool SortDepthNodes(TempNode*& a, TempNode*& b);
+		static bool SortResourceUsers(TempNode*& a, TempNode*& b);
 	};
 }

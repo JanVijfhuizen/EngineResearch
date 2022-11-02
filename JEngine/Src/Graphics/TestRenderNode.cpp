@@ -3,6 +3,7 @@
 #include "Graphics/VkAllocator.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
+#include "Jlb/JMove.h"
 
 namespace je::vk
 {
@@ -115,5 +116,12 @@ namespace je::vk
 
 		// Render.
 		vkCmdEndRenderPass(cmdBuffer);
+	}
+
+	Array<RenderNode::Output> TestRenderNode::DefineOutputs(Arena& arena) const
+	{
+		Array<Output> outputs{arena, 1};
+		outputs[0].name = "RenderGraphResult";
+		return Move(outputs);
 	}
 }

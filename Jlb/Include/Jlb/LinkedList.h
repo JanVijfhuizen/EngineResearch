@@ -45,6 +45,7 @@ namespace je
 		[[nodiscard]] T& operator[](size_t index);
 
 		void Inverse();
+		void Sort(bool (*comparer)(T& a, T& b));
 
 		[[nodiscard]] size_t GetCount() const;
 		[[nodiscard]] Iterator begin() const;
@@ -149,6 +150,26 @@ namespace je
 	void LinkedList<T>::Inverse()
 	{
 		_chain = Inverse(nullptr, _chain);
+	}
+
+	template <typename T>
+	void LinkedList<T>::Sort(bool(* comparer)(T& a, T& b))
+	{
+		Chain* current = _chain;
+		while(current->next)
+		{
+			auto& currentInstance = current->instance;
+			auto& nextInstance = current->next->instance;
+
+			if (comparer(nextInstance, currentInstance))
+			{
+				T temp = currentInstance;
+				currentInstance = nextInstance;
+				nextInstance = temp;
+			}
+
+			current = current->next;
+		}
 	}
 
 	template <typename T>

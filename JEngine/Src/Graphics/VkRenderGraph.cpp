@@ -3,7 +3,6 @@
 #include "Graphics/VkApp.h"
 #include "Graphics/VkSwapChain.h"
 #include "Jlb/JMath.h"
-#include "Jlb/JVector.h"
 #include "Jlb/LinSort.h"
 
 namespace je::vk
@@ -153,33 +152,52 @@ namespace je::vk
 			{
 				bool contained = false;
 
+				TempResource* resource = nullptr;
+
 				for (auto& tempResource : tempResources)
 					if(tempResource.resource == output.resource)
 					{
+						resource = &tempResource;
 						contained = true;
 						break;
 					}
 
 				if (!contained)
 				{
-					auto& tempResource = tempResources.Add();
-					tempResource.resource = output.resource;
+					resource = &tempResources.Add();
+					resource->resource = output.resource;
+					resource->users = tempArena.New<LinkedList<TempNode*>>(1, tempArena);
 				}
+
+				resource->users->Add(&tempNode);
 			}
 		}
 
-		// Find maximum parallel usage.
-		size_t current = 0;
-		for (const auto& layer : _layers.GetView())
-		{
-			for (auto& tempResource : tempResources)
-				tempResource.currentDepthUsages = 0;
+		// Sort users for resources.
+		for (auto& tempResource : tempResources)
+			tempResource.users->Sort(SortResourceUsers);
 
-			while(current < layer.index)
+		// Find maximum parallel resource usage.
+		for (auto& tempResource : tempResources)
+		{
+			size_t layer = 0;
+			size_t usages = 0;
+			size_t previousUsages = 0;
+
+			for (auto& user : *tempResource.users)
 			{
-				// First find input types.
-				++current;
+				if(user->depth != layer)
+				{
+					layer = user->depth;
+					tempResource.parallelUsages = math::Max(tempResource.parallelUsages, usages + previousUsages);
+					previousUsages = usages;
+					usages = 0;
+				}
+
+				++usages;
 			}
+
+			tempResource.parallelUsages = math::Max(tempResource.parallelUsages, usages + previousUsages);
 		}
 
 		// ...
@@ -257,5 +275,10 @@ namespace je::vk
 	bool RenderGraph::SortDepthNodes(TempNode*& a, TempNode*& b)
 	{
 		return true;
+	}
+
+	bool RenderGraph::SortResourceUsers(TempNode*& a, TempNode*& b)
+	{
+		return a->depth < b->depth;
 	}
 }

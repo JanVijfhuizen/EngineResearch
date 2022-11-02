@@ -21,5 +21,6 @@ namespace je::vk
 		VkFramebuffer _frameBuffer;
 
 		void Render(VkCommandBuffer cmdBuffer) override;
+		[[nodiscard]] Array<Output> DefineOutputs(Arena& arena) const override;
 	};
 }
