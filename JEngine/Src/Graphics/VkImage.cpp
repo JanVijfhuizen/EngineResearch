@@ -15,7 +15,7 @@ namespace je::vk
 {
 	Image::Image(const CreateInfo& info) :
 		_app(info.app), _allocator(info.allocator),
-		_format(info.format), _flag(info.flag), _resolution(info.resolution)
+		_format(info.format), _flag(info.aspectFlag), _resolution(info.resolution)
 	{
 		if(info.pixels)
 			Load(info.pixels, info.usageFlags, info.layout);

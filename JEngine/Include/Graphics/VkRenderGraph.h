@@ -6,6 +6,7 @@
 
 namespace je::vk
 {
+	class Image;
 	class Allocator;
 	class SwapChain;
 	struct App;
@@ -19,7 +20,7 @@ namespace je::vk
 		{
 			glm::ivec3 resolution;
 			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
-			VkImageAspectFlagBits flag = VK_IMAGE_ASPECT_COLOR_BIT;
+			VkImageAspectFlagBits aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
 			VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 			[[nodiscard]] bool operator==(const Resource& other) const;
@@ -89,6 +90,7 @@ namespace je::vk
 		Allocator& _allocator;
 		SwapChain& _swapChain;
 
+		Array<Image*> _images{};
 		Array<RenderNode*> _nodes{};
 		Array<Layer> _layers{};
 

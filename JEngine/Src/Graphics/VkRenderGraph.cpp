@@ -10,7 +10,7 @@ namespace je::vk
 {
 	bool RenderNode::Resource::operator==(const Resource& other) const
 	{
-		return resolution == other.resolution && format == other.format && flag == other.flag && usageFlags == other.usageFlags;
+		return resolution == other.resolution && format == other.format && aspectFlag == other.aspectFlag && usageFlags == other.usageFlags;
 	}
 
 	Array<StringView> RenderNode::DefineInputs(Arena& arena) const
@@ -175,6 +175,13 @@ namespace je::vk
 			tempResource.count = maxUsage;
 		}
 
+		// Find image count.
+		size_t imageCount = 0;
+		for (auto& tempResource : tempResources)
+			imageCount += tempResource.count;
+		imageCount *= frameCount;
+		_images = Array<Image*>(arena, imageCount);
+
 		// Define nodes and sync structs for individual frames.
 		_nodes = Array<RenderNode*>(arena, length);
 		{
@@ -228,10 +235,35 @@ namespace je::vk
 				assert(!result);
 			}
 		}
+
+		// Create images.
+		Image::CreateInfo imageCreateInfo{};
+		imageCreateInfo.app = &app;
+		imageCreateInfo.allocator = &allocator;
+		imageCreateInfo.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+
+		{
+			size_t index = 0;
+			for (const auto& tempResource : tempResources)
+			{
+				auto& resource = tempResource.resource;
+				imageCreateInfo.resolution = resource.resolution;
+				imageCreateInfo.format = resource.format;
+				imageCreateInfo.aspectFlag = resource.aspectFlag;
+				imageCreateInfo.usageFlags = resource.usageFlags;
+
+				const size_t resourceCount = tempResource.count * frameCount;
+				for (size_t i = 0; i < resourceCount; ++i)
+					_images[index++] = arena.New<Image>(1, imageCreateInfo);
+			}
+		}
 	}
 
 	RenderGraph::~RenderGraph()
 	{
+		for (int32_t i = static_cast<int32_t>(_images.GetLength()) - 1; i >= 0; --i)
+			_arena.Delete(_images[i]);
+
 		for (int32_t i = static_cast<int32_t>(_layers.GetLength()) - 1; i >= 0; --i)
 		{
 			const auto& layer = _layers[i];
