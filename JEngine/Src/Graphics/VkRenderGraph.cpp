@@ -48,38 +48,6 @@ namespace je::vk
 
 		const auto view = tempNodes.GetView();
 
-		// Find all different resource types.
-		LinkedList<TempResource> tempResources{ tempArena };
-		for (auto& tempNode : view)
-		{
-			const auto outputView = tempNode.outputs.GetView();
-			if (!outputView)
-				continue;
-
-			for (auto& output : outputView)
-			{
-				bool contained = false;
-
-				TempResource* resource = nullptr;
-
-				for (auto& tempResource : tempResources)
-					if (tempResource.resource == output.resource)
-					{
-						resource = &tempResource;
-						contained = true;
-						break;
-					}
-
-				if (!contained)
-				{
-					resource = &tempResources.Add();
-					resource->resource = output.resource;
-				}
-
-				tempNode.outputResources.Add(resource);
-			}
-		}
-
 		// Link parents by comparing inputs and outputs.
 		for (auto& tempNode : view)
 		{
@@ -130,6 +98,62 @@ namespace je::vk
 		}
 		LinSort(depthSorted.GetData(), depthSorted.GetLength(), SortDepthNodes);
 
+		// Find all different resource types.
+		LinkedList<TempResource> tempResources{ tempArena };
+		for (auto& tempNode : view)
+		{
+			if (const auto outputView = tempNode.outputs.GetView())
+				for (auto& output : outputView)
+				{
+					bool contained = false;
+
+					TempResource* resource = nullptr;
+
+					for (auto& tempResource : tempResources)
+						if (tempResource.resource == output.resource)
+						{
+							resource = &tempResource;
+							contained = true;
+							break;
+						}
+
+					if (!contained)
+					{
+						resource = &tempResources.Add();
+						resource->resource = output.resource;
+						resource->variations = tempArena.New<LinkedList<TempResource::Variation>>(1, tempArena);
+					}
+
+					tempNode.outputResources.Add(resource);
+
+					// Define lifetime and variations for resources.
+					contained = false;
+					for (auto& variation : *resource->variations)
+						if (variation.name == output.name)
+						{
+							contained = true;
+							variation.lifeTimeStart = math::Min(variation.lifeTimeStart, tempNode.depth);
+							break;
+						}
+
+					if (!contained)
+					{
+						auto& variation = resource->variations->Add();
+						variation.name = output.name;
+					}
+				}
+
+			// Define lifetime for resources.
+			if (const auto inputView = tempNode.inputs.GetView())
+				for (auto& input : inputView)
+				{
+					for (auto& tempResource : tempResources)
+						for (auto& variation : *tempResource.variations)
+							if (variation.name == input)
+								variation.lifeTimeEnd = math::Max(variation.lifeTimeEnd, tempNode.depth);
+				}
+		}
+
 		// Define nodes and sync structs for individual frames.
 		_nodes = Array<RenderNode*>(arena, length);
 		{
@@ -160,7 +184,7 @@ namespace je::vk
 				++layer.index;
 			}
 		}
-
+		
 		// Create command buffers and semaphores for the individual layers.
 		for (auto& layer : _layers.GetView())
 		{

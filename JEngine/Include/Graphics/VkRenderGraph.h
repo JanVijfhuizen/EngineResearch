@@ -47,7 +47,15 @@ namespace je::vk
 	private:
 		struct TempResource final
 		{
+			struct Variation final
+			{
+				StringView name;
+				size_t lifeTimeStart = 0;
+				size_t lifeTimeEnd = 0;
+			};
+
 			RenderNode::Resource resource{};
+			LinkedList<Variation>* variations = nullptr;
 		};
 
 		struct TempNode final
