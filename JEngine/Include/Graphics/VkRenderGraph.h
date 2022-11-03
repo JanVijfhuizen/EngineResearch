@@ -12,14 +12,11 @@ namespace je::vk
 	class SwapChain;
 	struct App;
 
-	class RenderNode
+	struct RenderNode final
 	{
-		friend class RenderGraph;
-
-	protected:
 		struct Resource final
 		{
-			glm::ivec3 resolution;
+			glm::ivec2 resolution;
 			[[nodiscard]] bool operator==(const Resource& other) const;
 		};
 
@@ -29,15 +26,16 @@ namespace je::vk
 			Resource resource;
 		};
 
-		virtual void Render(VkCommandBuffer cmdBuffer) = 0;
-		[[nodiscard]] virtual Array<StringView> DefineInputs(Arena& arena) const;
-		[[nodiscard]] virtual Array<Output> DefineOutputs(Arena& arena) const;
+		View<StringView> inputs{};
+		View<Output> outputs{};
+		
+		void (*renderFunc)(VkCommandBuffer cmdBuffer) = nullptr;
 	};
 
 	class RenderGraph final
 	{
 	public:
-		RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode*>& nodes);
+		RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode>& nodes);
 		~RenderGraph();
 
 		[[nodiscard]] VkSemaphore Update() const;
@@ -62,15 +60,15 @@ namespace je::vk
 
 		struct TempNode final
 		{
-			RenderNode* node = nullptr;
+			void (*renderFunc)(VkCommandBuffer cmdBuffer) = nullptr;
 
 			size_t index = SIZE_MAX;
 			size_t depth = 0;
 			bool isRoot = true;
 
 			LinkedList<TempNode*> children{};
-			Array<StringView> inputs{};
-			Array<RenderNode::Output> outputs{};
+			View<StringView> inputs{};
+			View<RenderNode::Output> outputs{};
 			LinkedList<TempResource*> inputResources{};
 			LinkedList<TempResource*> outputResources{};
 			LinkedList<TempResource::Variation*> inputResourceVariations{};
@@ -79,10 +77,10 @@ namespace je::vk
 
 		struct Node final
 		{
-			RenderNode* renderNode = nullptr;
+			void (*renderFunc)(VkCommandBuffer cmdBuffer) = nullptr;
 			Array<VkFramebuffer>* frameBuffers = nullptr;
 			VkRenderPass renderPass;
-			glm::ivec3 resolution;
+			glm::ivec2 resolution;
 			size_t inputCount = 0;
 			size_t outputCount = 0;
 		};

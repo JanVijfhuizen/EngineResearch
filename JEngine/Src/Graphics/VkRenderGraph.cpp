@@ -13,17 +13,7 @@ namespace je::vk
 		return resolution == other.resolution;
 	}
 
-	Array<StringView> RenderNode::DefineInputs(Arena& arena) const
-	{
-		return {};
-	}
-
-	Array<RenderNode::Output> RenderNode::DefineOutputs(Arena& arena) const
-	{
-		return {};
-	}
-
-	RenderGraph::RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode*>& nodes) :
+	RenderGraph::RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode>& nodes) :
 		_arena(arena), _app(app), _allocator(allocator), _swapChain(swapChain)
 	{
 		const auto _ = tempArena.CreateScope();
@@ -38,22 +28,21 @@ namespace je::vk
 			auto& tempNode = tempNodes[i];
 
 			tempNode.index = i;
-			tempNode.node = node;
+			tempNode.renderFunc = node.renderFunc;
 			tempNode.children = LinkedList<TempNode*>{tempArena};
-			tempNode.inputs = node->DefineInputs(tempArena);
-			tempNode.outputs = node->DefineOutputs(tempArena);
+			tempNode.inputs = node.inputs;
+			tempNode.outputs = node.outputs;
 			tempNode.inputResources = LinkedList<TempResource*>(tempArena);
 			tempNode.outputResources = LinkedList<TempResource*>(tempArena);
 			tempNode.inputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 			tempNode.outputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 
-			
 #ifdef _DEBUG
 			if(tempNode.outputs)
 			{
 				// Assert if the resolution is the same among outputs.
-				glm::ivec3 resolution = tempNode.outputs[0].resource.resolution;
-				for (auto& output : tempNode.outputs.GetView())
+				glm::ivec2 resolution = tempNode.outputs[0].resource.resolution;
+				for (auto& output : tempNode.outputs)
 					assert(resolution == output.resource.resolution);
 			}
 #endif
@@ -65,7 +54,7 @@ namespace je::vk
 		LinkedList<TempResource> tempResources{ tempArena };
 		for (auto& tempNode : view)
 		{
-			if (const auto outputView = tempNode.outputs.GetView())
+			if (const auto outputView = tempNode.outputs)
 				for (auto& output : outputView)
 				{
 					bool contained = false;
@@ -113,7 +102,7 @@ namespace je::vk
 				}
 
 			// Define lifetime for resources.
-			if (const auto inputView = tempNode.inputs.GetView())
+			if (const auto inputView = tempNode.inputs)
 				for (auto& input : inputView)
 					for (auto& tempResource : tempResources)
 						for (auto& variation : *tempResource.variations)
@@ -127,7 +116,7 @@ namespace je::vk
 		// Link parents by comparing inputs and outputs.
 		for (auto& tempNode : view)
 		{
-			const auto inputView = tempNode.inputs.GetView();
+			const auto inputView = tempNode.inputs;
 			if (!inputView)
 				continue;
 
@@ -136,7 +125,7 @@ namespace je::vk
 				if (&tempNode == &other)
 					continue;
 
-				const auto outputView = other.outputs.GetView();
+				const auto outputView = other.outputs;
 				if (!outputView)
 					continue;
 				for (auto& input : inputView)
@@ -218,7 +207,7 @@ namespace je::vk
 			for (auto& node : _nodes.GetView())
 			{
 				auto& tempNode = depthSorted[index];
-				node.renderNode = tempNode->node;
+				node.renderFunc = tempNode->renderFunc;
 				node.inputCount = tempNode->inputs.GetLength();
 				node.outputCount = tempNode->outputs.GetLength();
 				++index;
@@ -292,7 +281,7 @@ namespace je::vk
 			for (const auto& tempResource : tempResources)
 			{
 				auto& resource = tempResource.resource;
-				imageCreateInfo.resolution = resource.resolution;
+				imageCreateInfo.resolution = glm::ivec3(resource.resolution, 3);
 
 				imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
 				imageCreateInfo.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
@@ -517,7 +506,7 @@ namespace je::vk
 				renderPassBeginInfo.pClearValues = &clearColor;
 
 				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-				node.renderNode->Render(frame.cmdBuffer);
+				node.renderFunc(frame.cmdBuffer);
 				vkCmdEndRenderPass(frame.cmdBuffer);
 				
 				++index;

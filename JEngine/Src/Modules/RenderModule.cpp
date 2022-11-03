@@ -15,7 +15,6 @@
 #include "Graphics/VkShader.h"
 #include "Graphics/VkShape.h"
 #include "Graphics/VkSwapChain.h"
-#include "Graphics/TestRenderNode.h"
 
 namespace je::engine
 {
@@ -25,7 +24,7 @@ namespace je::engine
 
 		size_t windowExtensionCount;
 		const auto windowExtensions = WindowModule::GetRequiredExtensions(windowExtensionCount);
-		const Array<StringView> windowExtensionsArr{info.tempArena, windowExtensionCount};
+		const Array<StringView> windowExtensionsArr{ info.tempArena, windowExtensionCount };
 		memcpy(windowExtensionsArr.GetData(), windowExtensions, sizeof(const char*) * windowExtensionCount);
 
 		vk::init::Info vkInfo{};
@@ -54,7 +53,7 @@ namespace je::engine
 		createInfo.shader = _shader;
 		createInfo.resolution = _swapChain->GetResolution();
 		_pipeline = info.persistentArena.New<vk::Pipeline>(1, createInfo);
-		
+
 		Array<vk::Vertex> verts{};
 		Array<vk::Vertex::Index> inds{};
 		CreateQuadShape(info.tempArena, verts, inds, .5f);
@@ -97,7 +96,7 @@ namespace je::engine
 		result = vkCreateDescriptorPool(_app.device, &poolInfo, nullptr, &_descriptorPool);
 		assert(!result);
 
-		Array<VkDescriptorSetLayout> layouts{info.tempArena, _swapChain->GetLength()};
+		Array<VkDescriptorSetLayout> layouts{ info.tempArena, _swapChain->GetLength() };
 		for (auto& layout : layouts.GetView())
 			layout = vkLayout;
 
@@ -160,7 +159,7 @@ namespace je::engine
 			atlasInfo.imageLayout = _image->GetLayout();
 			atlasInfo.imageView = _view;
 			atlasInfo.sampler = _sampler;
-			
+
 			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			write.dstBinding = 0;
 			write.dstSet = _descriptorSets[i];
@@ -172,9 +171,16 @@ namespace je::engine
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
 
-		_testRenderNode = info.persistentArena.New<vk::TestRenderNode>(1, info.persistentArena, _app);
-		vk::RenderNode* nodes = _testRenderNode;
-		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, nodes);
+		vk::RenderNode::Output output{};
+		output.name = "Result";
+		output.resource.resolution = glm::ivec3{ 800, 600, 3 };
+
+		vk::RenderNode node{};
+		node.outputs = output;
+		node.renderFunc = Render;
+		View view{node};
+
+		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, view);
 	}
 
 	void RenderModule::OnExit(Info& info)
@@ -187,7 +193,6 @@ namespace je::engine
 		vkDestroyImageView(_app.device, _view, nullptr);
 
 		info.persistentArena.Delete(_renderGraph);
-		info.persistentArena.Delete(_testRenderNode);
 		info.persistentArena.Delete(_image);
 		info.persistentArena.Delete(_mesh);
 		info.persistentArena.Delete(_pipeline);
@@ -218,5 +223,10 @@ namespace je::engine
 		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 
 		_swapChain->EndFrame(info.tempArena, renderGraphSemaphore);
+	}
+
+	void RenderModule::Render(const VkCommandBuffer cmdBuffer)
+	{
+
 	}
 }
