@@ -50,14 +50,16 @@ namespace je::vk
 		{
 			struct Variation final
 			{
-				StringView name;
+				StringView name{};
 				size_t lifeTimeStart = 0;
 				size_t lifeTimeEnd = 0;
+				size_t imageIndex = SIZE_MAX;
 			};
 
 			RenderNode::Resource resource{};
 			LinkedList<Variation>* variations = nullptr;
 			size_t count = 0;
+			size_t lifeTimeEnd = 0;
 		};
 
 		struct TempNode final
@@ -71,6 +73,13 @@ namespace je::vk
 			Array<RenderNode::Output> outputs{};
 			LinkedList<TempResource*> inputResources{};
 			LinkedList<TempResource*> outputResources{};
+			LinkedList<TempResource::Variation*> inputResourceVariations{};
+			LinkedList<TempResource::Variation*> outputResourceVariations{};
+		};
+
+		struct Node final
+		{
+			RenderNode* renderNode = nullptr;
 		};
 
 		struct Layer final
@@ -91,11 +100,10 @@ namespace je::vk
 		SwapChain& _swapChain;
 
 		Array<Image*> _images{};
-		Array<RenderNode*> _nodes{};
+		Array<Node> _nodes{};
 		Array<Layer> _layers{};
 
 		static void DefineDepth(TempNode& node, size_t depth);
 		static bool SortDepthNodes(TempNode*& a, TempNode*& b);
-		static bool SortResourceUsers(TempNode*& a, TempNode*& b);
 	};
 }

@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "Graphics/VkRenderGraph.h"
+#include "Graphics/VkRenderGraph.h"
+#include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
 #include "Graphics/VkSwapChain.h"
@@ -44,59 +46,11 @@ namespace je::vk
 			tempNode.outputs = node->DefineOutputs(tempArena);
 			tempNode.inputResources = LinkedList<TempResource*>(tempArena);
 			tempNode.outputResources = LinkedList<TempResource*>(tempArena);
+			tempNode.inputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
+			tempNode.outputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 		}
 
 		const auto view = tempNodes.GetView();
-
-		// Link parents by comparing inputs and outputs.
-		for (auto& tempNode : view)
-		{
-			const auto inputView = tempNode.inputs.GetView();
-			if (!inputView)
-				continue;
-
-			for (auto& other : view)
-			{
-				if (&tempNode == &other)
-					continue;
-
-				const auto outputView = other.outputs.GetView();
-				if (!outputView)
-					continue;
-				for (auto& input : inputView)
-				{
-					size_t index = 0;
-					for (auto& output : outputView)
-					{
-						if (input == output.name)
-						{
-							tempNode.isRoot = false;
-							tempNode.inputResources.Add(other.outputResources[index]);
-							other.children.Add(&tempNode);
-							goto NEXT;
-						}
-						++index;
-					}
-				}
-
-			NEXT:
-				continue;
-			}
-		}
-
-		// Define depth of every node.
-		for (auto& tempNode : view)
-			if (tempNode.isRoot)
-				DefineDepth(tempNode, 0);
-
-		// Sort based on depth.
-		Array<TempNode*> depthSorted{ tempArena, length };
-		for (size_t i = 0; i < length; ++i)
-		{
-			auto& tempNode = tempNodes[i];
-			depthSorted[i] = &tempNode;
-		}
-		LinSort(depthSorted.GetData(), depthSorted.GetLength(), SortDepthNodes);
 
 		// Find all different resource types.
 		LinkedList<TempResource> tempResources{ tempArena };
@@ -126,6 +80,8 @@ namespace je::vk
 
 					tempNode.outputResources.Add(resource);
 
+					TempResource::Variation* tempResourceVariation = nullptr;
+
 					// Define lifetime and variations for resources.
 					contained = false;
 					for (auto& variation : *resource->variations)
@@ -133,6 +89,7 @@ namespace je::vk
 						{
 							contained = true;
 							variation.lifeTimeStart = math::Min(variation.lifeTimeStart, tempNode.depth);
+							tempResourceVariation = &variation;
 							break;
 						}
 
@@ -140,19 +97,76 @@ namespace je::vk
 					{
 						auto& variation = resource->variations->Add();
 						variation.name = output.name;
+						tempResourceVariation = &variation;
 					}
+
+					tempNode.outputResourceVariations.Add(tempResourceVariation);
 				}
 
 			// Define lifetime for resources.
 			if (const auto inputView = tempNode.inputs.GetView())
 				for (auto& input : inputView)
-				{
 					for (auto& tempResource : tempResources)
 						for (auto& variation : *tempResource.variations)
 							if (variation.name == input)
+							{
 								variation.lifeTimeEnd = math::Max(variation.lifeTimeEnd, tempNode.depth);
-				}
+								tempResource.lifeTimeEnd = math::Max(tempResource.lifeTimeEnd, variation.lifeTimeEnd);
+							}
 		}
+
+		// Link parents by comparing inputs and outputs.
+		for (auto& tempNode : view)
+		{
+			const auto inputView = tempNode.inputs.GetView();
+			if (!inputView)
+				continue;
+
+			for (auto& other : view)
+			{
+				if (&tempNode == &other)
+					continue;
+
+				const auto outputView = other.outputs.GetView();
+				if (!outputView)
+					continue;
+				for (auto& input : inputView)
+				{
+					size_t index = 0;
+					for (auto& output : outputView)
+					{
+						if (input == output.name)
+						{
+							auto& otherOutputResource = other.outputResources[index];
+
+							tempNode.isRoot = false;
+							tempNode.inputResources.Add(otherOutputResource);
+							tempNode.inputResourceVariations.Add(other.outputResourceVariations[index]);
+							other.children.Add(&tempNode);
+							goto NEXT;
+						}
+						++index;
+					}
+				}
+
+			NEXT:
+				continue;
+			}
+		}
+
+		// Define depth of every node.
+		for (auto& tempNode : view)
+			if (tempNode.isRoot)
+				DefineDepth(tempNode, 0);
+
+		// Sort based on depth.
+		Array<TempNode*> depthSorted{ tempArena, length };
+		for (size_t i = 0; i < length; ++i)
+		{
+			auto& tempNode = tempNodes[i];
+			depthSorted[i] = &tempNode;
+		}
+		LinSort(depthSorted.GetData(), depthSorted.GetLength(), SortDepthNodes);
 
 		// Find maximum parallel usage for the images. 
 		for (auto& tempResource : tempResources)
@@ -182,12 +196,12 @@ namespace je::vk
 		_images = Array<Image*>(arena, imageCount * frameCount);
 
 		// Define nodes and sync structs for individual frames.
-		_nodes = Array<RenderNode*>(arena, length);
+		_nodes = Array<Node>(arena, length);
 		{
 			size_t index = 0;
 			for (auto& node : _nodes.GetView())
 			{
-				node = depthSorted[index]->node;
+				node.renderNode = depthSorted[index]->node;
 				++index;
 			}
 		}
@@ -257,6 +271,12 @@ namespace je::vk
 					_images[index + j] = arena.New<Image>(1, imageCreateInfo);
 			}
 		}
+
+		// Assign image indexes to resource variations.
+		for (const auto& tempResource : tempResources)
+		{
+			
+		}
 	}
 
 	RenderGraph::~RenderGraph()
@@ -292,7 +312,8 @@ namespace je::vk
 			
 			while(current < layer.index)
 			{
-				_nodes[current]->Render(frame.cmdBuffer);
+				const auto& node = _nodes[current];
+				node.renderNode->Render(frame.cmdBuffer);
 				++current;
 			}
 
@@ -333,10 +354,5 @@ namespace je::vk
 	bool RenderGraph::SortDepthNodes(TempNode*& a, TempNode*& b)
 	{
 		return true;
-	}
-
-	bool RenderGraph::SortResourceUsers(TempNode*& a, TempNode*& b)
-	{
-		return a->depth < b->depth;
 	}
 }
