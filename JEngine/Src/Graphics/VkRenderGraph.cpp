@@ -173,7 +173,7 @@ namespace je::vk
 		for (auto& tempNode : depthSorted.GetView())
 			imageIndexesCount += tempNode->inputs.GetLength() + tempNode->outputs.GetLength();
 
-		_imageIndexes = Array<size_t>(arena, imageIndexesCount);
+		_attachmentIndexes = Array<size_t>(arena, imageIndexesCount);
 
 		// Find maximum parallel usage for the images. 
 		for (auto& tempResource : tempResources)
@@ -200,7 +200,7 @@ namespace je::vk
 		size_t imageCount = 0;
 		for (auto& tempResource : tempResources)
 			imageCount += tempResource.count;
-		_images = Array<Image*>(arena, imageCount * frameCount);
+		_attachments = Array<Attachment>(arena, imageCount * frameCount);
 
 		// Define nodes and sync structs for individual frames.
 		_nodes = Array<Node>(arena, length);
@@ -265,6 +265,18 @@ namespace je::vk
 		imageCreateInfo.allocator = &allocator;
 		imageCreateInfo.layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
+		VkImageViewCreateInfo viewCreateInfo{};
+		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+		viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		viewCreateInfo.subresourceRange.baseMipLevel = 0;
+		viewCreateInfo.subresourceRange.levelCount = 1;
+		viewCreateInfo.subresourceRange.baseArrayLayer = 0;
+		viewCreateInfo.subresourceRange.layerCount = 1;
+
 		for (size_t i = 0; i < frameCount; ++i)
 		{
 			const size_t index = imageCount * i;
@@ -278,7 +290,16 @@ namespace je::vk
 
 				const size_t resourceCount = tempResource.count;
 				for (size_t j = 0; j < resourceCount; ++j)
-					_images[index + j] = arena.New<Image>(1, imageCreateInfo);
+				{
+					auto& attachment = _attachments[index + j];
+					attachment.image = arena.New<Image>(1, imageCreateInfo);
+
+					viewCreateInfo.subresourceRange.aspectMask = attachment.image->GetAspectFlags();
+					viewCreateInfo.format = attachment.image->GetFormat();
+					viewCreateInfo.image = *attachment.image;
+					const auto viewResult = vkCreateImageView(app.device, &viewCreateInfo, nullptr, &attachment.view);
+					assert(!viewResult);
+				}
 			}
 		}
 
@@ -339,8 +360,12 @@ namespace je::vk
 
 	RenderGraph::~RenderGraph()
 	{
-		for (int32_t i = static_cast<int32_t>(_images.GetLength()) - 1; i >= 0; --i)
-			_arena.Delete(_images[i]);
+		for (int32_t i = static_cast<int32_t>(_attachments.GetLength()) - 1; i >= 0; --i)
+		{
+			const auto& attachment = _attachments[i];
+			vkDestroyImageView(_app.device, attachment.view, nullptr);
+			_arena.Delete(attachment.image);
+		}
 
 		for (int32_t i = static_cast<int32_t>(_layers.GetLength()) - 1; i >= 0; --i)
 		{

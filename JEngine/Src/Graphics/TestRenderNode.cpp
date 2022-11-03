@@ -41,7 +41,7 @@ namespace je::vk
 		attachmentInfo.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
 		attachmentInfo.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachmentInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-		attachmentInfo.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+		attachmentInfo.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 		attachmentInfo.format = _image->GetFormat();
 
 		VkRenderPassCreateInfo renderPassCreateInfo{};

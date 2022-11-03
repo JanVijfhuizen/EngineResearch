@@ -100,13 +100,19 @@ namespace je::vk
 			Array<Frame>* frames = nullptr;
 		};
 
+		struct Attachment final
+		{
+			Image* image = nullptr;
+			VkImageView view = VK_NULL_HANDLE;
+		};
+
 		Arena& _arena;
 		App& _app;
 		Allocator& _allocator;
 		SwapChain& _swapChain;
 
-		Array<size_t> _imageIndexes{};
-		Array<Image*> _images{};
+		Array<size_t> _attachmentIndexes{};
+		Array<Attachment> _attachments{};
 		Array<Node> _nodes{};
 		Array<Layer> _layers{};
 
