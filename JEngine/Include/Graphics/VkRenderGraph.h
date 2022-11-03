@@ -66,10 +66,15 @@ namespace je::vk
 
 		struct TempNode final
 		{
+			RenderNode* node = nullptr;
+
 			size_t index = SIZE_MAX;
 			size_t depth = 0;
 			bool isRoot = true;
-			RenderNode* node = nullptr;
+
+			size_t imageIndexStart = 0;
+			size_t imageIndexEnd = 0;
+			
 			LinkedList<TempNode*> children{};
 			Array<StringView> inputs{};
 			Array<RenderNode::Output> outputs{};
@@ -101,6 +106,7 @@ namespace je::vk
 		Allocator& _allocator;
 		SwapChain& _swapChain;
 
+		Array<size_t> _imageIndexes{};
 		Array<Image*> _images{};
 		Array<Node> _nodes{};
 		Array<Layer> _layers{};

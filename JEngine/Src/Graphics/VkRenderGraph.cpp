@@ -52,6 +52,17 @@ namespace je::vk
 
 		const auto view = tempNodes.GetView();
 
+		// Define image indexes.
+		size_t imageIndexesCount = 0;
+		for (auto& tempNode : view)
+		{
+			tempNode.imageIndexStart = imageIndexesCount;
+			imageIndexesCount += tempNode.inputs.GetLength() + tempNode.outputs.GetLength();
+			tempNode.imageIndexEnd = imageIndexesCount;
+		}
+
+		_imageIndexes = Array<size_t>(arena, imageIndexesCount);
+
 		// Find all different resource types.
 		LinkedList<TempResource> tempResources{ tempArena };
 		for (auto& tempNode : view)
@@ -323,6 +334,22 @@ namespace je::vk
 				}
 
 				index = current;
+			}
+		}
+
+		{
+			size_t index = 0;
+
+			for (const auto& layer : _layers.GetView())
+			{
+				while (index < layer.index)
+				{
+					auto& tempNode = tempNodes[index];
+
+
+
+					++index;
+				}
 			}
 		}
 	}
