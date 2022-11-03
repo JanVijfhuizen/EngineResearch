@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "Graphics/TestRenderNode.h"
+#include "Graphics/Vertex.h"
 #include "Graphics/VkAllocator.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
@@ -7,16 +8,27 @@
 
 namespace je::vk
 {
-	TestRenderNode::TestRenderNode(Arena& arena, App& app, Allocator& allocator) : _arena(arena), _app(app)
+	TestRenderNode::TestRenderNode(Arena& arena, App& app) : _arena(arena), _app(app)
 	{
-		Image::CreateInfo imageCreateInfo{};
-		imageCreateInfo.app = &app;
-		imageCreateInfo.allocator = &allocator;
-		imageCreateInfo.resolution = glm::ivec3{ 800, 600, 4 };
-		imageCreateInfo.usageFlags |= VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-		imageCreateInfo.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		_image = arena.New<Image>(1, imageCreateInfo);
+		
+	}
 
+	void TestRenderNode::Render(const VkCommandBuffer cmdBuffer)
+	{
+		
+	}
+
+	Array<RenderNode::Output> TestRenderNode::DefineOutputs(Arena& arena) const
+	{
+		Array<Output> outputs{arena, 1};
+		outputs[0].name = "Result";
+		auto& resource = outputs[0].resource;
+		resource.resolution = glm::ivec3{ 800, 600, 4 };
+		return Move(outputs);
+	}
+
+	void TestRenderNode::DefineRenderPass(const App& app, VkRenderPass& outRenderPass)
+	{
 		VkAttachmentReference colorAttachmentRef{};
 		colorAttachmentRef.attachment = 0;
 		colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
@@ -42,7 +54,7 @@ namespace je::vk
 		attachmentInfo.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 		attachmentInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
 		attachmentInfo.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
-		attachmentInfo.format = _image->GetFormat();
+		attachmentInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
 
 		VkRenderPassCreateInfo renderPassCreateInfo{};
 		renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
@@ -53,77 +65,7 @@ namespace je::vk
 		renderPassCreateInfo.dependencyCount = 1;
 		renderPassCreateInfo.pDependencies = &subpassDependency;
 
-		const auto renderPassResult = vkCreateRenderPass(app.device, &renderPassCreateInfo, nullptr, &_renderPass);
+		const auto renderPassResult = vkCreateRenderPass(app.device, &renderPassCreateInfo, nullptr, &outRenderPass);
 		assert(!renderPassResult);
-
-		VkImageViewCreateInfo viewCreateInfo{};
-		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-		viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-		viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewCreateInfo.subresourceRange.aspectMask = _image->GetAspectFlags();
-		viewCreateInfo.subresourceRange.baseMipLevel = 0;
-		viewCreateInfo.subresourceRange.levelCount = 1;
-		viewCreateInfo.subresourceRange.baseArrayLayer = 0;
-		viewCreateInfo.subresourceRange.layerCount = 1;
-		viewCreateInfo.format = _image->GetFormat();
-		viewCreateInfo.image = *_image;
-
-		const auto viewResult = vkCreateImageView(app.device, &viewCreateInfo, nullptr, &_view);
-		assert(!viewResult);
-
-		VkFramebufferCreateInfo frameBufferCreateInfo{};
-		frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		frameBufferCreateInfo.layers = 1;
-		frameBufferCreateInfo.attachmentCount = 1;
-		frameBufferCreateInfo.renderPass = _renderPass;
-		frameBufferCreateInfo.width = _image->GetResolution().x;
-		frameBufferCreateInfo.height = _image->GetResolution().y;
-		frameBufferCreateInfo.pAttachments = &_view;
-
-		auto result = vkCreateFramebuffer(app.device, &frameBufferCreateInfo, nullptr, &_frameBuffer);
-		assert(!result);
-	}
-
-	TestRenderNode::~TestRenderNode()
-	{
-		vkDestroyFramebuffer(_app.device, _frameBuffer, nullptr);
-		vkDestroyImageView(_app.device, _view, nullptr);
-		vkDestroyRenderPass(_app.device, _renderPass, nullptr);
-		_arena.Delete(_image);
-	}
-
-	void TestRenderNode::Render(const VkCommandBuffer cmdBuffer)
-	{
-		const VkClearValue clearColor = { 1.f, 1.f, 1.f, 1.f };
-
-		VkExtent2D extent{};
-		extent.width = _image->GetResolution().x;
-		extent.height = _image->GetResolution().y;
-
-		VkRenderPassBeginInfo renderPassBeginInfo{};
-		renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassBeginInfo.renderArea.offset = { 0, 0 };
-		renderPassBeginInfo.renderPass = _renderPass;
-		renderPassBeginInfo.framebuffer = _frameBuffer;
-		renderPassBeginInfo.renderArea.extent = extent;
-		renderPassBeginInfo.clearValueCount = 1;
-		renderPassBeginInfo.pClearValues = &clearColor;
-
-		vkCmdBeginRenderPass(cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		// Render.
-		vkCmdEndRenderPass(cmdBuffer);
-	}
-
-	Array<RenderNode::Output> TestRenderNode::DefineOutputs(Arena& arena) const
-	{
-		Array<Output> outputs{arena, 1};
-		outputs[0].name = "Result";
-		auto& resource = outputs[0].resource;
-		resource.resolution = glm::ivec3{ 800, 600, 4 };
-		return Move(outputs);
 	}
 }

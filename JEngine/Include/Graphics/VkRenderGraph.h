@@ -36,6 +36,7 @@ namespace je::vk
 		virtual void Render(VkCommandBuffer cmdBuffer) = 0;
 		[[nodiscard]] virtual Array<StringView> DefineInputs(Arena& arena) const;
 		[[nodiscard]] virtual Array<Output> DefineOutputs(Arena& arena) const;
+		virtual void DefineRenderPass(const App& app, VkRenderPass& outRenderPass) = 0;
 	};
 
 	class RenderGraph final
@@ -85,6 +86,8 @@ namespace je::vk
 		{
 			RenderNode* renderNode = nullptr;
 			Array<VkFramebuffer>* frameBuffers = nullptr;
+			VkRenderPass renderPass;
+			glm::ivec3 resolution;
 			size_t inputCount = 0;
 			size_t outputCount = 0;
 		};

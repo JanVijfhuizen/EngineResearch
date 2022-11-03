@@ -371,7 +371,6 @@ namespace je::vk
 			VkFramebufferCreateInfo frameBufferCreateInfo{};
 			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
 			frameBufferCreateInfo.layers = 1;
-			frameBufferCreateInfo.renderPass = _renderPass;
 
 			size_t index = 0;
 			for (auto& node : _nodes.GetView())
@@ -380,15 +379,16 @@ namespace je::vk
 				glm::ivec3 resolution{};
 
 				node.frameBuffers = arena.New<Array<VkFramebuffer>>(1, arena, frameCount);
+				node.renderNode->DefineRenderPass(app, node.renderPass);
 
 				size_t frameIndex = 0;
 				for (auto& frameBuffer : node.frameBuffers->GetView())
 				{
-					const size_t startIndex = imageCount * frameIndex + index + node.inputCount;
+					const size_t startIndex = index + node.inputCount;
 					for (size_t i = 0; i < node.outputCount; ++i)
 					{
 						auto& attachmentIndex = _attachmentIndexes[startIndex + i];
-						auto& attachment = _attachments[attachmentIndex];
+						auto& attachment = _attachments[imageCount * frameIndex + attachmentIndex];
 						views[i] = attachment.view;
 						resolution = attachment.image->GetResolution();
 					}
@@ -397,10 +397,15 @@ namespace je::vk
 					frameBufferCreateInfo.pAttachments = views;
 					frameBufferCreateInfo.width = resolution.x;
 					frameBufferCreateInfo.height = resolution.y;
+					frameBufferCreateInfo.renderPass = node.renderPass;
+
+					const auto result = vkCreateFramebuffer(app.device, &frameBufferCreateInfo, nullptr, &node.frameBuffers->GetView()[frameIndex]);
+					assert(!result);
 
 					++frameIndex;
 				}
 
+				node.resolution = resolution;
 				index += node.inputCount + node.outputCount;
 			}
 		}
@@ -411,8 +416,9 @@ namespace je::vk
 		for (int32_t i = static_cast<int32_t>(_nodes.GetLength()) - 1; i >= 0; --i)
 		{
 			const auto& node = _nodes[i];
-			for (auto& frameBuffer : node.frameBuffers->GetView())
+			for (const auto& frameBuffer : node.frameBuffers->GetView())
 				vkDestroyFramebuffer(_app.device, frameBuffer, nullptr);
+			vkDestroyRenderPass(_app.device, node.renderPass, nullptr);
 			_arena.Delete(node.frameBuffers);
 		}
 
@@ -434,14 +440,14 @@ namespace je::vk
 
 	VkSemaphore RenderGraph::Update() const
 	{
-		const size_t idx = _swapChain.GetIndex();
+		const size_t frameIndex = _swapChain.GetIndex();
 
 		VkSemaphore semaphore = VK_NULL_HANDLE;
 		size_t index = 0;
 
 		for (const auto& layer : _layers.GetView())
 		{
-			const auto& frame = layer.frames->GetView()[idx];
+			const auto& frame = layer.frames->GetView()[frameIndex];
 
 			VkCommandBufferBeginInfo cmdBufferBeginInfo{};
 			cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -452,7 +458,26 @@ namespace je::vk
 			while(index < layer.index)
 			{
 				const auto& node = _nodes[index];
+
+				const VkClearValue clearColor = { 1.f, 1.f, 1.f, 1.f };
+
+				VkExtent2D extent{};
+				extent.width = node.resolution.x;
+				extent.height = node.resolution.y;
+
+				VkRenderPassBeginInfo renderPassBeginInfo{};
+				renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+				renderPassBeginInfo.renderArea.offset = { 0, 0 };
+				renderPassBeginInfo.renderPass = node.renderPass;
+				renderPassBeginInfo.framebuffer = node.frameBuffers->GetView()[frameIndex];
+				renderPassBeginInfo.renderArea.extent = extent;
+				renderPassBeginInfo.clearValueCount = 1;
+				renderPassBeginInfo.pClearValues = &clearColor;
+
+				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 				node.renderNode->Render(frame.cmdBuffer);
+				vkCmdEndRenderPass(frame.cmdBuffer);
+				
 				++index;
 			}
 

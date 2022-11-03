@@ -172,7 +172,7 @@ namespace je::engine
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
 
-		_testRenderNode = info.persistentArena.New<vk::TestRenderNode>(1, info.persistentArena, _app, *_allocator);
+		_testRenderNode = info.persistentArena.New<vk::TestRenderNode>(1, info.persistentArena, _app);
 		vk::RenderNode* nodes = _testRenderNode;
 		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, nodes);
 	}

@@ -9,18 +9,14 @@ namespace je::vk
 	class TestRenderNode final : public RenderNode
 	{
 	public:
-		TestRenderNode(Arena& arena, App& app, Allocator& allocator);
-		~TestRenderNode();
+		TestRenderNode(Arena& arena, App& app);
 
 	private:
 		Arena& _arena;
 		App& _app;
-		Image* _image;
-		VkRenderPass _renderPass;
-		VkImageView _view;
-		VkFramebuffer _frameBuffer;
 
 		void Render(VkCommandBuffer cmdBuffer) override;
 		[[nodiscard]] Array<Output> DefineOutputs(Arena& arena) const override;
+		void DefineRenderPass(const App& app, VkRenderPass& outRenderPass) override;
 	};
 }
