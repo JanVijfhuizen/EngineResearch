@@ -290,11 +290,39 @@ namespace je::vk
 
 			for (const auto& layer : _layers.GetView())
 			{
-				while (index < layer.index)
+				// Define output images.
+				size_t current = index;
+				while (current < layer.index)
 				{
-					const auto& node = _nodes[index];
-					++index;
+					auto& tempNode = tempNodes[current];
+					const size_t count = tempNode.outputResources.GetCount();
+					for (size_t i = 0; i < count; ++i)
+					{
+						auto& variation = tempNode.outputResourceVariations[i];
+						variation->imageIndex = tempNode.outputResources[i]->imageQueue->Dequeue();
+					}
+					
+					++current;
 				}
+
+				// Pool input images which lifetime has come to an end.
+				current = index;
+				while (current < layer.index)
+				{
+					auto& tempNode = tempNodes[current];
+					const size_t count = tempNode.inputResources.GetCount();
+					for (size_t i = 0; i < count; ++i)
+					{
+						auto& variation = tempNode.inputResourceVariations[i];
+						auto& inputResource = tempNode.inputResources[i];
+
+						if (variation->lifeTimeEnd == layer.index)
+							inputResource->imageQueue->Enqueue(variation->imageIndex);
+					}
+					++current;
+				}
+
+				index = current;
 			}
 		}
 	}
