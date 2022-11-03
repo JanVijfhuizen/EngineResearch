@@ -21,7 +21,7 @@ namespace je::vk
 		{
 			glm::ivec3 resolution;
 			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
-			VkImageAspectFlagBits aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
+			VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 			VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 			[[nodiscard]] bool operator==(const Resource& other) const;

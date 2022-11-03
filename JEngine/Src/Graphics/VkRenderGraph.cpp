@@ -12,7 +12,7 @@ namespace je::vk
 {
 	bool RenderNode::Resource::operator==(const Resource& other) const
 	{
-		return resolution == other.resolution && format == other.format && aspectFlag == other.aspectFlag && usageFlags == other.usageFlags;
+		return resolution == other.resolution && format == other.format && aspectFlags == other.aspectFlags && usageFlags == other.usageFlags;
 	}
 
 	Array<StringView> RenderNode::DefineInputs(Arena& arena) const
@@ -273,7 +273,7 @@ namespace je::vk
 				auto& resource = tempResource.resource;
 				imageCreateInfo.resolution = resource.resolution;
 				imageCreateInfo.format = resource.format;
-				imageCreateInfo.aspectFlag = resource.aspectFlag;
+				imageCreateInfo.aspectFlags = resource.aspectFlags;
 				imageCreateInfo.usageFlags = resource.usageFlags;
 
 				const size_t resourceCount = tempResource.count;

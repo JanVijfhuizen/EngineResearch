@@ -26,7 +26,7 @@ namespace je::vk
 			StringView path{};
 
 			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
-			VkImageAspectFlagBits aspectFlag = VK_IMAGE_ASPECT_COLOR_BIT;
+			VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 			VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_TRANSFER_DST_BIT | VK_IMAGE_USAGE_SAMPLED_BIT;
 			VkImageLayout layout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 		};
@@ -41,6 +41,7 @@ namespace je::vk
 		[[nodiscard]] glm::ivec3 GetResolution() const;
 		[[nodiscard]] VkFormat GetFormat() const;
 		[[nodiscard]] VkImageLayout GetLayout() const;
+		[[nodiscard]] VkImageAspectFlags GetAspectFlags() const;
 		[[nodiscard]] operator VkImage() const;
 
 	private:
@@ -49,7 +50,7 @@ namespace je::vk
 		VkImage _image;
 		VkImageLayout _layout = VK_IMAGE_LAYOUT_UNDEFINED;
 		VkFormat _format;
-		VkImageAspectFlagBits _flag;
+		VkImageAspectFlags _aspectFlags;
 		glm::ivec3 _resolution;
 		Memory _memory;
 
