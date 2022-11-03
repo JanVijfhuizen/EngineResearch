@@ -52,17 +52,6 @@ namespace je::vk
 
 		const auto view = tempNodes.GetView();
 
-		// Define image indexes.
-		size_t imageIndexesCount = 0;
-		for (auto& tempNode : view)
-		{
-			tempNode.imageIndexStart = imageIndexesCount;
-			imageIndexesCount += tempNode.inputs.GetLength() + tempNode.outputs.GetLength();
-			tempNode.imageIndexEnd = imageIndexesCount;
-		}
-
-		_imageIndexes = Array<size_t>(arena, imageIndexesCount);
-
 		// Find all different resource types.
 		LinkedList<TempResource> tempResources{ tempArena };
 		for (auto& tempNode : view)
@@ -179,6 +168,13 @@ namespace je::vk
 		}
 		LinSort(depthSorted.GetData(), depthSorted.GetLength(), SortDepthNodes);
 
+		// Define image indexes.
+		size_t imageIndexesCount = 0;
+		for (auto& tempNode : depthSorted.GetView())
+			imageIndexesCount += tempNode->inputs.GetLength() + tempNode->outputs.GetLength();
+
+		_imageIndexes = Array<size_t>(arena, imageIndexesCount);
+
 		// Find maximum parallel usage for the images. 
 		for (auto& tempResource : tempResources)
 		{
@@ -212,7 +208,10 @@ namespace je::vk
 			size_t index = 0;
 			for (auto& node : _nodes.GetView())
 			{
-				node.renderNode = depthSorted[index]->node;
+				auto& tempNode = depthSorted[index];
+				node.renderNode = tempNode->node;
+				node.inputCount = tempNode->inputs.GetLength();
+				node.outputCount = tempNode->outputs.GetLength();
 				++index;
 			}
 		}
@@ -334,22 +333,6 @@ namespace je::vk
 				}
 
 				index = current;
-			}
-		}
-
-		{
-			size_t index = 0;
-
-			for (const auto& layer : _layers.GetView())
-			{
-				while (index < layer.index)
-				{
-					auto& tempNode = tempNodes[index];
-
-
-
-					++index;
-				}
 			}
 		}
 	}

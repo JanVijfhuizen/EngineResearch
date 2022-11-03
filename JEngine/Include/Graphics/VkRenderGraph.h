@@ -72,9 +72,6 @@ namespace je::vk
 			size_t depth = 0;
 			bool isRoot = true;
 
-			size_t imageIndexStart = 0;
-			size_t imageIndexEnd = 0;
-			
 			LinkedList<TempNode*> children{};
 			Array<StringView> inputs{};
 			Array<RenderNode::Output> outputs{};
@@ -87,6 +84,8 @@ namespace je::vk
 		struct Node final
 		{
 			RenderNode* renderNode = nullptr;
+			size_t inputCount = 0;
+			size_t outputCount = 0;
 		};
 
 		struct Layer final
