@@ -154,7 +154,7 @@ namespace je::vk
 				}
 		}
 
-		// Find maximum parallel usage for this 
+		// Find maximum parallel usage for the images. 
 		for (auto& tempResource : tempResources)
 		{
 			size_t usage = 0;
@@ -179,8 +179,7 @@ namespace je::vk
 		size_t imageCount = 0;
 		for (auto& tempResource : tempResources)
 			imageCount += tempResource.count;
-		imageCount *= frameCount;
-		_images = Array<Image*>(arena, imageCount);
+		_images = Array<Image*>(arena, imageCount * frameCount);
 
 		// Define nodes and sync structs for individual frames.
 		_nodes = Array<RenderNode*>(arena, length);
@@ -242,8 +241,9 @@ namespace je::vk
 		imageCreateInfo.allocator = &allocator;
 		imageCreateInfo.layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
+		for (size_t i = 0; i < frameCount; ++i)
 		{
-			size_t index = 0;
+			const size_t index = imageCount * i;
 			for (const auto& tempResource : tempResources)
 			{
 				auto& resource = tempResource.resource;
@@ -252,9 +252,9 @@ namespace je::vk
 				imageCreateInfo.aspectFlag = resource.aspectFlag;
 				imageCreateInfo.usageFlags = resource.usageFlags;
 
-				const size_t resourceCount = tempResource.count * frameCount;
-				for (size_t i = 0; i < resourceCount; ++i)
-					_images[index++] = arena.New<Image>(1, imageCreateInfo);
+				const size_t resourceCount = tempResource.count;
+				for (size_t j = 0; j < resourceCount; ++j)
+					_images[index + j] = arena.New<Image>(1, imageCreateInfo);
 			}
 		}
 	}
