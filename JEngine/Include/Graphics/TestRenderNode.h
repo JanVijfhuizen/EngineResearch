@@ -17,6 +17,5 @@ namespace je::vk
 
 		void Render(VkCommandBuffer cmdBuffer) override;
 		[[nodiscard]] Array<Output> DefineOutputs(Arena& arena) const override;
-		void DefineRenderPass(const App& app, VkRenderPass& outRenderPass) override;
 	};
 }

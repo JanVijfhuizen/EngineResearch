@@ -20,12 +20,6 @@ namespace je::vk
 		struct Resource final
 		{
 			glm::ivec3 resolution;
-
-			enum class Type
-			{
-				color
-			} type = Type::color;
-
 			[[nodiscard]] bool operator==(const Resource& other) const;
 		};
 
@@ -38,7 +32,6 @@ namespace je::vk
 		virtual void Render(VkCommandBuffer cmdBuffer) = 0;
 		[[nodiscard]] virtual Array<StringView> DefineInputs(Arena& arena) const;
 		[[nodiscard]] virtual Array<Output> DefineOutputs(Arena& arena) const;
-		virtual void DefineRenderPass(const App& app, VkRenderPass& outRenderPass) = 0;
 	};
 
 	class RenderGraph final

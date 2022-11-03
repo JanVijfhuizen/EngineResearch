@@ -10,7 +10,7 @@ namespace je::vk
 {
 	bool RenderNode::Resource::operator==(const Resource& other) const
 	{
-		return resolution == other.resolution && type == other.type;
+		return resolution == other.resolution;
 	}
 
 	Array<StringView> RenderNode::DefineInputs(Arena& arena) const
@@ -294,14 +294,9 @@ namespace je::vk
 				auto& resource = tempResource.resource;
 				imageCreateInfo.resolution = resource.resolution;
 
-				switch (resource.type)
-				{
-				case RenderNode::Resource::Type::color:
-					imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
-					imageCreateInfo.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-					imageCreateInfo.usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-					break;
-				}
+				imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+				imageCreateInfo.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+				imageCreateInfo.usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
 				const size_t resourceCount = tempResource.count;
 				for (size_t j = 0; j < resourceCount; ++j)
@@ -384,7 +379,49 @@ namespace je::vk
 				glm::ivec3 resolution{};
 
 				node.frameBuffers = arena.New<Array<VkFramebuffer>>(1, arena, frameCount);
-				node.renderNode->DefineRenderPass(app, node.renderPass);
+				
+				Array<VkAttachmentReference> colorAttachments{tempArena, node.outputCount};
+				for (size_t i = 0; i < node.outputCount; ++i)
+				{
+					auto& attachment = colorAttachments[i];
+					attachment.attachment = i;
+					attachment.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				}
+
+				VkSubpassDescription subpassDescription{};
+				subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
+				subpassDescription.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.GetLength());
+				subpassDescription.pColorAttachments = colorAttachments;
+
+				VkSubpassDependency subpassDependency{};
+				subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+				subpassDependency.dstSubpass = 0;
+				subpassDependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				subpassDependency.srcAccessMask = 0;
+				subpassDependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+				subpassDependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+
+				VkAttachmentDescription attachmentInfo{};
+				attachmentInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+				attachmentInfo.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+				attachmentInfo.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+				attachmentInfo.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+				attachmentInfo.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+				attachmentInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+				attachmentInfo.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+				attachmentInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+
+				VkRenderPassCreateInfo renderPassCreateInfo{};
+				renderPassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+				renderPassCreateInfo.attachmentCount = 1;
+				renderPassCreateInfo.pAttachments = &attachmentInfo;
+				renderPassCreateInfo.subpassCount = 1;
+				renderPassCreateInfo.pSubpasses = &subpassDescription;
+				renderPassCreateInfo.dependencyCount = 1;
+				renderPassCreateInfo.pDependencies = &subpassDependency;
+
+				const auto renderPassResult = vkCreateRenderPass(app.device, &renderPassCreateInfo, nullptr, &node.renderPass);
+				assert(!renderPassResult);
 
 				size_t frameIndex = 0;
 				for (auto& frameBuffer : node.frameBuffers->GetView())
