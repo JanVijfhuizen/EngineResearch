@@ -272,10 +272,30 @@ namespace je::vk
 			}
 		}
 
-		// Assign image indexes to resource variations.
-		for (const auto& tempResource : tempResources)
+		// Define image pools.
 		{
-			
+			size_t index = 0;
+			for (auto& tempResource : tempResources)
+			{
+				tempResource.imageQueue = tempArena.New<Queue<size_t>>(1, tempArena, tempResource.count);
+				for (size_t i = 0; i < tempResource.count; ++i)
+					tempResource.imageQueue->Enqueue(i + index);
+				index += tempResource.count;
+			}
+		}
+
+		// Assign image indexes to resource variations.
+		{
+			size_t index = 0;
+
+			for (const auto& layer : _layers.GetView())
+			{
+				while (index < layer.index)
+				{
+					const auto& node = _nodes[index];
+					++index;
+				}
+			}
 		}
 	}
 
@@ -298,7 +318,7 @@ namespace je::vk
 		const size_t idx = _swapChain.GetIndex();
 
 		VkSemaphore semaphore = VK_NULL_HANDLE;
-		size_t current = 0;
+		size_t index = 0;
 
 		for (const auto& layer : _layers.GetView())
 		{
@@ -310,11 +330,11 @@ namespace je::vk
 			vkResetCommandBuffer(frame.cmdBuffer, VK_COMMAND_BUFFER_RESET_RELEASE_RESOURCES_BIT);
 			vkBeginCommandBuffer(frame.cmdBuffer, &cmdBufferBeginInfo);
 			
-			while(current < layer.index)
+			while(index < layer.index)
 			{
-				const auto& node = _nodes[current];
+				const auto& node = _nodes[index];
 				node.renderNode->Render(frame.cmdBuffer);
-				++current;
+				++index;
 			}
 
 			auto result = vkEndCommandBuffer(frame.cmdBuffer);

@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include "Jlb/Array.h"
 #include "Jlb/LinkedList.h"
+#include "Jlb/Queue.h"
 #include "Jlb/StringView.h"
 #include "Jlb/View.h"
 
@@ -58,6 +59,7 @@ namespace je::vk
 
 			RenderNode::Resource resource{};
 			LinkedList<Variation>* variations = nullptr;
+			Queue<size_t>* imageQueue = nullptr;
 			size_t count = 0;
 			size_t lifeTimeEnd = 0;
 		};
