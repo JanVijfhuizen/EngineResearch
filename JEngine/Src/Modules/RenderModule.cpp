@@ -134,6 +134,17 @@ namespace je::engine
 
 		result = vkCreateSampler(_app.device, &samplerInfo, nullptr, &_sampler);
 
+		vk::RenderNode::Output output{};
+		output.name = "Result";
+		output.resource.resolution = glm::ivec3{ 800, 600, 3 };
+
+		vk::RenderNode node{};
+		node.outputs = output;
+		node.renderFunc = Render;
+		View view{node};
+
+		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, view);
+
 		// Bind descriptor sets to the instance data.
 		for (size_t i = 0; i < _swapChain->GetLength(); ++i)
 		{
@@ -156,8 +167,11 @@ namespace je::engine
 			*/
 			// Bind texture atlas.
 			VkDescriptorImageInfo  atlasInfo{};
-			atlasInfo.imageLayout = _image->GetLayout();
-			atlasInfo.imageView = _view;
+			//atlasInfo.imageLayout = _image->GetLayout();
+			//atlasInfo.imageView = _view;
+			const auto renderGraphResult = _renderGraph->GetResult(0);
+			atlasInfo.imageLayout = renderGraphResult.layout;
+			atlasInfo.imageView = renderGraphResult.view;
 			atlasInfo.sampler = _sampler;
 
 			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
@@ -170,17 +184,6 @@ namespace je::engine
 
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
-
-		vk::RenderNode::Output output{};
-		output.name = "Result";
-		output.resource.resolution = glm::ivec3{ 800, 600, 3 };
-
-		vk::RenderNode node{};
-		node.outputs = output;
-		node.renderFunc = Render;
-		View view{node};
-
-		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, view);
 	}
 
 	void RenderModule::OnExit(Info& info)
@@ -210,7 +213,7 @@ namespace je::engine
 		Module::OnUpdate(info);
 
 		_swapChain->WaitForImage();
-
+		
 		auto renderGraphSemaphore = _renderGraph->Update();
 		const auto cmd = _swapChain->BeginFrame(true);
 		

@@ -532,8 +532,20 @@ namespace je::vk
 
 			semaphore = frame.semaphore;
 		}
-
+		
 		return semaphore;
+	}
+
+	RenderGraph::Result RenderGraph::GetResult(const size_t frameIndex) const
+	{
+		const size_t index = _attachmentIndexes.GetLength() * (frameIndex + 1) - 1;
+		const size_t finalAttachmentIndex = _attachmentIndexes[index];
+
+		const auto& attachment = _attachments[finalAttachmentIndex];
+		Result result{};
+		result.view = attachment.view;
+		result.layout = attachment.image->GetLayout();
+		return result;
 	}
 
 	void RenderGraph::DefineDepth(TempNode& node, const size_t depth)
