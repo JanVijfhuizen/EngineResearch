@@ -48,6 +48,16 @@ namespace je::vk
 			tempNode.outputResources = LinkedList<TempResource*>(tempArena);
 			tempNode.inputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 			tempNode.outputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
+
+			// Assert
+#ifdef _DEBUG
+			if(tempNode.outputs)
+			{
+				glm::ivec3 resolution = tempNode.outputs[0].resource.resolution;
+				for (auto& output : tempNode.outputs.GetView())
+					assert(resolution == output.resource.resolution);
+			}
+#endif
 		}
 
 		const auto view = tempNodes.GetView();
@@ -356,10 +366,56 @@ namespace je::vk
 				index = current;
 			}
 		}
+
+		{
+			VkFramebufferCreateInfo frameBufferCreateInfo{};
+			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+			frameBufferCreateInfo.layers = 1;
+			frameBufferCreateInfo.renderPass = _renderPass;
+
+			size_t index = 0;
+			for (auto& node : _nodes.GetView())
+			{
+				Array<VkImageView> views{tempArena, node.outputCount};
+				glm::ivec3 resolution{};
+
+				node.frameBuffers = arena.New<Array<VkFramebuffer>>(1, arena, frameCount);
+
+				size_t frameIndex = 0;
+				for (auto& frameBuffer : node.frameBuffers->GetView())
+				{
+					const size_t startIndex = imageCount * frameIndex + index + node.inputCount;
+					for (size_t i = 0; i < node.outputCount; ++i)
+					{
+						auto& attachmentIndex = _attachmentIndexes[startIndex + i];
+						auto& attachment = _attachments[attachmentIndex];
+						views[i] = attachment.view;
+						resolution = attachment.image->GetResolution();
+					}
+
+					frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(views.GetLength());
+					frameBufferCreateInfo.pAttachments = views;
+					frameBufferCreateInfo.width = resolution.x;
+					frameBufferCreateInfo.height = resolution.y;
+
+					++frameIndex;
+				}
+
+				index += node.inputCount + node.outputCount;
+			}
+		}
 	}
 
 	RenderGraph::~RenderGraph()
 	{
+		for (int32_t i = static_cast<int32_t>(_nodes.GetLength()) - 1; i >= 0; --i)
+		{
+			const auto& node = _nodes[i];
+			for (auto& frameBuffer : node.frameBuffers->GetView())
+				vkDestroyFramebuffer(_app.device, frameBuffer, nullptr);
+			_arena.Delete(node.frameBuffers);
+		}
+
 		for (int32_t i = static_cast<int32_t>(_attachments.GetLength()) - 1; i >= 0; --i)
 		{
 			const auto& attachment = _attachments[i];

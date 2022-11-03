@@ -84,6 +84,7 @@ namespace je::vk
 		struct Node final
 		{
 			RenderNode* renderNode = nullptr;
+			Array<VkFramebuffer>* frameBuffers = nullptr;
 			size_t inputCount = 0;
 			size_t outputCount = 0;
 		};

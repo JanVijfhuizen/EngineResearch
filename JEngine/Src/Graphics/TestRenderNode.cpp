@@ -121,7 +121,7 @@ namespace je::vk
 	Array<RenderNode::Output> TestRenderNode::DefineOutputs(Arena& arena) const
 	{
 		Array<Output> outputs{arena, 1};
-		outputs[0].name = "RenderGraphResult";
+		outputs[0].name = "Result";
 		auto& resource = outputs[0].resource;
 		resource.resolution = glm::ivec3{ 800, 600, 4 };
 		return Move(outputs);
