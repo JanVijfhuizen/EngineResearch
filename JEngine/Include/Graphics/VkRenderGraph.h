@@ -20,9 +20,11 @@ namespace je::vk
 		struct Resource final
 		{
 			glm::ivec3 resolution;
-			VkFormat format = VK_FORMAT_R8G8B8A8_SRGB;
-			VkImageAspectFlags aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
-			VkImageUsageFlags usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+			enum class Type
+			{
+				color
+			} type = Type::color;
 
 			[[nodiscard]] bool operator==(const Resource& other) const;
 		};

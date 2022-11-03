@@ -1,7 +1,5 @@
 ﻿#include "pch.h"
 #include "Graphics/VkRenderGraph.h"
-#include "Graphics/VkRenderGraph.h"
-#include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
 #include "Graphics/VkSwapChain.h"
@@ -12,7 +10,7 @@ namespace je::vk
 {
 	bool RenderNode::Resource::operator==(const Resource& other) const
 	{
-		return resolution == other.resolution && format == other.format && aspectFlags == other.aspectFlags && usageFlags == other.usageFlags;
+		return resolution == other.resolution && type == other.type;
 	}
 
 	Array<StringView> RenderNode::DefineInputs(Arena& arena) const
@@ -49,10 +47,11 @@ namespace je::vk
 			tempNode.inputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 			tempNode.outputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 
-			// Assert
+			
 #ifdef _DEBUG
 			if(tempNode.outputs)
 			{
+				// Assert if the resolution is the same among outputs.
 				glm::ivec3 resolution = tempNode.outputs[0].resource.resolution;
 				for (auto& output : tempNode.outputs.GetView())
 					assert(resolution == output.resource.resolution);
@@ -294,9 +293,15 @@ namespace je::vk
 			{
 				auto& resource = tempResource.resource;
 				imageCreateInfo.resolution = resource.resolution;
-				imageCreateInfo.format = resource.format;
-				imageCreateInfo.aspectFlags = resource.aspectFlags;
-				imageCreateInfo.usageFlags = resource.usageFlags;
+
+				switch (resource.type)
+				{
+				case RenderNode::Resource::Type::color:
+					imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
+					imageCreateInfo.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
+					imageCreateInfo.usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+					break;
+				}
 
 				const size_t resourceCount = tempResource.count;
 				for (size_t j = 0; j < resourceCount; ++j)
@@ -399,7 +404,7 @@ namespace je::vk
 					frameBufferCreateInfo.height = resolution.y;
 					frameBufferCreateInfo.renderPass = node.renderPass;
 
-					const auto result = vkCreateFramebuffer(app.device, &frameBufferCreateInfo, nullptr, &node.frameBuffers->GetView()[frameIndex]);
+					const auto result = vkCreateFramebuffer(app.device, &frameBufferCreateInfo, nullptr, &frameBuffer);
 					assert(!result);
 
 					++frameIndex;
@@ -484,7 +489,7 @@ namespace je::vk
 			auto result = vkEndCommandBuffer(frame.cmdBuffer);
 			assert(!result);
 			
-			const VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+			constexpr VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 			VkSubmitInfo submitInfo{};
 			submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
