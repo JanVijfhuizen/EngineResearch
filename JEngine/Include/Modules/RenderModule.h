@@ -31,7 +31,6 @@ namespace je
 			vk::Shader* _shader2 = nullptr;
 			vk::Layout* _layout = nullptr;
 			vk::Pipeline* _pipeline = nullptr;
-			vk::Pipeline* _pipeline2 = nullptr;
 
 			vk::Mesh* _mesh = nullptr;
 			vk::Image* _image = nullptr;

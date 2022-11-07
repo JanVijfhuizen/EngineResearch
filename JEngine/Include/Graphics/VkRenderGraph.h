@@ -7,6 +7,8 @@
 
 namespace je::vk
 {
+	class Pipeline;
+	class Shader;
 	class Image;
 	class Allocator;
 	class SwapChain;
@@ -28,6 +30,8 @@ namespace je::vk
 
 		View<StringView> inputs{};
 		View<Output> outputs{};
+		View<VkDescriptorSetLayout> layouts{};
+		Shader* shader = nullptr;
 		
 		void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
 		void* userPtr = nullptr;
@@ -68,16 +72,13 @@ namespace je::vk
 
 		struct TempNode final
 		{
-			void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
-			void* userPtr;
+			const RenderNode* renderNode = nullptr;
 
 			size_t index = SIZE_MAX;
 			size_t depth = 0;
 			bool isRoot = true;
 
 			LinkedList<TempNode*> children{};
-			View<StringView> inputs{};
-			View<RenderNode::Output> outputs{};
 			LinkedList<TempResource*> inputResources{};
 			LinkedList<TempResource*> outputResources{};
 			LinkedList<TempResource::Variation*> inputResourceVariations{};
@@ -88,8 +89,9 @@ namespace je::vk
 		{
 			void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
 			void* userPtr = nullptr;
-			Array<VkFramebuffer>* frameBuffers = nullptr;
 			VkRenderPass renderPass;
+			Array<VkFramebuffer>* frameBuffers = nullptr;
+			Pipeline* pipeline = nullptr;
 			glm::ivec2 resolution;
 			size_t inputCount = 0;
 			size_t outputCount = 0;

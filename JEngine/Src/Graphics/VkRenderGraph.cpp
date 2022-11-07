@@ -2,6 +2,7 @@
 #include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
+#include "Graphics/VkPipeline.h"
 #include "Graphics/VkSwapChain.h"
 #include "Jlb/JMath.h"
 #include "Jlb/LinSort.h"
@@ -28,22 +29,19 @@ namespace je::vk
 			auto& tempNode = tempNodes[i];
 
 			tempNode.index = i;
-			tempNode.renderFunc = node.renderFunc;
-			tempNode.userPtr = node.userPtr;
+			tempNode.renderNode = &node;
 			tempNode.children = LinkedList<TempNode*>{tempArena};
-			tempNode.inputs = node.inputs;
-			tempNode.outputs = node.outputs;
 			tempNode.inputResources = LinkedList<TempResource*>(tempArena);
 			tempNode.outputResources = LinkedList<TempResource*>(tempArena);
 			tempNode.inputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 			tempNode.outputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
 
 #ifdef _DEBUG
-			if(tempNode.outputs)
+			if(node.outputs)
 			{
 				// Assert if the resolution is the same among outputs.
-				glm::ivec2 resolution = tempNode.outputs[0].resource.resolution;
-				for (auto& output : tempNode.outputs)
+				glm::ivec2 resolution = node.outputs[0].resource.resolution;
+				for (auto& output : node.outputs)
 					assert(resolution == output.resource.resolution);
 			}
 #endif
@@ -55,7 +53,7 @@ namespace je::vk
 		LinkedList<TempResource> tempResources{ tempArena };
 		for (auto& tempNode : view)
 		{
-			if (const auto outputView = tempNode.outputs)
+			if (const auto outputView = tempNode.renderNode->outputs)
 				for (auto& output : outputView)
 				{
 					bool contained = false;
@@ -103,7 +101,7 @@ namespace je::vk
 				}
 
 			// Define lifetime for resources.
-			if (const auto inputView = tempNode.inputs)
+			if (const auto inputView = tempNode.renderNode->inputs)
 				for (auto& input : inputView)
 					for (auto& tempResource : tempResources)
 						for (auto& variation : *tempResource.variations)
@@ -117,7 +115,7 @@ namespace je::vk
 		// Link parents by comparing inputs and outputs.
 		for (auto& tempNode : view)
 		{
-			const auto inputView = tempNode.inputs;
+			const auto inputView = tempNode.renderNode->inputs;
 			if (!inputView)
 				continue;
 
@@ -126,7 +124,7 @@ namespace je::vk
 				if (&tempNode == &other)
 					continue;
 
-				const auto outputView = other.outputs;
+				const auto outputView = other.renderNode->outputs;
 				if (!outputView)
 					continue;
 				for (auto& input : inputView)
@@ -170,7 +168,10 @@ namespace je::vk
 		// Define image indexes.
 		size_t imageIndexesCount = 0;
 		for (auto& tempNode : depthSorted.GetView())
-			imageIndexesCount += tempNode->inputs.GetLength() + tempNode->outputs.GetLength();
+		{
+			auto& renderNode = *tempNode->renderNode;
+			imageIndexesCount += renderNode.inputs.GetLength() + renderNode.outputs.GetLength();
+		}
 
 		_attachmentIndexes = Array<size_t>(arena, imageIndexesCount);
 
@@ -208,10 +209,11 @@ namespace je::vk
 			for (auto& node : _nodes.GetView())
 			{
 				auto& tempNode = depthSorted[index];
-				node.renderFunc = tempNode->renderFunc;
-				node.userPtr = tempNode->userPtr;
-				node.inputCount = tempNode->inputs.GetLength();
-				node.outputCount = tempNode->outputs.GetLength();
+				auto& renderNode = *tempNode->renderNode;
+				node.renderFunc = renderNode.renderFunc;
+				node.userPtr = renderNode.userPtr;
+				node.inputCount = renderNode.inputs.GetLength();
+				node.outputCount = renderNode.outputs.GetLength();
 				++index;
 			}
 		}
@@ -357,7 +359,7 @@ namespace je::vk
 			}
 		}
 
-		// Create frame buffers & render passes.
+		// Create frame buffers & render passes & pipelines.
 		{
 			VkFramebufferCreateInfo frameBufferCreateInfo{};
 			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -434,9 +436,21 @@ namespace je::vk
 
 					const auto result = vkCreateFramebuffer(app.device, &frameBufferCreateInfo, nullptr, &frameBuffer);
 					assert(!result);
-
+					
 					++frameIndex;
 				}
+
+				auto& tempNode = depthSorted[index];
+				auto& renderNode = *tempNode->renderNode;
+
+				PipelineCreateInfo createInfo{};
+				createInfo.tempArena = &tempArena;
+				createInfo.app = &_app;
+				createInfo.layouts = renderNode.layouts;
+				createInfo.renderPass = node.renderPass;
+				createInfo.shader = renderNode.shader;
+				createInfo.resolution = resolution;
+				node.pipeline = arena.New<Pipeline>(1, createInfo);
 
 				node.resolution = resolution;
 				index += node.inputCount + node.outputCount;
@@ -452,6 +466,7 @@ namespace je::vk
 			for (const auto& frameBuffer : node.frameBuffers->GetView())
 				vkDestroyFramebuffer(_app.device, frameBuffer, nullptr);
 			vkDestroyRenderPass(_app.device, node.renderPass, nullptr);
+			_arena.Delete(node.pipeline);
 			_arena.Delete(node.frameBuffers);
 		}
 
@@ -517,6 +532,7 @@ namespace je::vk
 				renderPassBeginInfo.pClearValues = &clearColor;
 
 				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+				node.pipeline->Bind(frame.cmdBuffer);
 				node.renderFunc(frame.cmdBuffer, node.userPtr);
 				vkCmdEndRenderPass(frame.cmdBuffer);
 
