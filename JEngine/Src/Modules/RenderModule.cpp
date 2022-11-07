@@ -116,7 +116,7 @@ namespace je::engine
 
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		// Since I'm going for pixelart, this will be the defaukt.
+		// Since I'm going for pixelart, this will be the default.
 		samplerInfo.magFilter = VK_FILTER_NEAREST;
 		samplerInfo.minFilter = VK_FILTER_NEAREST;
 		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -137,7 +137,7 @@ namespace je::engine
 
 		vk::RenderNode::Output output{};
 		output.name = "Result";
-		output.resource.resolution = glm::ivec3{ 800, 600, 3 };
+		output.resource.resolution = _swapChain->GetResolution();// glm::ivec3{ 800, 600, 3 };
 
 		vk::RenderNode node{};
 		node.outputs = output;
@@ -173,8 +173,8 @@ namespace je::engine
 			//atlasInfo.imageLayout = _image->GetLayout();
 			//atlasInfo.imageView = _view;
 			const auto renderGraphResult = _renderGraph->GetResult(0);
-			atlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;// renderGraphResult.layout;
-			atlasInfo.imageView = renderGraphResult.view;
+			atlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			atlasInfo.imageView = renderGraphResult;
 			atlasInfo.sampler = _sampler;
 
 			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

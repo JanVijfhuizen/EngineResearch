@@ -40,17 +40,11 @@ namespace je::vk
 	class RenderGraph final
 	{
 	public:
-		struct Result final
-		{
-			VkImageLayout layout;
-			VkImageView view;
-		};
-
 		RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode>& nodes);
 		~RenderGraph();
 
 		[[nodiscard]] VkSemaphore Update() const;
-		[[nodiscard]] Result GetResult(size_t frameIndex) const;
+		[[nodiscard]] VkImageView GetResult(size_t frameIndex) const;
 
 	private:
 		struct TempResource final
