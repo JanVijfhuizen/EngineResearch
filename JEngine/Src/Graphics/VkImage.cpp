@@ -15,7 +15,7 @@ namespace je::vk
 {
 	Image::Image(const CreateInfo& info) :
 		_app(info.app), _allocator(info.allocator),
-		_format(info.format), _flag(info.flag), _resolution(info.resolution)
+		_format(info.format), _aspectFlags(info.aspectFlags), _resolution(info.resolution)
 	{
 		if(info.pixels)
 			Load(info.pixels, info.usageFlags, info.layout);
@@ -37,54 +37,57 @@ namespace je::vk
 		{
 			CreateImage(info.usageFlags);
 
-			// Record and execute initial layout transition. 
-			VkCommandBuffer cmdBuffer;
-			VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
-			cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-			cmdBufferAllocInfo.commandPool = _app->commandPool;
-			cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-			cmdBufferAllocInfo.commandBufferCount = 1;
+			if (info.layout != VK_IMAGE_LAYOUT_UNDEFINED)
+			{
+				// Record and execute initial layout transition. 
+				VkCommandBuffer cmdBuffer;
+				VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
+				cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+				cmdBufferAllocInfo.commandPool = _app->commandPool;
+				cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+				cmdBufferAllocInfo.commandBufferCount = 1;
 
-			auto result = vkAllocateCommandBuffers(_app->device, &cmdBufferAllocInfo, &cmdBuffer);
-			assert(!result);
+				auto result = vkAllocateCommandBuffers(_app->device, &cmdBufferAllocInfo, &cmdBuffer);
+				assert(!result);
 
-			VkFence fence;
-			VkFenceCreateInfo fenceInfo{};
-			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+				VkFence fence;
+				VkFenceCreateInfo fenceInfo{};
+				fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+				fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-			result = vkCreateFence(_app->device, &fenceInfo, nullptr, &fence);
-			assert(!result);
-			result = vkResetFences(_app->device, 1, &fence);
-			assert(!result);
+				result = vkCreateFence(_app->device, &fenceInfo, nullptr, &fence);
+				assert(!result);
+				result = vkResetFences(_app->device, 1, &fence);
+				assert(!result);
 
-			VkCommandBufferBeginInfo cmdBeginInfo{};
-			cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-			cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-			vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
-			
-			TransitionLayout(cmdBuffer, info.layout, _flag);
+				VkCommandBufferBeginInfo cmdBeginInfo{};
+				cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+				cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+				vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
 
-			// End recording.
-			result = vkEndCommandBuffer(cmdBuffer);
-			assert(!result);
+				TransitionLayout(cmdBuffer, info.layout, _aspectFlags);
 
-			VkSubmitInfo cmdSubmitInfo{};
-			cmdSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-			cmdSubmitInfo.commandBufferCount = 1;
-			cmdSubmitInfo.pCommandBuffers = &cmdBuffer;
-			cmdSubmitInfo.waitSemaphoreCount = 0;
-			cmdSubmitInfo.pWaitSemaphores = nullptr;
-			cmdSubmitInfo.signalSemaphoreCount = 0;
-			cmdSubmitInfo.pSignalSemaphores = nullptr;
-			cmdSubmitInfo.pWaitDstStageMask = nullptr;
-			result = vkQueueSubmit(_app->queues[App::Queue::renderQueue], 1, &cmdSubmitInfo, fence);
-			assert(!result);
+				// End recording.
+				result = vkEndCommandBuffer(cmdBuffer);
+				assert(!result);
 
-			result = vkWaitForFences(_app->device, 1, &fence, VK_TRUE, UINT64_MAX);
-			assert(!result);
+				VkSubmitInfo cmdSubmitInfo{};
+				cmdSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+				cmdSubmitInfo.commandBufferCount = 1;
+				cmdSubmitInfo.pCommandBuffers = &cmdBuffer;
+				cmdSubmitInfo.waitSemaphoreCount = 0;
+				cmdSubmitInfo.pWaitSemaphores = nullptr;
+				cmdSubmitInfo.signalSemaphoreCount = 0;
+				cmdSubmitInfo.pSignalSemaphores = nullptr;
+				cmdSubmitInfo.pWaitDstStageMask = nullptr;
+				result = vkQueueSubmit(_app->queues[App::Queue::renderQueue], 1, &cmdSubmitInfo, fence);
+				assert(!result);
 
-			vkDestroyFence(_app->device, fence, nullptr);
+				result = vkWaitForFences(_app->device, 1, &fence, VK_TRUE, UINT64_MAX);
+				assert(!result);
+
+				vkDestroyFence(_app->device, fence, nullptr);
+			}
 		}
 	}
 
@@ -185,6 +188,11 @@ namespace je::vk
 		return _layout;
 	}
 
+	VkImageAspectFlags Image::GetAspectFlags() const
+	{
+		return _aspectFlags;
+	}
+
 	Image::operator VkImage() const
 	{
 		return _image;
@@ -246,7 +254,7 @@ namespace je::vk
 		cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
 		vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
 
-		TransitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _flag);
+		TransitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _aspectFlags);
 
 		VkBufferImageCopy region{};
 		region.bufferOffset = 0;
@@ -275,7 +283,7 @@ namespace je::vk
 			&region
 		);
 
-		TransitionLayout(cmdBuffer, layout, _flag);
+		TransitionLayout(cmdBuffer, layout, _aspectFlags);
 
 		// End recording.
 		result = vkEndCommandBuffer(cmdBuffer);
@@ -337,7 +345,7 @@ namespace je::vk
 		_image = other._image;
 		_layout = other._layout;
 		_format = other._format;
-		_flag = other._flag;
+		_aspectFlags = other._aspectFlags;
 		_resolution = other._resolution;
 		_memory = other._memory;
 		other._app = nullptr;

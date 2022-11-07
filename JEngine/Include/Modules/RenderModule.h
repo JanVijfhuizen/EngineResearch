@@ -11,7 +11,6 @@ namespace je
 
 	namespace vk
 	{
-		class TestRenderNode;
 		class Layout;
 		class Pipeline;
 		class Shader;
@@ -29,12 +28,12 @@ namespace je
 			vk::SwapChain* _swapChain = nullptr;
 
 			vk::Shader* _shader = nullptr;
+			vk::Shader* _shader2 = nullptr;
 			vk::Layout* _layout = nullptr;
 			vk::Pipeline* _pipeline = nullptr;
 
 			vk::Mesh* _mesh = nullptr;
 			vk::Image* _image = nullptr;
-			vk::TestRenderNode* _testRenderNode;
 			vk::RenderGraph* _renderGraph;
 
 			VkImageView _view;
@@ -46,6 +45,8 @@ namespace je
 			void OnExit(Info& info) override;
 
 			void OnUpdate(Info& info) override;
+
+			static void Render(VkCommandBuffer cmd, void* userPtr);
 		};
 	}
 }

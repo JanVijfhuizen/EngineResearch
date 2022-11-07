@@ -26,7 +26,7 @@ namespace je
 	private:
 		Arena* _arena = nullptr;
 		T* _data = nullptr;
-		size_t _length = SIZE_MAX;
+		size_t _length = 0;
 	};
 
 	template <typename T>

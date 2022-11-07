@@ -15,7 +15,6 @@
 #include "Graphics/VkShader.h"
 #include "Graphics/VkShape.h"
 #include "Graphics/VkSwapChain.h"
-#include "Graphics/TestRenderNode.h"
 
 namespace je::engine
 {
@@ -25,7 +24,7 @@ namespace je::engine
 
 		size_t windowExtensionCount;
 		const auto windowExtensions = WindowModule::GetRequiredExtensions(windowExtensionCount);
-		const Array<StringView> windowExtensionsArr{info.tempArena, windowExtensionCount};
+		const Array<StringView> windowExtensionsArr{ info.tempArena, windowExtensionCount };
 		memcpy(windowExtensionsArr.GetData(), windowExtensions, sizeof(const char*) * windowExtensionCount);
 
 		vk::init::Info vkInfo{};
@@ -39,6 +38,7 @@ namespace je::engine
 
 		// Temp.
 		_shader = info.persistentArena.New<vk::Shader>(1, info.tempArena, _app, "Shaders/vert.spv", "Shaders/frag.spv");
+		_shader2 = info.persistentArena.New<vk::Shader>(1, info.tempArena, _app, "Shaders/vert2.spv", "Shaders/frag2.spv");
 
 		vk::Layout::Binding binding;
 		binding.flag = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -54,7 +54,7 @@ namespace je::engine
 		createInfo.shader = _shader;
 		createInfo.resolution = _swapChain->GetResolution();
 		_pipeline = info.persistentArena.New<vk::Pipeline>(1, createInfo);
-		
+
 		Array<vk::Vertex> verts{};
 		Array<vk::Vertex::Index> inds{};
 		CreateQuadShape(info.tempArena, verts, inds, .5f);
@@ -73,7 +73,7 @@ namespace je::engine
 		viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
 		viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
 		viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-		viewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		viewCreateInfo.subresourceRange.aspectMask = _image->GetAspectFlags();
 		viewCreateInfo.subresourceRange.baseMipLevel = 0;
 		viewCreateInfo.subresourceRange.levelCount = 1;
 		viewCreateInfo.subresourceRange.baseArrayLayer = 0;
@@ -97,7 +97,7 @@ namespace je::engine
 		result = vkCreateDescriptorPool(_app.device, &poolInfo, nullptr, &_descriptorPool);
 		assert(!result);
 
-		Array<VkDescriptorSetLayout> layouts{info.tempArena, _swapChain->GetLength()};
+		Array<VkDescriptorSetLayout> layouts{ info.tempArena, _swapChain->GetLength() };
 		for (auto& layout : layouts.GetView())
 			layout = vkLayout;
 
@@ -116,7 +116,7 @@ namespace je::engine
 
 		VkSamplerCreateInfo samplerInfo{};
 		samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
-		// Since I'm going for pixelart, this will be the defaukt.
+		// Since I'm going for pixelart, this will be the default.
 		samplerInfo.magFilter = VK_FILTER_NEAREST;
 		samplerInfo.minFilter = VK_FILTER_NEAREST;
 		samplerInfo.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
@@ -134,6 +134,19 @@ namespace je::engine
 		samplerInfo.maxLod = 0;
 
 		result = vkCreateSampler(_app.device, &samplerInfo, nullptr, &_sampler);
+
+		vk::RenderNode::Output output{};
+		output.name = "Result";
+		output.resource.resolution = _swapChain->GetResolution();// glm::ivec3{ 800, 600, 3 };
+
+		vk::RenderNode node{};
+		node.outputs = output;
+		node.renderFunc = Render;
+		node.userPtr = this;
+		node.shader = _shader2;
+		View view{node};
+
+		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, view);
 
 		// Bind descriptor sets to the instance data.
 		for (size_t i = 0; i < _swapChain->GetLength(); ++i)
@@ -157,10 +170,13 @@ namespace je::engine
 			*/
 			// Bind texture atlas.
 			VkDescriptorImageInfo  atlasInfo{};
-			atlasInfo.imageLayout = _image->GetLayout();
-			atlasInfo.imageView = _view;
+			//atlasInfo.imageLayout = _image->GetLayout();
+			//atlasInfo.imageView = _view;
+			const auto renderGraphResult = _renderGraph->GetResult(0);
+			atlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+			atlasInfo.imageView = renderGraphResult;
 			atlasInfo.sampler = _sampler;
-			
+
 			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			write.dstBinding = 0;
 			write.dstSet = _descriptorSets[i];
@@ -171,10 +187,6 @@ namespace je::engine
 
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
-
-		_testRenderNode = info.persistentArena.New<vk::TestRenderNode>(1, info.persistentArena, _app, *_allocator);
-		vk::RenderNode* nodes = _testRenderNode;
-		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, _app, info.persistentArena, info.tempArena, *_swapChain, nodes);
 	}
 
 	void RenderModule::OnExit(Info& info)
@@ -187,11 +199,11 @@ namespace je::engine
 		vkDestroyImageView(_app.device, _view, nullptr);
 
 		info.persistentArena.Delete(_renderGraph);
-		info.persistentArena.Delete(_testRenderNode);
 		info.persistentArena.Delete(_image);
 		info.persistentArena.Delete(_mesh);
 		info.persistentArena.Delete(_pipeline);
 		info.persistentArena.Delete(_layout);
+		info.persistentArena.Delete(_shader2);
 		info.persistentArena.Delete(_shader);
 		info.persistentArena.Delete(_swapChain);
 		info.persistentArena.Delete(_allocator);
@@ -205,8 +217,8 @@ namespace je::engine
 		Module::OnUpdate(info);
 
 		_swapChain->WaitForImage();
-
-		const auto renderGraphWaitSemaphores = _renderGraph->Update(info.tempArena);
+		
+		auto renderGraphSemaphore = _renderGraph->Update();
 		const auto cmd = _swapChain->BeginFrame(true);
 		
 		_pipeline->Bind(cmd);
@@ -217,6 +229,13 @@ namespace je::engine
 
 		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 
-		_swapChain->EndFrame(info.tempArena, renderGraphWaitSemaphores);
+		_swapChain->EndFrame(info.tempArena, renderGraphSemaphore);
+	}
+
+	void RenderModule::Render(const VkCommandBuffer cmd, void* userPtr)
+	{
+		const auto ptr = static_cast<RenderModule*>(userPtr);
+		ptr->_mesh->Bind(cmd);
+		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 	}
 }
