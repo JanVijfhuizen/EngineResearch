@@ -282,11 +282,10 @@ namespace je::vk
 			{
 				auto& resource = tempResource.resource;
 				imageCreateInfo.resolution = glm::ivec3(resource.resolution, 3);
-
 				imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
 				imageCreateInfo.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 				imageCreateInfo.usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-
+				
 				const size_t resourceCount = tempResource.count;
 				for (size_t j = 0; j < resourceCount; ++j)
 				{
@@ -356,6 +355,7 @@ namespace je::vk
 			}
 		}
 
+		// Create frame buffers & render passes.
 		{
 			VkFramebufferCreateInfo frameBufferCreateInfo{};
 			frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
@@ -475,6 +475,7 @@ namespace je::vk
 
 		VkSemaphore semaphore = VK_NULL_HANDLE;
 		size_t index = 0;
+		size_t attachmentIndex = 0;
 
 		for (const auto& layer : _layers.GetView())
 		{
@@ -492,6 +493,14 @@ namespace je::vk
 
 				const VkClearValue clearColor = { 1.f, 1.f, 1.f, 1.f };
 
+				// Transition layouts to attachments.
+				attachmentIndex += node.inputCount;
+				for (size_t i = 0; i < node.outputCount; ++i)
+				{
+					const auto& attachment = _attachments[_attachmentIndexes[attachmentIndex + i]];
+					attachment.image->TransitionLayout(frame.cmdBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+				}
+
 				VkExtent2D extent{};
 				extent.width = node.resolution.x;
 				extent.height = node.resolution.y;
@@ -508,7 +517,15 @@ namespace je::vk
 				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 				node.renderFunc(frame.cmdBuffer);
 				vkCmdEndRenderPass(frame.cmdBuffer);
-				
+
+				// transition layouts to shader read only.
+				for (size_t i = 0; i < node.outputCount; ++i)
+				{
+					const auto& attachment = _attachments[_attachmentIndexes[attachmentIndex + i]];
+					attachment.image->TransitionLayout(frame.cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+				}
+
+				attachmentIndex += node.outputCount;
 				++index;
 			}
 
@@ -532,7 +549,7 @@ namespace je::vk
 
 			semaphore = frame.semaphore;
 		}
-		
+
 		return semaphore;
 	}
 

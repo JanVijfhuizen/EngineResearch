@@ -167,10 +167,10 @@ namespace je::engine
 			*/
 			// Bind texture atlas.
 			VkDescriptorImageInfo  atlasInfo{};
-			//atlasInfo.imageLayout = _image->GetLayout();
-			//atlasInfo.imageView = _view;
+			atlasInfo.imageLayout = _image->GetLayout();
+			atlasInfo.imageView = _view;
 			const auto renderGraphResult = _renderGraph->GetResult(0);
-			atlasInfo.imageLayout = renderGraphResult.layout;
+			atlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;// renderGraphResult.layout;
 			atlasInfo.imageView = renderGraphResult.view;
 			atlasInfo.sampler = _sampler;
 
