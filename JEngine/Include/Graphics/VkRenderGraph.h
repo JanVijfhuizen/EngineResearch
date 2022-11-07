@@ -29,7 +29,8 @@ namespace je::vk
 		View<StringView> inputs{};
 		View<Output> outputs{};
 		
-		void (*renderFunc)(VkCommandBuffer cmdBuffer) = nullptr;
+		void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
+		void* userPtr = nullptr;
 	};
 
 	class RenderGraph final
@@ -67,7 +68,8 @@ namespace je::vk
 
 		struct TempNode final
 		{
-			void (*renderFunc)(VkCommandBuffer cmdBuffer) = nullptr;
+			void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
+			void* userPtr;
 
 			size_t index = SIZE_MAX;
 			size_t depth = 0;
@@ -84,7 +86,8 @@ namespace je::vk
 
 		struct Node final
 		{
-			void (*renderFunc)(VkCommandBuffer cmdBuffer) = nullptr;
+			void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
+			void* userPtr = nullptr;
 			Array<VkFramebuffer>* frameBuffers = nullptr;
 			VkRenderPass renderPass;
 			glm::ivec2 resolution;

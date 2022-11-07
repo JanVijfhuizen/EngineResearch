@@ -29,6 +29,7 @@ namespace je::vk
 
 			tempNode.index = i;
 			tempNode.renderFunc = node.renderFunc;
+			tempNode.userPtr = node.userPtr;
 			tempNode.children = LinkedList<TempNode*>{tempArena};
 			tempNode.inputs = node.inputs;
 			tempNode.outputs = node.outputs;
@@ -208,6 +209,7 @@ namespace je::vk
 			{
 				auto& tempNode = depthSorted[index];
 				node.renderFunc = tempNode->renderFunc;
+				node.userPtr = tempNode->userPtr;
 				node.inputCount = tempNode->inputs.GetLength();
 				node.outputCount = tempNode->outputs.GetLength();
 				++index;
@@ -515,7 +517,7 @@ namespace je::vk
 				renderPassBeginInfo.pClearValues = &clearColor;
 
 				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-				node.renderFunc(frame.cmdBuffer);
+				node.renderFunc(frame.cmdBuffer, node.userPtr);
 				vkCmdEndRenderPass(frame.cmdBuffer);
 
 				// transition layouts to shader read only.

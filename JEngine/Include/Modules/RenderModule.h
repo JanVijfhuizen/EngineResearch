@@ -28,8 +28,10 @@ namespace je
 			vk::SwapChain* _swapChain = nullptr;
 
 			vk::Shader* _shader = nullptr;
+			vk::Shader* _shader2 = nullptr;
 			vk::Layout* _layout = nullptr;
 			vk::Pipeline* _pipeline = nullptr;
+			vk::Pipeline* _pipeline2 = nullptr;
 
 			vk::Mesh* _mesh = nullptr;
 			vk::Image* _image = nullptr;
@@ -45,7 +47,7 @@ namespace je
 
 			void OnUpdate(Info& info) override;
 
-			static void Render(VkCommandBuffer cmdBuffer);
+			static void Render(VkCommandBuffer cmd, void* userPtr);
 		};
 	}
 }

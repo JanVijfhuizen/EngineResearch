@@ -38,6 +38,7 @@ namespace je::engine
 
 		// Temp.
 		_shader = info.persistentArena.New<vk::Shader>(1, info.tempArena, _app, "Shaders/vert.spv", "Shaders/frag.spv");
+		_shader2 = info.persistentArena.New<vk::Shader>(1, info.tempArena, _app, "Shaders/vert2.spv", "Shaders/frag2.spv");
 
 		vk::Layout::Binding binding;
 		binding.flag = VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -53,6 +54,14 @@ namespace je::engine
 		createInfo.shader = _shader;
 		createInfo.resolution = _swapChain->GetResolution();
 		_pipeline = info.persistentArena.New<vk::Pipeline>(1, createInfo);
+
+		vk::PipelineCreateInfo createInfo2{};
+		createInfo2.tempArena = &info.tempArena;
+		createInfo2.app = &_app;
+		createInfo2.renderPass = _swapChain->GetRenderPass();
+		createInfo2.shader = _shader2;
+		createInfo2.resolution = _swapChain->GetResolution();
+		_pipeline2 = info.persistentArena.New<vk::Pipeline>(1, createInfo2);
 
 		Array<vk::Vertex> verts{};
 		Array<vk::Vertex::Index> inds{};
@@ -141,6 +150,7 @@ namespace je::engine
 		vk::RenderNode node{};
 		node.outputs = output;
 		node.renderFunc = Render;
+		node.userPtr = this;
 		View view{node};
 
 		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, view);
@@ -167,8 +177,8 @@ namespace je::engine
 			*/
 			// Bind texture atlas.
 			VkDescriptorImageInfo  atlasInfo{};
-			atlasInfo.imageLayout = _image->GetLayout();
-			atlasInfo.imageView = _view;
+			//atlasInfo.imageLayout = _image->GetLayout();
+			//atlasInfo.imageView = _view;
 			const auto renderGraphResult = _renderGraph->GetResult(0);
 			atlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;// renderGraphResult.layout;
 			atlasInfo.imageView = renderGraphResult.view;
@@ -198,8 +208,10 @@ namespace je::engine
 		info.persistentArena.Delete(_renderGraph);
 		info.persistentArena.Delete(_image);
 		info.persistentArena.Delete(_mesh);
+		info.persistentArena.Delete(_pipeline2);
 		info.persistentArena.Delete(_pipeline);
 		info.persistentArena.Delete(_layout);
+		info.persistentArena.Delete(_shader2);
 		info.persistentArena.Delete(_shader);
 		info.persistentArena.Delete(_swapChain);
 		info.persistentArena.Delete(_allocator);
@@ -228,8 +240,13 @@ namespace je::engine
 		_swapChain->EndFrame(info.tempArena, renderGraphSemaphore);
 	}
 
-	void RenderModule::Render(const VkCommandBuffer cmdBuffer)
+	void RenderModule::Render(const VkCommandBuffer cmd, void* userPtr)
 	{
+		const auto ptr = static_cast<RenderModule*>(userPtr);
 
+		ptr->_pipeline2->Bind(cmd);
+		ptr->_mesh->Bind(cmd);
+		
+		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
 	}
 }
