@@ -14,12 +14,12 @@ namespace je
 		struct Scope final
 		{
 			friend Arena;
-
+			
+			Scope(Scope&& other) noexcept;
 			~Scope();
 
 		private:
 			explicit Scope(Arena& arena, size_t& scopeCount, size_t current);
-			Scope(Scope&& other) noexcept;
 
 			Arena* _arena = nullptr;
 			size_t& _scopeCount;

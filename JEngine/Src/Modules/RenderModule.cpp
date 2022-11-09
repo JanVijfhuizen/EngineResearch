@@ -2,6 +2,7 @@
 #include "Modules/RenderModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
+#include "Graphics/ObjLoader.h"
 #include "Graphics/Vertex.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkInitializer.h"
@@ -55,10 +56,18 @@ namespace je::engine
 		createInfo.resolution = _swapChain->GetResolution();
 		_pipeline = info.persistentArena.New<vk::Pipeline>(1, createInfo);
 
+		/*
 		Array<vk::Vertex> verts{};
 		Array<vk::Vertex::Index> inds{};
 		CreateQuadShape(info.tempArena, verts, inds, .5f);
-		_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
+		*/
+
+		{
+			Array<vk::Vertex> verts{};
+			Array<vk::Vertex::Index> inds{};
+			const auto _ = obj::Load(info.tempArena, "Meshes/cube.obj", verts, inds);
+			_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
+		}
 
 		vk::Image::CreateInfo imageCreateInfo{};
 		imageCreateInfo.app = &_app;
