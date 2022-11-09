@@ -14,6 +14,8 @@ namespace je::vk
 	class SwapChain;
 	struct App;
 
+	typedef void(*RenderFunc)(VkCommandBuffer cmdBuffer, void* userPtr);
+
 	struct RenderNode final
 	{
 		struct Resource final
@@ -33,8 +35,10 @@ namespace je::vk
 		View<VkDescriptorSetLayout> layouts{};
 		Shader* shader = nullptr;
 		
-		void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
+		RenderFunc renderFunc = nullptr;
 		void* userPtr = nullptr;
+
+		View<VkImageView> outImageViews{};
 	};
 
 	class RenderGraph final
@@ -81,7 +85,7 @@ namespace je::vk
 
 		struct Node final
 		{
-			void (*renderFunc)(VkCommandBuffer cmdBuffer, void* userPtr) = nullptr;
+			RenderFunc renderFunc = nullptr;
 			void* userPtr = nullptr;
 			VkRenderPass renderPass;
 			Array<VkFramebuffer>* frameBuffers = nullptr;

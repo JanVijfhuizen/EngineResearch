@@ -139,11 +139,14 @@ namespace je::engine
 		output.name = "Result";
 		output.resource.resolution = _swapChain->GetResolution();// glm::ivec3{ 800, 600, 3 };
 
+		Array<VkImageView> views{info.tempArena, _swapChain->GetLength() * 0};
+
 		vk::RenderNode node{};
 		node.outputs = output;
 		node.renderFunc = Render;
 		node.userPtr = this;
 		node.shader = _shader2;
+		node.outImageViews = views;
 		View view{node};
 
 		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, view);

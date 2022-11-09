@@ -456,6 +456,20 @@ namespace je::vk
 				index += node.inputCount + node.outputCount;
 			}
 		}
+
+		// Update image views for user.
+		for (auto& tempNode : depthSorted.GetView())
+		{
+			auto& renderNode = *tempNode->renderNode;
+			auto& inputVariations = tempNode->inputResourceVariations;
+			size_t index = 0;
+			for (auto& inputVariation : inputVariations)
+				for (size_t i = 0; i < frameCount; ++i)
+				{
+					renderNode.outImageViews[index] = _attachments[inputVariation->imageIndex + i * imageCount].view;
+					++index;
+				}
+		}
 	}
 
 	RenderGraph::~RenderGraph()
