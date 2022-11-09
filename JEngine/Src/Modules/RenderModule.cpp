@@ -235,7 +235,7 @@ namespace je::engine
 		_swapChain->EndFrame(info.tempArena, renderGraphSemaphore);
 	}
 
-	void RenderModule::Render(const VkCommandBuffer cmd, void* userPtr)
+	void RenderModule::Render(const VkCommandBuffer cmd, void* userPtr, const size_t frameIndex)
 	{
 		const auto ptr = static_cast<RenderModule*>(userPtr);
 		ptr->_mesh->Bind(cmd);
