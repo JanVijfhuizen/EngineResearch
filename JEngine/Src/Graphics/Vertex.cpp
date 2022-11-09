@@ -16,17 +16,23 @@ namespace je::vk
 
 	Array<VkVertexInputAttributeDescription> Vertex::GetAttributeDescriptions(Arena& arena)
 	{
-		Array<VkVertexInputAttributeDescription> ret{arena, 2};
+		Array<VkVertexInputAttributeDescription> ret{arena, 3};
 
 		auto& position = ret[0];
 		position.binding = 0;
 		position.location = 0;
-		position.format = VK_FORMAT_R32G32_SFLOAT;
+		position.format = VK_FORMAT_R32G32B32_SFLOAT;
 		position.offset = offsetof(Vertex, position);
 
-		auto& texCoords = ret[1];
+		auto& normal = ret[1];
+		normal.binding = 0;
+		normal.location = 1;
+		normal.format = VK_FORMAT_R32G32B32_SFLOAT;
+		normal.offset = offsetof(Vertex, normal);
+
+		auto& texCoords = ret[2];
 		texCoords.binding = 0;
-		texCoords.location = 1;
+		texCoords.location = 2;
 		texCoords.format = VK_FORMAT_R32G32_SFLOAT;
 		texCoords.offset = offsetof(Vertex, textureCoordinates);
 

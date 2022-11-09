@@ -8,10 +8,10 @@ namespace je::vk
 		outVertices = { arena, 4 };
 		outIndices = {arena, 6 };
 
-		outVertices[0].position = { -1, -1 };
-		outVertices[1].position = { -1, 1 };
-		outVertices[2].position = { 1, 1 };
-		outVertices[3].position = { 1, -1 };
+		outVertices[0].position = { -1, -1, 0 };
+		outVertices[1].position = { -1, 1, 0 };
+		outVertices[2].position = { 1, 1, 0 };
+		outVertices[3].position = { 1, -1, 0 };
 
 		outVertices[0].textureCoordinates = { 0, 0 };
 		outVertices[1].textureCoordinates = { 0, 1 };
