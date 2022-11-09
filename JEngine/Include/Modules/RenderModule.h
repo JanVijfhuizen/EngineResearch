@@ -46,7 +46,7 @@ namespace je
 
 			void OnUpdate(Info& info) override;
 
-			static void Render(VkCommandBuffer cmd, void* userPtr);
+			static void Render(VkCommandBuffer cmd, void* userPtr, const size_t frameIndex);
 		};
 	}
 }

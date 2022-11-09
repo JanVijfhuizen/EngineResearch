@@ -547,7 +547,7 @@ namespace je::vk
 
 				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 				node.pipeline->Bind(frame.cmdBuffer);
-				node.renderFunc(frame.cmdBuffer, node.userPtr);
+				node.renderFunc(frame.cmdBuffer, node.userPtr, frameIndex);
 				vkCmdEndRenderPass(frame.cmdBuffer);
 
 				// transition layouts to shader read only.
