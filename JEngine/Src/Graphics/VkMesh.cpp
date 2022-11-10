@@ -45,4 +45,9 @@ namespace je::vk
 		vkCmdBindVertexBuffers(cmd, 0, 1, &_vertexBuffer.buffer, &_vertexBuffer.memory.offset);
 		vkCmdBindIndexBuffer(cmd, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
 	}
+
+	void Mesh::Draw(const VkCommandBuffer cmd, const size_t count) const
+	{
+		vkCmdDrawIndexed(cmd, static_cast<uint32_t>(_indexCount), static_cast<uint32_t>(count), 0, 0, 0);
+	}
 }

@@ -36,7 +36,7 @@ namespace je::file
 			const auto& c = data[i];
 
 			if (c == d)
-				lines[++index] = i;
+				lines[++index] = i + 1;
 		}
 		return Move(lines);
 	}

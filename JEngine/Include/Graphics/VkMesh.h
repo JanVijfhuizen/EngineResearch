@@ -18,6 +18,7 @@ namespace je::vk
 		~Mesh();
 
 		void Bind(VkCommandBuffer cmd) const;
+		void Draw(VkCommandBuffer cmd, size_t count) const;
 
 	private:
 		Buffer _vertexBuffer;

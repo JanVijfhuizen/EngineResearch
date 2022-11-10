@@ -8,7 +8,7 @@ namespace je
 
 	namespace obj
 	{
-		[[nodiscard]] Arena::Scope Load(Arena& tempArena, const StringView& path, Array<vk::Vertex>& outVertices, Array<vk::Vertex::Index>& outIndices);
+		void Load(Arena& arena, const StringView& path, const Arena::Scope& scope, Array<vk::Vertex>& outVertices, Array<vk::Vertex::Index>& outIndices, float scale = 1);
 	}
 	
 }
