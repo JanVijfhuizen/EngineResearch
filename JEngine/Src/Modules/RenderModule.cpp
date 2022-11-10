@@ -2,6 +2,7 @@
 #include "Modules/RenderModule.h"
 #include "EngineInfo.h"
 #include "ModuleFinder.h"
+#include "Graphics/ObjLoader.h"
 #include "Graphics/Vertex.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkInitializer.h"
@@ -55,10 +56,24 @@ namespace je::engine
 		createInfo.resolution = _swapChain->GetResolution();
 		_pipeline = info.persistentArena.New<vk::Pipeline>(1, createInfo);
 
-		Array<vk::Vertex> verts{};
-		Array<vk::Vertex::Index> inds{};
-		CreateQuadShape(info.tempArena, verts, inds, .5f);
-		_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
+		{
+			const auto _ = info.tempArena.CreateScope();
+
+			Array<vk::Vertex> verts{};
+			Array<vk::Vertex::Index> inds{};
+			CreateQuadShape(info.tempArena, verts, inds, .5f);
+			_mesh = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
+		}
+
+		{
+			const auto _ = info.tempArena.CreateScope();
+			
+			Array<vk::Vertex> verts{};
+			Array<vk::Vertex::Index> inds{};
+			constexpr float scale = .5f;
+			obj::Load(info.tempArena, "Meshes/cube.obj", _, verts, inds, scale);
+			_mesh2 = info.persistentArena.New<vk::Mesh>(1, _app, *_allocator, verts, inds);
+		}
 
 		vk::Image::CreateInfo imageCreateInfo{};
 		imageCreateInfo.app = &_app;
@@ -203,6 +218,7 @@ namespace je::engine
 
 		info.persistentArena.Delete(_renderGraph);
 		info.persistentArena.Delete(_image);
+		info.persistentArena.Delete(_mesh2);
 		info.persistentArena.Delete(_mesh);
 		info.persistentArena.Delete(_pipeline);
 		info.persistentArena.Delete(_layout);
@@ -225,12 +241,11 @@ namespace je::engine
 		const auto cmd = _swapChain->BeginFrame(true);
 		
 		_pipeline->Bind(cmd);
-		_mesh->Bind(cmd);
 
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->GetLayout(),
 			0, 1, &_descriptorSets[_swapChain->GetIndex()], 0, nullptr);
-
-		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+		
+		_mesh->Draw(cmd, 1);
 
 		_swapChain->EndFrame(info.tempArena, renderGraphSemaphore);
 	}
@@ -238,7 +253,6 @@ namespace je::engine
 	void RenderModule::Render(const VkCommandBuffer cmd, void* userPtr, const size_t frameIndex)
 	{
 		const auto ptr = static_cast<RenderModule*>(userPtr);
-		ptr->_mesh->Bind(cmd);
-		vkCmdDrawIndexed(cmd, 6, 1, 0, 0, 0);
+		ptr->_mesh2->Draw(cmd, 1);
 	}
 }

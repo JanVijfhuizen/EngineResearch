@@ -14,7 +14,7 @@ namespace je
 	public:
 		StringArray() = default;
 		StringArray(Arena& arena, size_t number);
-		StringArray(Arena& arena, const StringView& view);
+		StringArray(Arena& arena, const StringView& view, size_t length = SIZE_MAX);
 
 		[[nodiscard]] explicit operator StringView() const;
 		[[nodiscard]] StringView GetStringView() const;
@@ -40,10 +40,10 @@ namespace je
 	}
 
 	template <typename T>
-	StringArray<T>::StringArray(Arena& arena, const StringView& view) : Array<T>(arena, view.GetLength() + 1)
+	StringArray<T>::StringArray(Arena& arena, const StringView& view, size_t length) : Array<T>(arena, length == SIZE_MAX ? view.GetLength() + 1 : length)
 	{
 		const auto data = Array<T>::GetData();
-		const size_t length = Array<T>::GetLength() - 1;
+		length = Array<T>::GetLength() - 1;
 		for (size_t i = 0; i < length; ++i)
 			data[i] = view[i];
 		data[length] = '\0';

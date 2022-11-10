@@ -33,6 +33,7 @@ namespace je
 			vk::Pipeline* _pipeline = nullptr;
 
 			vk::Mesh* _mesh = nullptr;
+			vk::Mesh* _mesh2 = nullptr;
 			vk::Image* _image = nullptr;
 			vk::RenderGraph* _renderGraph;
 
