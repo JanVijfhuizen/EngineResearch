@@ -244,8 +244,7 @@ namespace je::engine
 
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline->GetLayout(),
 			0, 1, &_descriptorSets[_swapChain->GetIndex()], 0, nullptr);
-
-		_mesh->Bind(cmd);
+		
 		_mesh->Draw(cmd, 1);
 
 		_swapChain->EndFrame(info.tempArena, renderGraphSemaphore);
@@ -254,7 +253,6 @@ namespace je::engine
 	void RenderModule::Render(const VkCommandBuffer cmd, void* userPtr, const size_t frameIndex)
 	{
 		const auto ptr = static_cast<RenderModule*>(userPtr);
-		ptr->_mesh2->Bind(cmd);
 		ptr->_mesh2->Draw(cmd, 1);
 	}
 }

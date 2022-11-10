@@ -16,8 +16,7 @@ namespace je::vk
 		Mesh(Mesh&& other) noexcept;
 		Mesh& operator=(Mesh&& other) noexcept;
 		~Mesh();
-
-		void Bind(VkCommandBuffer cmd) const;
+		
 		void Draw(VkCommandBuffer cmd, size_t count) const;
 
 	private:

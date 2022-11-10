@@ -40,14 +40,11 @@ namespace je::vk
 		vkDestroyBuffer(_app->device, _vertexBuffer.buffer, nullptr);
 	}
 
-	void Mesh::Bind(const VkCommandBuffer cmd) const
-	{
-		vkCmdBindVertexBuffers(cmd, 0, 1, &_vertexBuffer.buffer, &_vertexBuffer.memory.offset);
-		vkCmdBindIndexBuffer(cmd, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
-	}
-
 	void Mesh::Draw(const VkCommandBuffer cmd, const size_t count) const
 	{
+		VkDeviceSize offset = 0;
+		vkCmdBindVertexBuffers(cmd, 0, 1, &_vertexBuffer.buffer, &offset);
+		vkCmdBindIndexBuffer(cmd, _indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
 		vkCmdDrawIndexed(cmd, static_cast<uint32_t>(_indexCount), static_cast<uint32_t>(count), 0, 0, 0);
 	}
 }
