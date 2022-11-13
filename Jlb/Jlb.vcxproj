@@ -159,9 +159,7 @@
     <ClInclude Include="Include\jpch.h" />
     <ClInclude Include="Include\Jlb\Queue.h" />
     <ClInclude Include="Include\Jlb\Stack.h" />
-    <ClInclude Include="Include\Jlb\StringView.h" />
-    <ClInclude Include="Include\Jlb\Utils.h" />
-    <ClInclude Include="Include\Jlb\View.h" />
+    <ClInclude Include="Include\Jlb\Swap.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\FileLoader.cpp" />
@@ -177,7 +175,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Src\StringView.cpp" />
+    <ClCompile Include="Src\StringUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

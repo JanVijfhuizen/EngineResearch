@@ -3,73 +3,49 @@
 
 namespace je
 {
-	// Allows for resizing, adding and removing values.
 	template <typename T>
-	class Vector : public Array<T>
+	struct Vector final
 	{
-	public:
-		Vector(Arena& arena, size_t length);
-		Vector(Vector<T>&& other) noexcept;
-		Vector& operator=(Vector&& other) noexcept;
+		T* data = nullptr;
+		size_t length = 0;
+		size_t count = 0;
 
 		T& Add(const T& instance = {});
 		void Remove(size_t index);
 		void Clear();
-
-		[[nodiscard]] size_t GetCount() const;
-		[[nodiscard]] View<T> GetView() const override;
-
-	private:
-		size_t _count = 0;
 	};
-
-	template <typename T>
-	Vector<T>::Vector(Arena& arena, const size_t length) : Array<T>(arena, length)
-	{
-	}
-
-	template <typename T>
-	Vector<T>::Vector(Vector<T>&& other) noexcept : Array<T>(Move(other))
-	{
-		_count = other._count;
-	}
-
-	template <typename T>
-	Vector<T>& Vector<T>::operator=(Vector&& other) noexcept
-	{
-		_count = other._count;
-		Array<T>::operator=(Move(other));
-		return *this;
-	}
 
 	template <typename T>
 	T& Vector<T>::Add(const T& instance)
 	{
-		assert(GetCount() < Array<T>::GetLength());
-		return Array<T>::GetData()[_count++] = instance;
+		assert(count < length);
+		return data[count++] = instance;
 	}
 
 	template <typename T>
 	void Vector<T>::Remove(const size_t index)
 	{
-		Array<T>::GetData()[index] = Array<T>::GetData()[--_count];
+		data[index] = data[--count];
 	}
 
 	template <typename T>
 	void Vector<T>::Clear()
 	{
-		_count = 0;
+		count = 0;
 	}
 
 	template <typename T>
-	size_t Vector<T>::GetCount() const
+	[[nodiscard]] Vector<T> CreateVector(Arena* arena, const size_t length)
 	{
-		return _count;
+		Vector<T> instance{};
+		instance.data = arena->New<T>(length);
+		instance.length = length;
+		return instance;
 	}
 
 	template <typename T>
-	View<T> Vector<T>::GetView() const
+	void DestroyVector(Vector<T>* instance, Arena* arena)
 	{
-		return { Array<T>::GetData(), _count };
+		arena->Free(instance->data);
 	}
 }

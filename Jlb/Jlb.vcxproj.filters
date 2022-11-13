@@ -57,13 +57,7 @@
     <ClInclude Include="Include\Jlb\Stack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Jlb\StringView.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Jlb\Utils.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Jlb\View.h">
+    <ClInclude Include="Include\Jlb\Swap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Jlb\LinkedList.h">
@@ -89,7 +83,7 @@
     <ClCompile Include="Src\Arena.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\StringView.cpp">
+    <ClCompile Include="Src\StringUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\FileLoader.cpp">

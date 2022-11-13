@@ -2,7 +2,6 @@
 
 namespace je
 {
-	// Standard linear allocator.
 	template <typename T>
 	struct Iterator final
 	{
