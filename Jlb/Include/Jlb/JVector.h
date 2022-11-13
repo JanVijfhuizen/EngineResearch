@@ -12,6 +12,10 @@ namespace je
 		T& Add(const T& instance = {});
 		void Remove(size_t index);
 		void Clear();
+
+
+		[[nodiscard]] Iterator<T> begin() const;
+		[[nodiscard]] Iterator<T> end() const;
 	};
 
 	template <typename T>
@@ -31,6 +35,25 @@ namespace je
 	void Vector<T>::Clear()
 	{
 		count = 0;
+	}
+
+	template <typename T>
+	Iterator<T> Vector<T>::begin() const
+	{
+		Iterator<T> it{};
+		it.length = count;
+		it.data = data;
+		return it;
+	}
+
+	template <typename T>
+	Iterator<T> Vector<T>::end() const
+	{
+		Iterator<T> it{};
+		it.length = count;
+		it.index = length;
+		it.data = data;
+		return it;
 	}
 
 	template <typename T>
