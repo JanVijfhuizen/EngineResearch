@@ -26,7 +26,7 @@ namespace je
 			[[nodiscard]] size_t GetMemorySpaceRequired() const;
 		};
 
-		explicit Engine(const CreateInfo& info = {});
+		explicit Engine(const CreateInfo* info);
 		virtual ~Engine();
 
 		[[nodiscard]] size_t Run();

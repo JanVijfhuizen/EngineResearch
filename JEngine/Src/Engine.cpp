@@ -15,11 +15,11 @@ namespace je
 		return persistentArenaSize + dumpArenaSize;
 	}
 
-	Engine::Engine(const CreateInfo& info) :
-		_memory(malloc(info.GetMemorySpaceRequired())),
-		_persistentArena(_memory, info.persistentArenaSize),
-		_tempArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize, info.tempArenaSize),
-		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize)
+	Engine::Engine(const CreateInfo* info) :
+		_memory(malloc(info->GetMemorySpaceRequired())),
+		_persistentArena(_memory, info->persistentArenaSize),
+		_tempArena(static_cast<unsigned char*>(_memory) + info->persistentArenaSize, info->tempArenaSize),
+		_dumpArena(static_cast<unsigned char*>(_memory) + info->persistentArenaSize + info->tempArenaSize, info->dumpArenaSize)
 	{
 	}
 
@@ -35,7 +35,7 @@ namespace je
 
 		const auto _ = _persistentArena.CreateScope();
 
-		LinkedList<KeyPair<Module*>> linkedModules{_persistentArena};
+		auto linkedModules = CreateLinkedList<KeyPair<Module*>>();
 
 		{
 			engine::Initializer initializer{ *this };
@@ -45,7 +45,7 @@ namespace je
 			DefineAdditionalModules(initializer);
 			
 			for (auto& mod : initializer._linkedModules)
-				linkedModules.Add(mod);
+				LinkedListAdd(&linkedModules, &_persistentArena, mod);
 		}
 
 		engine::ModuleFinder finder{ _persistentArena, linkedModules };
