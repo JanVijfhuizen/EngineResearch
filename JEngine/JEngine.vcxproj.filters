@@ -69,7 +69,7 @@
     <ClCompile Include="Src\Graphics\Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\VkShape.cpp">
+    <ClCompile Include="Src\Graphics\VkShapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\VkImage.cpp">
@@ -146,7 +146,7 @@
     <ClInclude Include="Include\Graphics\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VkShape.h">
+    <ClInclude Include="Include\Graphics\VkShapes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VkImage.h">

@@ -3,6 +3,7 @@
 #include <cstring>
 #include <iostream>
 #include "Graphics/VkApp.h"
+#include "Jlb/Array.h"
 #include "Jlb/Heap.h"
 #include "Jlb/JMap.h"
 #include "Jlb/JVector.h"
@@ -208,7 +209,7 @@ namespace je::vk::init
 		return families;
 	}
 
-	bool CheckDeviceExtensionSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const Array<const char*>&extensions)
+	bool CheckDeviceExtensionSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const View<const char*>&extensions)
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
@@ -446,9 +447,9 @@ namespace je::vk::init
 		memcpy(deviceExtensions.data, info.deviceExtensions.data, sizeof(const char*) * info.deviceExtensions.length);
 
 		Info updatedInfo = info;
-		updatedInfo.validationLayers = validationLayers;
-		updatedInfo.instanceExtensions = instanceExtensions;
-		updatedInfo.deviceExtensions = deviceExtensions;
+		updatedInfo.validationLayers = static_cast<View<const char*>>(validationLayers);
+		updatedInfo.instanceExtensions = static_cast<View<const char*>>(instanceExtensions);
+		updatedInfo.deviceExtensions = static_cast<View<const char*>>(deviceExtensions);
 
 		CheckValidationSupport(*updatedInfo.tempArena, validationLayers);
 		app.instance = CreateInstance(validationLayers, instanceExtensions);

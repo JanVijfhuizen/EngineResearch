@@ -156,6 +156,7 @@
     <ClInclude Include="Include\Jlb\KeyPair.h" />
     <ClInclude Include="Include\Jlb\LinkedList.h" />
     <ClInclude Include="Include\Jlb\Tuple.h" />
+    <ClInclude Include="Include\Jlb\View.h" />
     <ClInclude Include="Include\jpch.h" />
     <ClInclude Include="Include\Jlb\Queue.h" />
     <ClInclude Include="Include\Jlb\Stack.h" />

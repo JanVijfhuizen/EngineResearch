@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Graphics/VkShape.h"
+#include "Graphics/VkShapes.h"
 
 namespace je::vk
 {
@@ -25,7 +25,7 @@ namespace je::vk
 		outIndices[4] = 2;
 		outIndices[5] = 3;
 
-		for (auto& vertex : outVertices.GetView())
+		for (auto& vertex : outVertices)
 			vertex.position *= scale;
 	}
 }

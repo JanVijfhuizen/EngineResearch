@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Jlb/Array.h"
+#include "Jlb/View.h"
 
 namespace je
 {
@@ -30,8 +30,8 @@ namespace je
 			struct SwapChainSupportDetails final
 			{
 				VkSurfaceCapabilitiesKHR capabilities{};
-				Array<VkSurfaceFormatKHR> formats{};
-				Array<VkPresentModeKHR> presentModes{};
+				View<VkSurfaceFormatKHR> formats{};
+				View<VkPresentModeKHR> presentModes{};
 
 				[[nodiscard]] operator bool() const;
 				[[nodiscard]] size_t GetRecommendedImageCount() const;
@@ -45,9 +45,9 @@ namespace je
 			struct Info final
 			{
 				Arena* tempArena = nullptr;
-				Array<const char*> validationLayers{};
-				Array<const char*> instanceExtensions{};
-				Array<const char*> deviceExtensions{};
+				View<const char*> validationLayers{};
+				View<const char*> instanceExtensions{};
+				View<const char*> deviceExtensions{};
 
 				bool(*isPhysicalDeviceValid)(const PhysicalDeviceInfo& info) = IsPhysicalDeviceValid;
 				size_t(*getPhysicalDeviceRating)(const PhysicalDeviceInfo& info) = GetPhysicalDeviceRating;
@@ -59,7 +59,7 @@ namespace je
 			void DestroyApp(const App& app);
 
 			[[nodiscard]] QueueFamilies GetQueueFamilies(Arena& arena, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
-			[[nodiscard]] SwapChainSupportDetails QuerySwapChainSupport(Arena& arena, VkPhysicalDevice physicalDevice, const VkSurfaceKHR surface);
+			[[nodiscard]] SwapChainSupportDetails QuerySwapChainSupport(Arena& arena, VkPhysicalDevice physicalDevice, VkSurfaceKHR surface);
 		}
 	}
 }

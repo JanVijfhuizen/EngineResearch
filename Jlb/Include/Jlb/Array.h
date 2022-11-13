@@ -1,37 +1,15 @@
 #pragma once
 #include "Arena.h"
-#include "Iterator.h"
+#include "View.h"
 
 namespace je
 {
 	template <typename T>
-	struct Array final
+	struct Array final : View<T>
 	{
 		T* data = nullptr;
 		size_t length = 0;
-
-		[[nodiscard]] Iterator<T> begin() const;
-		[[nodiscard]] Iterator<T> end() const;
 	};
-
-	template <typename T>
-	Iterator<T> Array<T>::begin() const
-	{
-		Iterator<T> it{};
-		it.length = length;
-		it.data = data;
-		return it;
-	}
-
-	template <typename T>
-	Iterator<T> Array<T>::end() const
-	{
-		Iterator<T> it{};
-		it.length = length;
-		it.index = length;
-		it.data = data;
-		return it;
-	}
 
 	template <typename T>
 	[[nodiscard]] Array<T> CreateArray(Arena& arena, const size_t length)

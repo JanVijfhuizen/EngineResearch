@@ -138,7 +138,7 @@
     <ClCompile Include="Src\Graphics\ObjLoader.cpp" />
     <ClCompile Include="Src\Graphics\VkLayout.cpp" />
     <ClCompile Include="Src\Graphics\VkImage.cpp" />
-    <ClCompile Include="Src\Graphics\VkShape.cpp" />
+    <ClCompile Include="Src\Graphics\VkShapes.cpp" />
     <ClCompile Include="Src\Graphics\Vertex.cpp" />
     <ClCompile Include="Src\Graphics\VkMesh.cpp" />
     <ClCompile Include="Src\Graphics\VkPipeline.cpp" />
@@ -175,7 +175,7 @@
     <ClInclude Include="Include\Graphics\VkPipeline.h" />
     <ClInclude Include="Include\Graphics\VkRenderGraph.h" />
     <ClInclude Include="Include\Graphics\VkShader.h" />
-    <ClInclude Include="Include\Graphics\VkShape.h" />
+    <ClInclude Include="Include\Graphics\VkShapes.h" />
     <ClInclude Include="Include\Graphics\VkSwapChain.h" />
     <ClInclude Include="Include\Graphics\VkImage.h" />
     <ClInclude Include="Include\Module.h" />
