@@ -1,84 +1,65 @@
 #pragma once
-#include "Array.h"
 
 namespace je
 {
 	// First-In-First-Out.
 	template <typename T>
-	class Queue final : public Array<T>
+	struct Queue final
 	{
-	public:
-		Queue() = default;
-		Queue(Arena& arena, size_t length);
-		Queue(Queue<T>&& other) noexcept;
-		Queue<T>& operator=(Queue<T>&& other) noexcept;
-
+		T* data = nullptr;
+		size_t length = 0;
+		size_t count = 0;
+		size_t begin = 0;
+		
 		void Enqueue(const T& instance = {});
 		[[nodiscard]] T& Peek();
 		T Dequeue();
-
 		void Clear();
-		[[nodiscard]] size_t GetCount() const;
-
-	private:
-		size_t _count = 0;
-		size_t _begin = 0;
 	};
-
-	template <typename T>
-	Queue<T>::Queue(Arena& arena, size_t length) : Array<T>(arena, length)
-	{
-	}
-
-	template <typename T>
-	Queue<T>::Queue(Queue<T>&& other) noexcept : Array<T>(Move(other)), _count(other._count), _begin(other._begin)
-	{
-
-	}
-
-	template <typename T>
-	Queue<T>& Queue<T>::operator=(Queue<T>&& other) noexcept
-	{
-		_count = other._count;
-		Array<T>::operator=(Move(other));
-		return *this;
-	}
 
 	template <typename T>
 	void Queue<T>::Enqueue(const T& instance)
 	{
-		const size_t length = Array<T>::GetLength();
-		assert(_count < length);
-		size_t tail = _begin + _count++;
+		assert(count < length);
+		size_t tail = begin + count++;
 		tail %= length;
-		Array<T>::GetData()[tail] = instance;
+		data[tail] = instance;
 	}
 
 	template <typename T>
 	T& Queue<T>::Peek()
 	{
-		return Array<T>::GetData()[_begin];
+		return data[begin];
 	}
 
 	template <typename T>
 	T Queue<T>::Dequeue()
 	{
-		assert(_count > 0);
-		const T instance = Array<T>::GetData()[_begin++];
-		_begin %= Array<T>::GetLength();
+		assert(count > 0);
+		const T instance = data[begin++];
+		begin %= length;
 		return instance;
 	}
 
 	template <typename T>
 	void Queue<T>::Clear()
 	{
-		_begin = 0;
-		_count = 0;
+		begin = 0;
+		count = 0;
 	}
 
 	template <typename T>
-	size_t Queue<T>::GetCount() const
+	[[nodiscard]] Queue<T> CreateQueue(Arena* arena, const size_t length)
 	{
-		return _count;
+		Queue<T> instance{};
+		instance.data = arena->New<T>(length);
+		instance.length = length;
+		return instance;
+	}
+
+	template <typename T>
+	void DestroyQueue(Queue<T>* instance, Arena* arena)
+	{
+		arena->Free(instance->data);
 	}
 }

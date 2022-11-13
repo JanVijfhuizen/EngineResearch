@@ -1,31 +1,23 @@
 #pragma once
-#include "Array.h"
 #include "KeyPair.h"
-#include "Utils.h"
+#include "Swap.h"
 
 namespace je
 {
 	// Allows for quick lookup of values.
 	template <typename T>
-	class Map final : public Array<KeyPair<T>>
+	struct Map final
 	{
-	public:
-		Map() = default;
-		Map(Arena& arena, size_t length);
-		Map(Map<T>&& other) noexcept;
-		Map<T>& operator=(Map<T>&& other) noexcept;
+		KeyPair<T>* data = nullptr;
+		size_t length = 0;
+		size_t count = 0;
 
 		void Insert(const T& instance, size_t key);
-
 		[[nodiscard]] T* Contains(size_t key) const;
 		void Erase(T& value);
-		[[nodiscard]] size_t GetCount() const;
-
-	protected:
-		[[nodiscard]] size_t GetHash(size_t key) const;
 
 	private:
-		size_t _count = 0;
+		[[nodiscard]] size_t GetHash(size_t key) const;
 	};
 
 	template <typename T>
@@ -34,13 +26,9 @@ namespace je
 		size_t index;
 		const bool contains = Contains(value, index);
 		assert(contains);
-
-		const size_t length = Array<KeyPair<T>>::GetLength();
-		assert(_count > 0);
-
-		auto data = Array<KeyPair<T>>::GetData();
+		assert(count > 0);
+		
 		auto& keyPair = data[index];
-
 
 		// Check how big the key group is.
 		size_t i = 1;
@@ -57,40 +45,18 @@ namespace je
 		keyPair = {};
 		// Move the key group one place backwards by swapping the first and last index.
 		Swap(data, index, index + i - 1);
-		--_count;
-	}
-
-	template <typename T>
-	Map<T>::Map(Arena& arena, size_t length) : Array<KeyPair<T>>(arena, length)
-	{
-	}
-
-	template <typename T>
-	Map<T>::Map(Map<T>&& other) noexcept : Array<KeyPair<T>>(Move(other)), _count(other._count)
-	{
-
-	}
-
-	template <typename T>
-	Map<T>& Map<T>::operator=(Map<T>&& other) noexcept
-	{
-		_count = other._count;
-		Array<T>::operator=(Move(other));
-		return *this;
+		--count;
 	}
 
 	template <typename T>
 	void Map<T>::Insert(const T& instance, const size_t key)
 	{
-		const size_t length = Array<KeyPair<T>>::GetLength();
-		assert(_count < length);
+		assert(count < length);
 
 		// If it already contains this value, replace the old one with the newer value.
 		if (Contains(key))
 			return;
-
-		auto data = Array<KeyPair<T>>::GetData();
-
+		
 		const size_t hash = GetHash(key);
 
 		for (size_t i = 0; i < length; ++i)
@@ -103,7 +69,7 @@ namespace je
 
 			keyPair.key = key;
 			keyPair.value = instance;
-			++_count;
+			++count;
 			break;
 		}
 	}
@@ -111,13 +77,10 @@ namespace je
 	template <typename T>
 	T* Map<T>::Contains(const size_t key) const
 	{
-		const size_t length = Array<KeyPair<T>>::GetLength();
-		assert(_count <= length);
+		assert(count <= length);
 
 		// Get and use the hash as an index.
 		const size_t hash = GetHash(key);
-
-		auto data = Array<KeyPair<T>>::GetData();
 
 		for (size_t i = 0; i < length; ++i)
 		{
@@ -133,14 +96,23 @@ namespace je
 	}
 
 	template <typename T>
-	size_t Map<T>::GetCount() const
+	size_t Map<T>::GetHash(const size_t key) const
 	{
-		return _count;
+		return key % length;
 	}
 
 	template <typename T>
-	size_t Map<T>::GetHash(const size_t key) const
+	[[nodiscard]] Map<T> CreateMap(Arena* arena, const size_t length)
 	{
-		return key % Array<KeyPair<T>>::GetLength();
+		Map<T> instance{};
+		instance.data = arena->New<T>(length);
+		instance.length = length;
+		return instance;
+	}
+
+	template <typename T>
+	void DestroyMap(Map<T>* instance, Arena* arena)
+	{
+		arena->Free(instance->data);
 	}
 }

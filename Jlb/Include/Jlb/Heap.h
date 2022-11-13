@@ -1,5 +1,4 @@
 #pragma once
-#include "Array.h"
 #include "KeyPair.h"
 #include "Swap.h"
 
@@ -87,8 +86,7 @@ namespace je
 		// If no more nodes remain on the left side.
 		if (count < left)
 			return;
-
-		const auto data = Array<KeyPair<T>>::GetData();
+		
 		// Is the left node smaller than index.
 		const bool lDiff = data[index].key > data[left].key;
 		// Is the right node smaller than index.
