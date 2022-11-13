@@ -3,7 +3,7 @@
 namespace je
 {
 	template <typename T>
-	struct Vector final : View<T>
+	struct Vector final
 	{
 		T* data = nullptr;
 		size_t length = 0;
@@ -12,8 +12,9 @@ namespace je
 		T& Add(const T& instance = {});
 		void Remove(size_t index);
 		void Clear();
-		
-		[[nodiscard]] Iterator<T> end() const override;
+
+		[[nodiscard]] Iterator<T> begin() const;
+		[[nodiscard]] Iterator<T> end() const;
 	};
 
 	template <typename T>
@@ -36,11 +37,21 @@ namespace je
 	}
 
 	template <typename T>
+	Iterator<T> Vector<T>::begin() const
+	{
+		Iterator<T> it{};
+		it.length = count;
+		it.index = 0;
+		it.data = data;
+		return it;
+	}
+
+	template <typename T>
 	Iterator<T> Vector<T>::end() const
 	{
 		Iterator<T> it{};
 		it.length = count;
-		it.index = length;
+		it.index = count;
 		it.data = data;
 		return it;
 	}

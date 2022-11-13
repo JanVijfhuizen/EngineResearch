@@ -7,8 +7,7 @@ namespace je
 	template <typename T>
 	struct Array final : View<T>
 	{
-		T* data = nullptr;
-		size_t length = 0;
+		
 	};
 
 	template <typename T>

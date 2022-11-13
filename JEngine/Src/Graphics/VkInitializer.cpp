@@ -209,7 +209,7 @@ namespace je::vk::init
 		return families;
 	}
 
-	bool CheckDeviceExtensionSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const View<const char*>&extensions)
+	bool CheckDeviceExtensionSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const View<const char*>& extensions)
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
