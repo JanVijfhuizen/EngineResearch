@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Jlb/View.h"
+#include "Jlb/Array.h"
 
 namespace je
 {
@@ -30,8 +30,8 @@ namespace je
 			struct SwapChainSupportDetails final
 			{
 				VkSurfaceCapabilitiesKHR capabilities{};
-				View<VkSurfaceFormatKHR> formats{};
-				View<VkPresentModeKHR> presentModes{};
+				Array<VkSurfaceFormatKHR> formats{};
+				Array<VkPresentModeKHR> presentModes{};
 
 				[[nodiscard]] operator bool() const;
 				[[nodiscard]] size_t GetRecommendedImageCount() const;
@@ -45,9 +45,9 @@ namespace je
 			struct Info final
 			{
 				Arena* tempArena = nullptr;
-				View<const char*> validationLayers{};
-				View<const char*> instanceExtensions{};
-				View<const char*> deviceExtensions{};
+				Array<const char*> validationLayers{};
+				Array<const char*> instanceExtensions{};
+				Array<const char*> deviceExtensions{};
 
 				bool(*isPhysicalDeviceValid)(const PhysicalDeviceInfo& info) = IsPhysicalDeviceValid;
 				size_t(*getPhysicalDeviceRating)(const PhysicalDeviceInfo& info) = GetPhysicalDeviceRating;

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Array.h"
-#include <cstdint>
 
 namespace je
 {
