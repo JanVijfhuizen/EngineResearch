@@ -155,6 +155,7 @@
     <ClCompile Include="Src\Module.cpp" />
     <ClCompile Include="Src\ModuleFinder.cpp" />
     <ClCompile Include="Src\Modules\WindowModule.cpp" />
+    <ClCompile Include="Src\Algorithms\PackingFFDH.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -182,6 +183,7 @@
     <ClInclude Include="Include\Modules\RenderModule.h" />
     <ClInclude Include="Include\Modules\TimeModule.h" />
     <ClInclude Include="Include\Modules\WindowModule.h" />
+    <ClInclude Include="Include\Algorithms\PackingFFDH.h" />
     <ClInclude Include="Include\pch.h" />
     <ClInclude Include="Include\Graphics\VkInitializer.h" />
     <ClInclude Include="Include\Graphics\VkApp.h" />

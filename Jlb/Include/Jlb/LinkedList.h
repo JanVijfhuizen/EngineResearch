@@ -43,6 +43,7 @@ namespace je
 
 		T& Add(const T& instance = {});
 		[[nodiscard]] T& operator[](size_t index);
+		T Pop();
 
 		void Inverse();
 		void Sort(bool (*comparer)(T& a, T& b));
@@ -144,6 +145,18 @@ namespace je
 			chain = chain->next;
 		}
 		return chain->instance;
+	}
+
+	template <typename T>
+	T LinkedList<T>::Pop()
+	{
+		assert(_count > 0);
+		--_count;
+		T instance = _chain->instance;
+		Chain* next = _chain->next;
+		_arena->Delete(_chain);
+		_chain = next;
+		return instance;
 	}
 
 	template <typename T>
