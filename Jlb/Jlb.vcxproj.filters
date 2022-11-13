@@ -69,6 +69,9 @@
     <ClInclude Include="Include\Jlb\LinSort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Jlb\JMove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Jlb.cpp">
@@ -78,9 +81,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Arena.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\StringUtils.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\FileLoader.cpp">

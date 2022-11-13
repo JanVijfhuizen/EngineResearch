@@ -13,7 +13,6 @@ namespace je
 		void Remove(size_t index);
 		void Clear();
 
-
 		[[nodiscard]] Iterator<T> begin() const;
 		[[nodiscard]] Iterator<T> end() const;
 	};

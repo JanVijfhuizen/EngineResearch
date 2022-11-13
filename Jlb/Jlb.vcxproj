@@ -149,6 +149,7 @@
     <ClInclude Include="Include\Jlb\Iterator.h" />
     <ClInclude Include="Include\Jlb\JMap.h" />
     <ClInclude Include="Include\Jlb\JMath.h" />
+    <ClInclude Include="Include\Jlb\JMove.h" />
     <ClInclude Include="Include\Jlb\LinSort.h" />
     <ClInclude Include="Include\Jlb\StringArray.h" />
     <ClInclude Include="Include\Jlb\JVector.h" />
@@ -175,7 +176,6 @@
       <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Src\StringArray.cpp" />
-    <ClCompile Include="Src\StringUtils.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

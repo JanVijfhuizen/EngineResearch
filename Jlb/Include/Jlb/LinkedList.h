@@ -5,7 +5,7 @@ namespace je
 {
 	// List that linearly links different, likely non adjacent points in memory.
 	template <typename T>
-	class LinkedList final
+	struct LinkedList final
 	{
 		struct Chain final
 		{
@@ -13,7 +13,6 @@ namespace je
 			Chain* next = nullptr;
 		};
 
-	public:
 		struct Iterator final
 		{
 			Chain* chain = nullptr;
@@ -34,29 +33,19 @@ namespace je
 				return !(a == b);
 			}
 		};
+		
+		Chain* chain = nullptr;
+		size_t count = 0;
 
-		LinkedList() = default;
-		explicit LinkedList(Arena& arena);
-		LinkedList(LinkedList<T>&& other) noexcept;
-		LinkedList<T>& operator=(LinkedList<T>&& other) noexcept;
-		~LinkedList();
-
-		T& Add(const T& instance = {});
 		[[nodiscard]] T& operator[](size_t index);
-		T Pop();
 
 		void Inverse();
 		void Sort(bool (*comparer)(T& a, T& b));
-
-		[[nodiscard]] size_t GetCount() const;
+		
 		[[nodiscard]] Iterator begin() const;
-		[[nodiscard]] Iterator end() const;
+		[[nodiscard]] static Iterator end();
 
 	private:
-		Arena* _arena = nullptr;
-		Chain* _chain = nullptr;
-		size_t _count = 0;
-
 		[[nodiscard]] Chain* Inverse(Chain* previous, Chain* current);
 	};
 
@@ -89,86 +78,24 @@ namespace je
 	}
 
 	template <typename T>
-	LinkedList<T>::LinkedList(Arena& arena) : _arena(&arena)
-	{
-	}
-
-	template <typename T>
-	LinkedList<T>::LinkedList(LinkedList<T>&& other) noexcept : _arena(other._arena), _chain(other._chain)
-	{
-		other._arena = nullptr;
-		other._chain = nullptr;
-	}
-
-	template <typename T>
-	LinkedList<T>& LinkedList<T>::operator=(LinkedList<T>&& other) noexcept
-	{
-		_arena = other._arena;
-		_chain = other._chain;
-		other._arena = nullptr;
-		other._chain = nullptr;
-		return *this;
-	}
-
-	template <typename T>
-	LinkedList<T>::~LinkedList()
-	{
-		if (!_arena)
-			return;
-
-		Chain* chain = _chain;
-		while(chain)
-		{
-			Chain* next = chain->next;
-			_arena->Free(chain);
-			chain = next;
-		}
-	}
-
-	template <typename T>
-	T& LinkedList<T>::Add(const T& instance)
-	{
-		++_count;
-		auto* chain = _arena->New<Chain>();
-		chain->instance = instance;
-		chain->next = _chain;
-		_chain = chain;
-		return chain->instance;
-	}
-
-	template <typename T>
 	T& LinkedList<T>::operator[](const size_t index)
 	{
-		Chain* chain = _chain;
+		Chain* current = chain;
 		for (size_t i = 1; i < index; ++i)
-		{
-			chain = chain->next;
-		}
-		return chain->instance;
-	}
-
-	template <typename T>
-	T LinkedList<T>::Pop()
-	{
-		assert(_count > 0);
-		--_count;
-		T instance = _chain->instance;
-		Chain* next = _chain->next;
-		_arena->Delete(_chain);
-		_chain = next;
-		return instance;
+			current = current->next;
+		return current->instance;
 	}
 
 	template <typename T>
 	void LinkedList<T>::Inverse()
 	{
-		_chain = Inverse(nullptr, _chain);
+		chain = Inverse(nullptr, chain);
 	}
 
 	template <typename T>
 	void LinkedList<T>::Sort(bool(* comparer)(T& a, T& b))
 	{
-		Chain* current = _chain;
+		Chain* current = chain;
 		while(current->next)
 		{
 			auto& currentInstance = current->instance;
@@ -186,21 +113,15 @@ namespace je
 	}
 
 	template <typename T>
-	size_t LinkedList<T>::GetCount() const
-	{
-		return _count;
-	}
-
-	template <typename T>
 	typename LinkedList<T>::Iterator LinkedList<T>::begin() const
 	{
 		Iterator iterator{};
-		iterator.chain = _chain;
+		iterator.chain = chain;
 		return iterator;
 	}
 
 	template <typename T>
-	typename LinkedList<T>::Iterator LinkedList<T>::end() const
+	typename LinkedList<T>::Iterator LinkedList<T>::end()
 	{
 		return {};
 	}
@@ -213,5 +134,46 @@ namespace je
 		Chain* begin = Inverse(current, current->next);
 		current->next = previous;
 		return begin;
+	}
+
+	template <typename T>
+	[[nodiscard]] LinkedList<T> CreateLinkedList()
+	{
+		return {};
+	}
+
+	template <typename T>
+	void DestroyLinkedList(LinkedList<T>* instance, Arena* arena)
+	{
+		auto chain = instance->chain;
+		while (chain)
+		{
+			auto next = chain->next;
+			arena->Free(chain);
+			chain = next;
+		}
+	}
+
+	template <typename T>
+	T& LinkedListAdd(LinkedList<T>* instance, Arena* arena)
+	{
+		++instance->count;
+		auto* chain = arena->New<typename LinkedList<T>::Chain>();
+		chain->instance = instance;
+		chain->next = chain;
+		instance->chain = chain;
+		return chain->instance;
+	}
+
+	template <typename T>
+	T LinkedListPop(LinkedList<T>* instance, Arena* arena)
+	{
+		assert(instance->count > 0);
+		--instance->count;
+		T chainInstance = instance->chain->instance;
+		auto next = instance->chain->next;
+		arena->Delete(instance->chain);
+		instance->chain = next;
+		return instance;
 	}
 }
