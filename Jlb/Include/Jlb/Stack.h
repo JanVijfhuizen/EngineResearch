@@ -37,18 +37,18 @@ namespace je
 	}
 
 	template <typename T>
-	[[nodiscard]] Stack<T> CreateStack(Arena* arena, const size_t length)
+	[[nodiscard]] Stack<T> CreateStack(Arena& arena, const size_t length)
 	{
 		Stack<T> instance{};
-		instance.data = arena->New<T>(length);
+		instance.data = arena.New<T>(length);
 		instance.length = length;
 		return instance;
 	}
 
 	template <typename T>
-	void DestroyStack(Stack<T>* instance, Arena* arena)
+	void DestroyStack(Stack<T>& instance, Arena& arena)
 	{
-		arena->Free(instance->data);
+		arena.Free(instance.data);
 	}
 }
 

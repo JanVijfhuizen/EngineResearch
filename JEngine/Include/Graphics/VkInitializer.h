@@ -1,7 +1,5 @@
 ﻿#pragma once
 #include "Jlb/Array.h"
-#include "Jlb/StringView.h"
-#include "Jlb/View.h"
 
 namespace je
 {
@@ -32,8 +30,8 @@ namespace je
 			struct SwapChainSupportDetails final
 			{
 				VkSurfaceCapabilitiesKHR capabilities{};
-				View<VkSurfaceFormatKHR> formats{};
-				View<VkPresentModeKHR> presentModes{};
+				Array<VkSurfaceFormatKHR> formats{};
+				Array<VkPresentModeKHR> presentModes{};
 
 				[[nodiscard]] operator bool() const;
 				[[nodiscard]] size_t GetRecommendedImageCount() const;
@@ -47,9 +45,9 @@ namespace je
 			struct Info final
 			{
 				Arena* tempArena = nullptr;
-				View<StringView> validationLayers{};
-				View<StringView> instanceExtensions{};
-				View<StringView> deviceExtensions{};
+				Array<const char*> validationLayers{};
+				Array<const char*> instanceExtensions{};
+				Array<const char*> deviceExtensions{};
 
 				bool(*isPhysicalDeviceValid)(const PhysicalDeviceInfo& info) = IsPhysicalDeviceValid;
 				size_t(*getPhysicalDeviceRating)(const PhysicalDeviceInfo& info) = GetPhysicalDeviceRating;

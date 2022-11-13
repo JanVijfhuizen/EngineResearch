@@ -49,17 +49,17 @@ namespace je
 	}
 
 	template <typename T>
-	[[nodiscard]] Queue<T> CreateQueue(Arena* arena, const size_t length)
+	[[nodiscard]] Queue<T> CreateQueue(Arena& arena, const size_t length)
 	{
 		Queue<T> instance{};
-		instance.data = arena->New<T>(length);
+		instance.data = arena.New<T>(length);
 		instance.length = length;
 		return instance;
 	}
 
 	template <typename T>
-	void DestroyQueue(Queue<T>* instance, Arena* arena)
+	void DestroyQueue(Queue<T>& instance, Arena& arena)
 	{
-		arena->Free(instance->data);
+		arena.Free(instance.data);
 	}
 }

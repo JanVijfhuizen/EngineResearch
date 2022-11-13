@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Jlb/View.h"
+#include "Jlb/Array.h"
 
 namespace je
 {
@@ -20,7 +20,7 @@ namespace je
 				VkShaderStageFlagBits flag;
 			};
 
-			explicit Layout(App& app, Arena& tempArena, const View<Binding>& bindings);
+			explicit Layout(App& app, Arena& tempArena, const Array<Binding>& bindings);
 			Layout(Layout&& other) noexcept;
 			Layout& operator=(Layout&& other) noexcept;
 			~Layout();

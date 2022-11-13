@@ -5,13 +5,14 @@
 
 namespace je::vk
 {
-	Layout::Layout(App& app, Arena& tempArena, const View<Binding>& bindings) : _app(&app)
+	Layout::Layout(App& app, Arena& tempArena, const Array<Binding>& bindings) : _app(&app)
 	{
-		const Array<VkDescriptorSetLayoutBinding> sets{tempArena, bindings.GetLength()};
-		for (size_t i = 0; i < bindings.GetLength(); ++i)
+		const auto _ = tempArena.CreateScope();
+		const auto sets = CreateArray<VkDescriptorSetLayoutBinding>(tempArena, bindings.length);
+		for (size_t i = 0; i < bindings.length; ++i)
 		{
-			const auto& binding = bindings[i];
-			auto& set = sets[i];
+			const auto& binding = bindings.data[i];
+			auto& set = sets.data[i];
 
 			set.stageFlags = binding.flag;
 			set.binding = static_cast<uint32_t>(i);
@@ -23,8 +24,8 @@ namespace je::vk
 		layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		layoutInfo.pNext = nullptr;
 		layoutInfo.flags = 0;
-		layoutInfo.bindingCount = static_cast<uint32_t>(sets.GetLength());
-		layoutInfo.pBindings = sets.GetData();
+		layoutInfo.bindingCount = static_cast<uint32_t>(sets.length);
+		layoutInfo.pBindings = sets.data;
 		
 		const auto result = vkCreateDescriptorSetLayout(app.device, &layoutInfo, nullptr, &_layout);
 		assert(!result);

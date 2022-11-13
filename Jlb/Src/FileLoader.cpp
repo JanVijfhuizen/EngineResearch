@@ -4,7 +4,7 @@
 
 namespace je::file
 {
-	Array<char> Load(Arena* arena, const char* path)
+	Array<char> Load(Arena& arena, const char* path)
 	{
 		std::ifstream file(path, std::ios::ate | std::ios::binary);
 		assert(file.is_open());

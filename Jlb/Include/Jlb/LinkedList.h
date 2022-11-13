@@ -90,7 +90,7 @@ namespace je
 	template <typename T>
 	void LinkedList<T>::Sort(bool(* comparer)(T& a, T& b))
 	{
-		Chain* current = chain;
+		auto current = next;
 		while(current->next)
 		{
 			auto& currentInstance = current->instance;
@@ -117,7 +117,7 @@ namespace je
 	typename LinkedList<T>::Iterator LinkedList<T>::begin() const
 	{
 		Iterator iterator{};
-		iterator.chain = chain;
+		iterator.chain = next;
 		return iterator;
 	}
 
@@ -144,13 +144,13 @@ namespace je
 	}
 
 	template <typename T>
-	void DestroyLinkedList(LinkedList<T>* instance, Arena* arena)
+	void DestroyLinkedList(LinkedList<T>& instance, Arena& arena)
 	{
-		auto chain = instance->chain;
+		auto chain = instance.chain;
 		while (chain)
 		{
 			auto next = chain->next;
-			arena->Free(chain);
+			arena.Free(chain);
 			chain = next;
 		}
 	}
@@ -159,7 +159,7 @@ namespace je
 	T& LinkedListAdd(LinkedList<T>* instance, Arena* arena, const T& value)
 	{
 		++instance->count;
-		auto* chain = arena->New<typename LinkedList<T>::Chain>();
+		auto chain = arena->New<LinkedList<T>>();
 		chain->instance = value;
 		chain->next = chain;
 		instance->chain = chain;
@@ -167,14 +167,14 @@ namespace je
 	}
 
 	template <typename T>
-	T LinkedListPop(LinkedList<T>* instance, Arena* arena)
+	T LinkedListPop(LinkedList<T>& instance, Arena& arena)
 	{
-		assert(instance->count > 0);
-		--instance->count;
-		T chainInstance = instance->chain->instance;
-		auto next = instance->chain->next;
-		arena->Delete(instance->chain);
-		instance->chain = next;
+		assert(instance.count > 0);
+		--instance.count;
+		T chainInstance = instance.chain->instance;
+		auto next = instance.chain->next;
+		arena.Delete(instance.chain);
+		instance.chain = next;
 		return instance;
 	}
 }

@@ -3,5 +3,5 @@
 
 namespace je::file
 {
-	[[nodiscard]] Array<char> Load(Arena* arena, const char* path);
+	[[nodiscard]] Array<char> Load(Arena& arena, const char* path);
 }
