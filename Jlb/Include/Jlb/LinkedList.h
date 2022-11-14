@@ -161,7 +161,7 @@ namespace je
 		auto chain = arena.New<LinkedList<T>>();
 		chain->instance = value;
 		chain->next = chain;
-		instance.chain = chain;
+		instance.next = chain;
 		return chain->instance;
 	}
 

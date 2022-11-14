@@ -2,32 +2,30 @@
 #include "Graphics/VkPipeline.h"
 #include "Graphics/Vertex.h"
 #include "Graphics/VkApp.h"
-#include "Graphics/VkShader.h"
 #include "Jlb/Array.h"
 
 namespace je::vk
 {
-	Pipeline::Pipeline(const PipelineCreateInfo& info) : _app(info.app)
+	void Pipeline::Bind(const VkCommandBuffer cmd) const
 	{
-		auto& tempArena = *info.tempArena;
-		const auto& shader = *info.shader;
-		const auto& resolution = info.resolution;
-		
+		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
+	}
+
+	Pipeline CreatePipeline(const PipelineCreateInfo& info, Arena& tempArena, const App& app)
+	{
 		const auto _ = tempArena.CreateScope();
 
-		VkPipelineShaderStageCreateInfo modules[2]{};
+		Pipeline pipeline{};
+
+		const auto modules = CreateArray<VkPipelineShaderStageCreateInfo>(tempArena, info.modules.length);
+		for (size_t i = 0; i < modules.length; ++i)
 		{
-			auto& vertModule = modules[0];
-			vertModule.stage = VK_SHADER_STAGE_VERTEX_BIT;
-			vertModule.module = shader[Shader::Stage::vertex];
-			auto& fragModule = modules[1];
-			fragModule.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-			fragModule.module = shader[Shader::Stage::fragment];
-		}
-		for (auto& mod : modules)
-		{
+			auto& mod = modules[i];
+			auto& infoMod = info.modules[i];
 			mod.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
 			mod.pName = "main";
+			mod.stage = infoMod.stage;
+			mod.module = infoMod.module;
 		}
 
 		const auto bindingDescription = Vertex::GetBindingDescriptions(tempArena);
@@ -35,10 +33,10 @@ namespace je::vk
 
 		VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
 		vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescription.GetLength());
-		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescription.GetLength());
-		vertexInputInfo.pVertexBindingDescriptions = bindingDescription.GetData();
-		vertexInputInfo.pVertexAttributeDescriptions = attributeDescription.GetData();
+		vertexInputInfo.vertexBindingDescriptionCount = static_cast<uint32_t>(bindingDescription.length);
+		vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescription.length);
+		vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data;
+		vertexInputInfo.pVertexAttributeDescriptions = attributeDescription.data;
 
 		VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
 		inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -48,8 +46,8 @@ namespace je::vk
 		VkViewport viewport{};
 		viewport.x = 0;
 		viewport.y = 0;
-		viewport.width = static_cast<float>(resolution.x);
-		viewport.height = static_cast<float>(resolution.y);
+		viewport.width = static_cast<float>(info.resolution.x);
+		viewport.height = static_cast<float>(info.resolution.y);
 		viewport.minDepth = 0;
 		viewport.maxDepth = 1;
 
@@ -57,8 +55,8 @@ namespace je::vk
 		scissor.offset = { 0, 0 };
 		scissor.extent =
 		{
-			static_cast<uint32_t>(resolution.x),
-			static_cast<uint32_t>(resolution.y)
+			static_cast<uint32_t>(info.resolution.x),
+			static_cast<uint32_t>(info.resolution.y)
 		};
 
 		VkPipelineViewportStateCreateInfo viewportState{};
@@ -115,18 +113,18 @@ namespace je::vk
 
 		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
 		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(info.layouts.GetLength());
-		pipelineLayoutInfo.pSetLayouts = info.layouts.GetData();
+		pipelineLayoutInfo.setLayoutCount = static_cast<uint32_t>(info.layouts.length);
+		pipelineLayoutInfo.pSetLayouts = info.layouts.data;
 		pipelineLayoutInfo.pushConstantRangeCount = info.pushConstantSize > 0;
 		pipelineLayoutInfo.pPushConstantRanges = &pushConstant;
-		
-		auto result = vkCreatePipelineLayout(info.app->device, &pipelineLayoutInfo, nullptr, &_layout);
+
+		auto result = vkCreatePipelineLayout(app.device, &pipelineLayoutInfo, nullptr, &pipeline.layout);
 		assert(!result);
 
 		VkGraphicsPipelineCreateInfo pipelineInfo{};
 		pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
 		pipelineInfo.stageCount = 2;
-		pipelineInfo.pStages = modules;
+		pipelineInfo.pStages = modules.data;
 		pipelineInfo.pVertexInputState = &vertexInputInfo;
 		pipelineInfo.pInputAssemblyState = &inputAssembly;
 		pipelineInfo.pViewportState = &viewportState;
@@ -135,50 +133,21 @@ namespace je::vk
 		pipelineInfo.pDepthStencilState = info.depthBufferEnabled ? &depthStencil : nullptr;
 		pipelineInfo.pColorBlendState = &colorBlending;
 		pipelineInfo.pDynamicState = nullptr;
-		pipelineInfo.layout = _layout;
+		pipelineInfo.layout = pipeline.layout;
 		pipelineInfo.renderPass = info.renderPass;
 		pipelineInfo.subpass = 0;
 		pipelineInfo.basePipelineHandle = info.basePipeline;
 		pipelineInfo.basePipelineIndex = info.basePipelineIndex;
-		
-		result = vkCreateGraphicsPipelines(info.app->device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &_pipeline);
+
+		result = vkCreateGraphicsPipelines(app.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &pipeline.pipeline);
 		assert(!result);
+
+		return pipeline;
 	}
 
-	Pipeline::Pipeline(Pipeline&& other) noexcept : _layout(other._layout), _pipeline(other._pipeline), _app(other._app)
+	void DestroyPipeline(const Pipeline& pipeline, const App& app)
 	{
-		other._app = nullptr;
-	}
-
-	Pipeline& Pipeline::operator=(Pipeline&& other) noexcept
-	{
-		_layout = other._layout;
-		_pipeline = other._pipeline;
-		_app = other._app;
-		other._app = nullptr;
-		return *this;
-	}
-
-	Pipeline::~Pipeline()
-	{
-		if (!_app)
-			return;
-		vkDestroyPipeline(_app->device, _pipeline, nullptr);
-		vkDestroyPipelineLayout(_app->device, _layout, nullptr);
-	}
-
-	void Pipeline::Bind(const VkCommandBuffer cmd) const
-	{
-		vkCmdBindPipeline(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, _pipeline);
-	}
-
-	Pipeline::operator VkPipeline() const
-	{
-		return _pipeline;
-	}
-
-	VkPipelineLayout Pipeline::GetLayout() const
-	{
-		return _layout;
+		vkDestroyPipeline(app.device, pipeline.pipeline, nullptr);
+		vkDestroyPipelineLayout(app.device, pipeline.layout, nullptr);
 	}
 }

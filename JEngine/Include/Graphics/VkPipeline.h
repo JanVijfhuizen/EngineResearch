@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Jlb/View.h"
+#include "Jlb/Array.h"
 
 namespace je
 {
@@ -7,18 +7,29 @@ namespace je
 
 	namespace vk
 	{
-		class Shader;
 		struct App;
+
+		struct Pipeline final
+		{
+			VkPipelineLayout layout;
+			VkPipeline pipeline;
+
+			void Bind(VkCommandBuffer cmd) const;
+		};
 
 		struct PipelineCreateInfo final
 		{
-			Arena* tempArena;
-			App* app;
-			Shader* shader;
+			struct Module final
+			{
+				VkShaderModule module = VK_NULL_HANDLE;
+				VkShaderStageFlagBits stage = VK_SHADER_STAGE_ALL;
+			};
+
+			Array<Module> modules;
 			glm::ivec2 resolution;
 			VkRenderPass renderPass;
-			View<VkDescriptorSetLayout> layouts{};
 
+			Array<VkDescriptorSetLayout> layouts{};
 			bool shaderSamplingEnabled = false;
 			VkSampleCountFlagBits samples = VK_SAMPLE_COUNT_1_BIT;
 			size_t pushConstantSize = 0;
@@ -28,24 +39,7 @@ namespace je
 			int32_t basePipelineIndex = 0;
 		};
 
-		class Pipeline
-		{
-		public:
-			Pipeline() = default;
-			explicit Pipeline(const PipelineCreateInfo& info);
-			Pipeline(Pipeline&& other) noexcept;
-			Pipeline& operator=(Pipeline&& other) noexcept;
-			~Pipeline();
-
-			void Bind(VkCommandBuffer cmd) const;
-
-			[[nodiscard]] operator VkPipeline() const;
-			[[nodiscard]] VkPipelineLayout GetLayout() const;
-
-		private:
-			VkPipelineLayout _layout;
-			VkPipeline _pipeline;
-			App* _app = nullptr;
-		};
+		[[nodiscard]] Pipeline CreatePipeline(const PipelineCreateInfo& info, Arena& tempArena, const App& app);
+		void DestroyPipeline(const Pipeline& pipeline, const App& app);
 	}
 }

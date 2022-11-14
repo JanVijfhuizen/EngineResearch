@@ -1,5 +1,4 @@
 ﻿#pragma once
-#include "Jlb/StringView.h"
 
 namespace je
 {
@@ -30,5 +29,7 @@ namespace je
 			VkShaderModule _modules[2];
 			const App* _app = nullptr;
 		};
+
+		[[nodiscard]] VkShaderModule CreateShaderModule(Arena& tempArena, const App& app, const char* path);
 	}
 }
