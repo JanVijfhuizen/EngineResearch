@@ -13,6 +13,7 @@ namespace je
 		void Remove(size_t index);
 		void Clear();
 
+		[[nodiscard]] T& operator [](size_t index);
 		[[nodiscard]] Iterator<T> begin() const;
 		[[nodiscard]] Iterator<T> end() const;
 	};
@@ -34,6 +35,13 @@ namespace je
 	void Vector<T>::Clear()
 	{
 		count = 0;
+	}
+
+	template <typename T>
+	T& Vector<T>::operator[](const size_t index)
+	{
+		assert(index < count);
+		return data[index];
 	}
 
 	template <typename T>

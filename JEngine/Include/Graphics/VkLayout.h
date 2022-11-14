@@ -5,31 +5,18 @@ namespace je
 {
 	class Arena;
 
-	namespace vk
+	namespace vk::layout
 	{
 		struct App;
 
-		class Layout final
+		struct Binding
 		{
-		public:
-			struct Binding final
-			{
-				VkDescriptorType type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				size_t size = sizeof(int32_t);
-				uint32_t count = 1;
-				VkShaderStageFlagBits flag;
-			};
-
-			explicit Layout(App& app, Arena& tempArena, const Array<Binding>& bindings);
-			Layout(Layout&& other) noexcept;
-			Layout& operator=(Layout&& other) noexcept;
-			~Layout();
-
-			[[nodiscard]] operator VkDescriptorSetLayout() const;
-
-		private:
-			VkDescriptorSetLayout _layout;
-			App* _app = nullptr;
+			VkDescriptorType type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			size_t size = sizeof(int32_t);
+			uint32_t count = 1;
+			VkShaderStageFlagBits flag;
 		};
+
+		[[nodiscard]] VkDescriptorSetLayout Create(Arena& tempArena, App& app, const Array<Binding>& bindings);
 	}
 }

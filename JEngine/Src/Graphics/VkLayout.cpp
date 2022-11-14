@@ -5,7 +5,7 @@
 
 namespace je::vk
 {
-	Layout::Layout(App& app, Arena& tempArena, const Array<Binding>& bindings) : _app(&app)
+	VkDescriptorSetLayout layout::Create(Arena& tempArena, App& app, const Array<Binding>& bindings)
 	{
 		const auto _ = tempArena.CreateScope();
 		const auto sets = CreateArray<VkDescriptorSetLayoutBinding>(tempArena, bindings.length);
@@ -26,34 +26,10 @@ namespace je::vk
 		layoutInfo.flags = 0;
 		layoutInfo.bindingCount = static_cast<uint32_t>(sets.length);
 		layoutInfo.pBindings = sets.data;
-		
-		const auto result = vkCreateDescriptorSetLayout(app.device, &layoutInfo, nullptr, &_layout);
+
+		VkDescriptorSetLayout layout;
+		const auto result = vkCreateDescriptorSetLayout(app.device, &layoutInfo, nullptr, &layout);
 		assert(!result);
-	}
-
-	Layout::Layout(Layout&& other) noexcept : _layout(other._layout), _app(other._app)
-	{
-		other._app = nullptr;
-	}
-
-	Layout& Layout::operator=(Layout&& other) noexcept
-	{
-		_app = other._app;
-		_layout = other._layout;
-		other._app = nullptr;
-		return *this;
-	}
-
-	Layout::~Layout()
-	{
-		if (!_app)
-			return;
-
-		vkDestroyDescriptorSetLayout(_app->device, _layout, nullptr);
-	}
-
-	Layout::operator VkDescriptorSetLayout() const
-	{
-		return _layout;
+		return layout;
 	}
 }
