@@ -5,57 +5,20 @@
 
 namespace je::vk
 {
-	Shader::~Shader()
-	{
-		if (!_app)
-			return;
-		for (const auto& mod : _modules)
-			vkDestroyShaderModule(_app->device, mod, nullptr);
-	}
-
-	VkShaderModule Shader::operator[](Stage stage) const
-	{
-		return _modules[static_cast<size_t>(stage)];
-	}
-
-	Shader::Shader(Arena& tempArena, const App& app, const StringView vertexPath, const StringView fragmentPath) : _app(&app)
+	VkShaderModule CreateShaderModule(Arena& tempArena, const App& app, const char* path)
 	{
 		const auto _ = tempArena.CreateScope();
-		const auto vertCode = file::Load(tempArena, vertexPath);
-		const auto fragCode = file::Load(tempArena, fragmentPath);
-
-		const View<char> code[2]
-		{
-			vertCode.GetView(),
-			fragCode.GetView()
-		};
+		const auto code = file::Load(tempArena, path);
 
 		VkShaderModuleCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
 
-		for (size_t i = 0; i < 2; ++i)
-		{
-			createInfo.codeSize = code[i].GetLength();
-			createInfo.pCode = reinterpret_cast<const uint32_t*>(code[i].GetData());
+		createInfo.codeSize = code.length;
+		createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data);
 
-			const auto result = vkCreateShaderModule(app.device, &createInfo, nullptr, &_modules[i]);
-			assert(!result);
-		}
-	}
-
-	Shader::Shader(Shader&& other) noexcept : _app(other._app)
-	{
-		for (size_t i = 0; i < 2; ++i)
-			_modules[i] = other._modules[i];
-		other._app = nullptr;
-	}
-
-	Shader& Shader::operator=(Shader&& other) noexcept
-	{
-		_app = other._app;
-		for (size_t i = 0; i < 2; ++i)
-			_modules[i] = other._modules[i];
-		other._app = nullptr;
-		return *this;
+		VkShaderModule mod;
+		const auto result = vkCreateShaderModule(app.device, &createInfo, nullptr, &mod);
+		assert(!result);
+		return mod;
 	}
 }

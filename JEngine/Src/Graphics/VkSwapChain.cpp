@@ -8,7 +8,7 @@
 
 namespace je::vk
 {
-	VkSurfaceFormatKHR ChooseSurfaceFormat(const View<VkSurfaceFormatKHR>& availableFormats)
+	VkSurfaceFormatKHR ChooseSurfaceFormat(const Array<VkSurfaceFormatKHR>& availableFormats)
 	{
 		// Preferably go for SRGB, if it's not present just go with the first one found.
 		// We can basically assume that SRGB is supported on most hardware.
@@ -19,7 +19,7 @@ namespace je::vk
 		return availableFormats[0];
 	}
 
-	VkPresentModeKHR ChoosePresentMode(const View<VkPresentModeKHR>& availablePresentModes)
+	VkPresentModeKHR ChoosePresentMode(const Array<VkPresentModeKHR>& availablePresentModes)
 	{
 		// Preferably go for Mailbox, otherwise go for Fifo.
 		// Fifo is traditional VSync, where mailbox is all that and better, but unlike Fifo is not required to be supported by the hardware.
@@ -59,8 +59,8 @@ namespace je::vk
 		_surfaceFormat = ChooseSurfaceFormat(support.formats);
 		_presentMode = ChoosePresentMode(support.presentModes);
 
-		_images = Array<Image>(arena, imageCount);
-		_frames = Array<Frame>(arena, SWAPCHAIN_MAX_FRAMES_IN_FLIGHT);
+		_images = CreateArray<Image>(arena, imageCount);
+		_frames = CreateArray<Frame>(arena, SWAPCHAIN_MAX_FRAMES_IN_FLIGHT);
 
 		Recreate();
 	}
@@ -68,8 +68,8 @@ namespace je::vk
 	SwapChain::~SwapChain()
 	{
 		Cleanup();
-		_arena.Free(_frames);
-		_arena.Free(_images);
+		DestroyArray(_frames, _arena);
+		DestroyArray(_images, _arena);
 	}
 
 	void SwapChain::WaitForImage()
@@ -116,33 +116,34 @@ namespace je::vk
 		return image.cmdBuffer;
 	}
 
-	void SwapChain::EndFrame(Arena& tempArena, const View<VkSemaphore>& waitSemaphores)
+	void SwapChain::EndFrame(Arena& tempArena, const Array<VkSemaphore>& waitSemaphores)
 	{
+		const auto _ = tempArena.CreateScope();
+
 		const auto& frame = _frames[_frameIndex];
 		const auto& image = _images[_imageIndex];
 
 		vkCmdEndRenderPass(image.cmdBuffer);
 		auto result = vkEndCommandBuffer(image.cmdBuffer);
 		assert(!result);
+		
+		const auto allWaitSemaphores = CreateArray<VkSemaphore>(_tempArena, waitSemaphores.length + 1);
+		memcpy(allWaitSemaphores.data, waitSemaphores.data, sizeof(VkSemaphore) * waitSemaphores.length);
+		allWaitSemaphores[waitSemaphores.length] = frame.imageAvailableSemaphore;
 
-		const auto _ = _tempArena.CreateScope();
-		const Array<VkSemaphore> allWaitSemaphores{_tempArena, waitSemaphores.GetLength() + 1};
-		memcpy(allWaitSemaphores.GetData(), waitSemaphores.GetData(), sizeof(VkSemaphore) * waitSemaphores.GetLength());
-		allWaitSemaphores[waitSemaphores.GetLength()] = frame.imageAvailableSemaphore;
-
-		const Array<VkPipelineStageFlags> waitStages{ tempArena, allWaitSemaphores.GetLength() };
-		for (auto& waitStage : waitStages.GetView())
+		const auto waitStages = CreateArray<VkPipelineStageFlags>(tempArena, allWaitSemaphores.length);
+		for (auto& waitStage : waitStages)
 			waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 		VkSubmitInfo submitInfo{};
 		submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		submitInfo.commandBufferCount = 1;
 		submitInfo.pCommandBuffers = &image.cmdBuffer;
-		submitInfo.waitSemaphoreCount = static_cast<uint32_t>(allWaitSemaphores.GetLength());
-		submitInfo.pWaitSemaphores = allWaitSemaphores;
+		submitInfo.waitSemaphoreCount = static_cast<uint32_t>(allWaitSemaphores.length);
+		submitInfo.pWaitSemaphores = allWaitSemaphores.data;
 		submitInfo.signalSemaphoreCount = 1;
 		submitInfo.pSignalSemaphores = &frame.renderFinishedSemaphore;
-		submitInfo.pWaitDstStageMask = waitStages;
+		submitInfo.pWaitDstStageMask = waitStages.data;
 
 		vkResetFences(_app.device, 1, &frame.inFlightFence);
 		result = vkQueueSubmit(_app.queues[App::renderQueue], 1, &submitInfo, frame.inFlightFence);
@@ -157,7 +158,7 @@ namespace je::vk
 		presentInfo.pImageIndices = &_imageIndex;
 
 		result = vkQueuePresentKHR(_app.queues[App::presentQueue], &presentInfo);
-		_frameIndex = (_frameIndex + 1) % _frames.GetLength();
+		_frameIndex = (_frameIndex + 1) % _frames.length;
 
 		if(result)
 			Recreate();
@@ -165,7 +166,7 @@ namespace je::vk
 
 	size_t SwapChain::GetLength() const
 	{
-		return _images.GetLength();
+		return _images.length;
 	}
 
 	VkRenderPass SwapChain::GetRenderPass() const
@@ -196,7 +197,7 @@ namespace je::vk
 		const auto result = vkDeviceWaitIdle(_app.device);
 		assert(!result);
 		
-		for (auto& image : _images.GetView())
+		for (auto& image : _images)
 		{
 			vkDestroyImageView(_app.device, image.view, nullptr);
 			if (image.fence)
@@ -206,7 +207,7 @@ namespace je::vk
 			vkDestroyFramebuffer(_app.device, image.frameBuffer, nullptr);
 		}
 
-		for (const auto& frame : _frames.GetView())
+		for (const auto& frame : _frames)
 		{
 			vkDestroySemaphore(_app.device, frame.imageAvailableSemaphore, nullptr);
 			vkDestroySemaphore(_app.device, frame.renderFinishedSemaphore, nullptr);
@@ -234,7 +235,7 @@ namespace je::vk
 		VkSwapchainCreateInfoKHR createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 		createInfo.surface = _app.surface;
-		createInfo.minImageCount = static_cast<uint32_t>(_images.GetLength());
+		createInfo.minImageCount = static_cast<uint32_t>(_images.length);
 		createInfo.imageFormat = _surfaceFormat.format;
 		createInfo.imageColorSpace = _surfaceFormat.colorSpace;
 		createInfo.imageExtent = _extent;
@@ -262,9 +263,9 @@ namespace je::vk
 		Cleanup();
 		_swapChain = newSwapChain;
 
-		auto length = static_cast<uint32_t>(_images.GetLength());
-		const Array<VkImage> vkImages{_tempArena, length};
-		vkGetSwapchainImagesKHR(_app.device, _swapChain, &length, vkImages.GetData());
+		auto length = static_cast<uint32_t>(_images.length);
+		const auto vkImages = CreateArray<VkImage>(_tempArena, length);
+		vkGetSwapchainImagesKHR(_app.device, _swapChain, &length, vkImages.data);
 
 		VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
 		cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -272,8 +273,8 @@ namespace je::vk
 		cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		cmdBufferAllocInfo.commandBufferCount = length;
 
-		const Array<VkCommandBuffer> cmdBuffers{_tempArena, length};
-		const auto cmdResult = vkAllocateCommandBuffers(_app.device, &cmdBufferAllocInfo, cmdBuffers.GetData());
+		const auto cmdBuffers = CreateArray<VkCommandBuffer>(_tempArena, length);
+		const auto cmdResult = vkAllocateCommandBuffers(_app.device, &cmdBufferAllocInfo, cmdBuffers.data);
 		assert(!cmdResult);
 
 		VkAttachmentReference colorAttachmentRef{};
@@ -361,7 +362,7 @@ namespace je::vk
 		fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 		// Create frames.
-		for (auto& frame : _frames.GetView())
+		for (auto& frame : _frames)
 		{
 			auto semaphoreResult = vkCreateSemaphore(_app.device, &semaphoreCreateInfo, nullptr, &frame.imageAvailableSemaphore);
 			assert(!semaphoreResult);
