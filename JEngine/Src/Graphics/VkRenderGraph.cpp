@@ -14,14 +14,14 @@ namespace je::vk
 		return resolution == other.resolution;
 	}
 
-	RenderGraph::RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode>& nodes) :
+	RenderGraph::RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const Array<RenderNode>& nodes) :
 		_arena(arena), _app(app), _allocator(allocator), _swapChain(swapChain)
 	{
 		const auto _ = tempArena.CreateScope();
 
-		const size_t length = nodes.GetLength();
+		const size_t length = nodes.length;
 		const size_t frameCount = swapChain.GetLength();
-		const Array<TempNode> tempNodes{tempArena, length };
+		const auto tempNodes = CreateArray<TempNode>(tempArena, length);
 
 		for (size_t i = 0; i < length; ++i)
 		{
@@ -30,14 +30,14 @@ namespace je::vk
 
 			tempNode.index = i;
 			tempNode.renderNode = &node;
-			tempNode.children = LinkedList<TempNode*>{tempArena};
-			tempNode.inputResources = LinkedList<TempResource*>(tempArena);
-			tempNode.outputResources = LinkedList<TempResource*>(tempArena);
-			tempNode.inputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
-			tempNode.outputResourceVariations = LinkedList<TempResource::Variation*>(tempArena);
+			tempNode.children = CreateLinkedList<TempNode*>();
+			tempNode.inputResources = CreateLinkedList<TempResource*>();
+			tempNode.outputResources = CreateLinkedList<TempResource*>();
+			tempNode.inputResourceVariations = CreateLinkedList<TempResource::Variation*>();
+			tempNode.outputResourceVariations = CreateLinkedList<TempResource::Variation*>();
 
 #ifdef _DEBUG
-			if(node.outputs)
+			if(node.outputs.data)
 			{
 				// Assert if the resolution is the same among outputs.
 				glm::ivec2 resolution = node.outputs[0].resource.resolution;
@@ -46,100 +46,94 @@ namespace je::vk
 			}
 #endif
 		}
-
-		const auto view = tempNodes.GetView();
-
+		
 		// Find all different resource types.
-		LinkedList<TempResource> tempResources{ tempArena };
-		for (auto& tempNode : view)
+		auto tempResources = CreateLinkedList<TempResource>();
+		for (auto& tempNode : tempNodes)
 		{
-			if (const auto outputView = tempNode.renderNode->outputs)
-				for (auto& output : outputView)
+			for (auto& output : tempNode.renderNode->outputs)
+			{
+				bool contained = false;
+				TempResource* resource = nullptr;
+
+				for (auto& tempResource : tempResources)
+					if (tempResource.resource == output.resource)
+					{
+						resource = &tempResource;
+						contained = true;
+						break;
+					}
+
+				if (!contained)
 				{
-					bool contained = false;
-
-					TempResource* resource = nullptr;
-
-					for (auto& tempResource : tempResources)
-						if (tempResource.resource == output.resource)
-						{
-							resource = &tempResource;
-							contained = true;
-							break;
-						}
-
-					if (!contained)
-					{
-						resource = &tempResources.Add();
-						resource->resource = output.resource;
-						resource->variations = tempArena.New<LinkedList<TempResource::Variation>>(1, tempArena);
-					}
-
-					tempNode.outputResources.Add(resource);
-
-					TempResource::Variation* tempResourceVariation = nullptr;
-
-					// Define lifetime and variations for resources.
-					contained = false;
-					for (auto& variation : *resource->variations)
-						if (variation.name == output.name)
-						{
-							contained = true;
-							variation.lifeTimeStart = math::Min(variation.lifeTimeStart, tempNode.depth);
-							tempResourceVariation = &variation;
-							break;
-						}
-
-					if (!contained)
-					{
-						auto& variation = resource->variations->Add();
-						variation.name = output.name;
-						tempResourceVariation = &variation;
-					}
-
-					tempNode.outputResourceVariations.Add(tempResourceVariation);
+					resource = &LinkedListAdd(tempResources, tempArena);
+					resource->resource = output.resource;
+					resource->variations = CreateLinkedList<TempResource::Variation>();
 				}
 
+				LinkedListAdd(tempNode.outputResources, tempArena, resource);
+				TempResource::Variation* tempResourceVariation = nullptr;
+
+				// Define lifetime and variations for resources.
+				contained = false;
+				for (auto& variation : resource->variations)
+					if (variation.name == output.name)
+					{
+						contained = true;
+						variation.lifeTimeStart = math::Min(variation.lifeTimeStart, tempNode.depth);
+						tempResourceVariation = &variation;
+						break;
+					}
+
+				if (!contained)
+				{
+					auto& variation = LinkedListAdd(resource->variations, tempArena);
+					variation.name = output.name;
+					tempResourceVariation = &variation;
+				}
+
+				LinkedListAdd(tempNode.outputResourceVariations, tempArena, tempResourceVariation);
+			}
+
 			// Define lifetime for resources.
-			if (const auto inputView = tempNode.renderNode->inputs)
-				for (auto& input : inputView)
-					for (auto& tempResource : tempResources)
-						for (auto& variation : *tempResource.variations)
-							if (variation.name == input)
-							{
-								variation.lifeTimeEnd = math::Max(variation.lifeTimeEnd, tempNode.depth);
-								tempResource.lifeTimeEnd = math::Max(tempResource.lifeTimeEnd, variation.lifeTimeEnd);
-							}
+			for (auto& input : tempNode.renderNode->inputs)
+				for (auto& tempResource : tempResources)
+					for (auto& variation : tempResource.variations)
+						if (variation.name == input)
+						{
+							variation.lifeTimeEnd = math::Max(variation.lifeTimeEnd, tempNode.depth);
+							tempResource.lifeTimeEnd = math::Max(tempResource.lifeTimeEnd, variation.lifeTimeEnd);
+						}
 		}
 
 		// Link parents by comparing inputs and outputs.
-		for (auto& tempNode : view)
+		for (auto& tempNode : tempNodes)
 		{
-			const auto inputView = tempNode.renderNode->inputs;
-			if (!inputView)
+			const auto& inputs = tempNode.renderNode->inputs;
+			if (!inputs.data)
 				continue;
 
-			for (auto& other : view)
+			for (auto& other : tempNodes)
 			{
 				if (&tempNode == &other)
 					continue;
 
-				const auto outputView = other.renderNode->outputs;
-				if (!outputView)
+				const auto& outputs = other.renderNode->outputs;
+				if (!outputs.data)
 					continue;
-				for (auto& input : inputView)
+				for (auto& input : inputs)
 				{
 					size_t index = 0;
-					for (auto& output : outputView)
+					for (auto& output : outputs)
 					{
 						if (input == output.name)
 						{
 							auto& otherOutputResource = other.outputResources[index];
 
 							tempNode.isRoot = false;
-							tempNode.inputResources.Add(otherOutputResource);
-							tempNode.inputResourceVariations.Add(other.outputResourceVariations[index]);
-							other.children.Add(&tempNode);
+							LinkedListAdd(tempNode.inputResources, tempArena, otherOutputResource);
+							LinkedListAdd(tempNode.inputResourceVariations, tempArena, other.outputResourceVariations[index]);
+							LinkedListAdd(other.children, tempArena, &tempNode);
 							goto NEXT;
 						}
 						++index;
@@ -152,28 +146,28 @@ namespace je::vk
 		}
 
 		// Define depth of every node.
-		for (auto& tempNode : view)
+		for (auto& tempNode : tempNodes)
 			if (tempNode.isRoot)
 				DefineDepth(tempNode, 0);
 
 		// Sort based on depth.
-		Array<TempNode*> depthSorted{ tempArena, length };
+		const auto depthSorted = CreateArray<TempNode*>(tempArena, length);
 		for (size_t i = 0; i < length; ++i)
 		{
 			auto& tempNode = tempNodes[i];
 			depthSorted[i] = &tempNode;
 		}
-		LinSort(depthSorted.GetData(), depthSorted.GetLength(), SortDepthNodes);
+		LinSort(depthSorted.data, depthSorted.length, SortDepthNodes);
 
 		// Define image indexes.
 		size_t imageIndexesCount = 0;
-		for (auto& tempNode : depthSorted.GetView())
+		for (auto& tempNode : depthSorted)
 		{
 			auto& renderNode = *tempNode->renderNode;
-			imageIndexesCount += renderNode.inputs.GetLength() + renderNode.outputs.GetLength();
+			imageIndexesCount += renderNode.inputs.length + renderNode.outputs.length;
 		}
 
-		_attachmentIndexes = Array<size_t>(arena, imageIndexesCount);
+		_attachmentIndexes = CreateArray<size_t>(arena, imageIndexesCount);
 
 		// Find maximum parallel usage for the images. 
 		for (auto& tempResource : tempResources)
@@ -182,13 +176,13 @@ namespace je::vk
 			size_t maxUsage = 0;
 
 			size_t deepestLayer = 0;
-			for (auto& variation : *tempResource.variations)
+			for (auto& variation : tempResource.variations)
 				deepestLayer = math::Max(variation.lifeTimeEnd, length);
 
 			for (size_t i = 0; i < deepestLayer; ++i)
 			{
 				usage = 0;
-				for (auto& variation : *tempResource.variations)
+				for (auto& variation : tempResource.variations)
 					usage += variation.lifeTimeStart <= i && variation.lifeTimeEnd <= i;
 				maxUsage = math::Max(maxUsage, usage);
 			}
@@ -200,35 +194,35 @@ namespace je::vk
 		size_t imageCount = 0;
 		for (auto& tempResource : tempResources)
 			imageCount += tempResource.count;
-		_attachments = Array<Attachment>(arena, imageCount * frameCount);
+		_attachments = CreateArray<Attachment>(arena, imageCount * frameCount);
 
 		// Define nodes and sync structs for individual frames.
-		_nodes = Array<Node>(arena, length);
+		_nodes = CreateArray<Node>(arena, length);
 		{
 			size_t index = 0;
-			for (auto& node : _nodes.GetView())
+			for (auto& node : _nodes)
 			{
 				auto& tempNode = depthSorted[index];
 				auto& renderNode = *tempNode->renderNode;
 				node.renderFunc = renderNode.renderFunc;
 				node.userPtr = renderNode.userPtr;
-				node.inputCount = renderNode.inputs.GetLength();
-				node.outputCount = renderNode.outputs.GetLength();
+				node.inputCount = renderNode.inputs.length;
+				node.outputCount = renderNode.outputs.length;
 				++index;
 			}
 		}
 
 		// Find the amount of batches.
 		size_t batchCount = 0;
-		for (auto& depthNode : depthSorted.GetView())
+		for (auto& depthNode : depthSorted)
 			batchCount = math::Max(batchCount, depthNode->depth);
 		++batchCount;
 
 		// Define batch indices.
-		_layers = { arena, batchCount };
+		_layers = CreateArray<Layer>(arena, batchCount);
 		{
 			size_t idx = 0;
-			for (auto& depthNode : depthSorted.GetView())
+			for (auto& depthNode : depthSorted)
 			{
 				const size_t newBatch = depthNode->depth > idx;
 				idx += newBatch;
@@ -239,11 +233,11 @@ namespace je::vk
 		}
 		
 		// Create command buffers and semaphores for the individual layers.
-		for (auto& layer : _layers.GetView())
+		for (auto& layer : _layers)
 		{
-			layer.frames = arena.New<Array<Layer::Frame>>(1, arena, frameCount);
+			layer.frames = CreateArray<Layer::Frame>(arena, frameCount);
 
-			for (auto& frame : layer.frames->GetView())
+			for (auto& frame : layer.frames)
 			{
 				VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
 				cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -262,9 +256,7 @@ namespace je::vk
 		}
 
 		// Create images.
-		Image::CreateInfo imageCreateInfo{};
-		imageCreateInfo.app = &app;
-		imageCreateInfo.allocator = &allocator;
+		ImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.layout = VK_IMAGE_LAYOUT_UNDEFINED;
 
 		VkImageViewCreateInfo viewCreateInfo{};
@@ -285,7 +277,6 @@ namespace je::vk
 			for (const auto& tempResource : tempResources)
 			{
 				auto& resource = tempResource.resource;
-				imageCreateInfo.resolution = glm::ivec3(resource.resolution, 3);
 				imageCreateInfo.format = VK_FORMAT_R8G8B8A8_SRGB;
 				imageCreateInfo.aspectFlags = VK_IMAGE_ASPECT_COLOR_BIT;
 				imageCreateInfo.usageFlags = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
@@ -294,11 +285,11 @@ namespace je::vk
 				for (size_t j = 0; j < resourceCount; ++j)
 				{
 					auto& attachment = _attachments[index + j];
-					attachment.image = arena.New<Image>(1, imageCreateInfo);
+					attachment.image = CreateImage(app, allocator, imageCreateInfo, glm::ivec3(resource.resolution, 3));
 
-					viewCreateInfo.subresourceRange.aspectMask = attachment.image->GetAspectFlags();
-					viewCreateInfo.format = attachment.image->GetFormat();
-					viewCreateInfo.image = *attachment.image;
+					viewCreateInfo.subresourceRange.aspectMask = attachment.image.aspectFlags;
+					viewCreateInfo.format = attachment.image.format;
+					viewCreateInfo.image = attachment.image.image;
 					const auto viewResult = vkCreateImageView(app.device, &viewCreateInfo, nullptr, &attachment.view);
 					assert(!viewResult);
 				}
@@ -310,9 +301,9 @@ namespace je::vk
 			size_t index = 0;
 			for (auto& tempResource : tempResources)
 			{
-				tempResource.imageQueue = tempArena.New<Queue<size_t>>(1, tempArena, tempResource.count);
+				tempResource.imageQueue = CreateQueue<size_t>(tempArena, tempResource.count);
 				for (size_t i = 0; i < tempResource.count; ++i)
-					tempResource.imageQueue->Enqueue(i + index);
+					tempResource.imageQueue.Enqueue(i + index);
 				index += tempResource.count;
 			}
 		}
@@ -321,7 +312,7 @@ namespace je::vk
 		{
 			size_t index = 0;
 
-			for (const auto& layer : _layers.GetView())
+			for (const auto& layer : _layers)
 			{
 				// Define output images.
 				size_t current = index;
@@ -332,7 +323,7 @@ namespace je::vk
 					for (size_t i = 0; i < count; ++i)
 					{
 						auto& variation = tempNode.outputResourceVariations[i];
-						variation->imageIndex = tempNode.outputResources[i]->imageQueue->Dequeue();
+						variation->imageIndex = tempNode.outputResources[i]->imageQueue.Dequeue();
 					}
 					
 					++current;
@@ -350,7 +341,7 @@ namespace je::vk
 						auto& inputResource = tempNode.inputResources[i];
 
 						if (variation->lifeTimeEnd == layer.index)
-							inputResource->imageQueue->Enqueue(variation->imageIndex);
+							inputResource->imageQueue.Enqueue(variation->imageIndex);
 					}
 					++current;
 				}
@@ -366,14 +357,14 @@ namespace je::vk
 			frameBufferCreateInfo.layers = 1;
 
 			size_t index = 0;
-			for (auto& node : _nodes.GetView())
+			for (auto& node : _nodes)
 			{
-				Array<VkImageView> views{tempArena, node.outputCount};
+				const auto views = CreateArray<VkImageView>(tempArena, node.outputCount);
 				glm::ivec3 resolution{};
 
-				node.frameBuffers = arena.New<Array<VkFramebuffer>>(1, arena, frameCount);
+				node.frameBuffers = CreateArray<VkFramebuffer>(arena, frameCount);
 				
-				Array<VkAttachmentReference> colorAttachments{tempArena, node.outputCount};
+				const auto colorAttachments = CreateArray<VkAttachmentReference>(tempArena, node.outputCount);
 				for (size_t i = 0; i < node.outputCount; ++i)
 				{
 					auto& attachment = colorAttachments[i];
@@ -383,8 +374,8 @@ namespace je::vk
 
 				VkSubpassDescription subpassDescription{};
 				subpassDescription.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
-				subpassDescription.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.GetLength());
-				subpassDescription.pColorAttachments = colorAttachments;
+				subpassDescription.colorAttachmentCount = static_cast<uint32_t>(colorAttachments.length);
+				subpassDescription.pColorAttachments = colorAttachments.data;
 
 				VkSubpassDependency subpassDependency{};
 				subpassDependency.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -417,7 +408,7 @@ namespace je::vk
 				assert(!renderPassResult);
 
 				size_t frameIndex = 0;
-				for (auto& frameBuffer : node.frameBuffers->GetView())
+				for (auto& frameBuffer : node.frameBuffers)
 				{
 					const size_t startIndex = index + node.inputCount;
 					for (size_t i = 0; i < node.outputCount; ++i)
@@ -425,11 +416,11 @@ namespace je::vk
 						auto& attachmentIndex = _attachmentIndexes[startIndex + i];
 						auto& attachment = _attachments[imageCount * frameIndex + attachmentIndex];
 						views[i] = attachment.view;
-						resolution = attachment.image->GetResolution();
+						resolution = attachment.image.resolution;
 					}
 
-					frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(views.GetLength());
-					frameBufferCreateInfo.pAttachments = views;
+					frameBufferCreateInfo.attachmentCount = static_cast<uint32_t>(views.length);
+					frameBufferCreateInfo.pAttachments = views.data;
 					frameBufferCreateInfo.width = resolution.x;
 					frameBufferCreateInfo.height = resolution.y;
 					frameBufferCreateInfo.renderPass = node.renderPass;
@@ -444,8 +435,6 @@ namespace je::vk
 				auto& renderNode = *tempNode->renderNode;
 
 				PipelineCreateInfo createInfo{};
-				createInfo.tempArena = &tempArena;
-				createInfo.app = &_app;
 				createInfo.layouts = renderNode.layouts;
 				createInfo.renderPass = node.renderPass;
 				createInfo.shader = renderNode.shader;
@@ -458,7 +447,7 @@ namespace je::vk
 		}
 
 		// Update image views for user.
-		for (auto& tempNode : depthSorted.GetView())
+		for (auto& tempNode : depthSorted)
 		{
 			auto& renderNode = *tempNode->renderNode;
 			auto& inputVariations = tempNode->inputResourceVariations;
@@ -474,29 +463,29 @@ namespace je::vk
 
 	RenderGraph::~RenderGraph()
 	{
-		for (int32_t i = static_cast<int32_t>(_nodes.GetLength()) - 1; i >= 0; --i)
+		for (int32_t i = static_cast<int32_t>(_nodes.length) - 1; i >= 0; --i)
 		{
 			const auto& node = _nodes[i];
-			for (const auto& frameBuffer : node.frameBuffers->GetView())
+			for (const auto& frameBuffer : node.frameBuffers)
 				vkDestroyFramebuffer(_app.device, frameBuffer, nullptr);
 			vkDestroyRenderPass(_app.device, node.renderPass, nullptr);
-			_arena.Delete(node.pipeline);
-			_arena.Delete(node.frameBuffers);
+			DestroyPipeline(node.pipeline, _app);
+			DestroyArray(node.frameBuffers, _arena);
 		}
 
-		for (int32_t i = static_cast<int32_t>(_attachments.GetLength()) - 1; i >= 0; --i)
+		for (int32_t i = static_cast<int32_t>(_attachments.length) - 1; i >= 0; --i)
 		{
 			const auto& attachment = _attachments[i];
 			vkDestroyImageView(_app.device, attachment.view, nullptr);
-			_arena.Delete(attachment.image);
+			DestroyImage(attachment.image, _app, _allocator);
 		}
 
-		for (int32_t i = static_cast<int32_t>(_layers.GetLength()) - 1; i >= 0; --i)
+		for (int32_t i = static_cast<int32_t>(_layers.length) - 1; i >= 0; --i)
 		{
 			const auto& layer = _layers[i];
-			for (const auto& frame : layer.frames->GetView())
+			for (const auto& frame : layer.frames)
 				vkDestroySemaphore(_app.device, frame.semaphore, nullptr);
-			_arena.Delete(layer.frames);
+			DestroyArray(layer.frames, _arena);
 		}
 	}
 
@@ -508,9 +497,9 @@ namespace je::vk
 		size_t index = 0;
 		size_t attachmentIndex = 0;
 
-		for (const auto& layer : _layers.GetView())
+		for (const auto& layer : _layers)
 		{
-			const auto& frame = layer.frames->GetView()[frameIndex];
+			const auto& frame = layer.frames.data[frameIndex];
 
 			VkCommandBufferBeginInfo cmdBufferBeginInfo{};
 			cmdBufferBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -528,8 +517,8 @@ namespace je::vk
 				attachmentIndex += node.inputCount;
 				for (size_t i = 0; i < node.outputCount; ++i)
 				{
-					const auto& attachment = _attachments[_attachmentIndexes[attachmentIndex + i]];
-					attachment.image->TransitionLayout(frame.cmdBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+					auto& attachment = _attachments[_attachmentIndexes[attachmentIndex + i]];
+					ImageTransitionLayout(attachment.image, frame.cmdBuffer, VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
 				}
 
 				VkExtent2D extent{};
@@ -540,21 +529,21 @@ namespace je::vk
 				renderPassBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 				renderPassBeginInfo.renderArea.offset = { 0, 0 };
 				renderPassBeginInfo.renderPass = node.renderPass;
-				renderPassBeginInfo.framebuffer = node.frameBuffers->GetView()[frameIndex];
+				renderPassBeginInfo.framebuffer = node.frameBuffers.data[frameIndex];
 				renderPassBeginInfo.renderArea.extent = extent;
 				renderPassBeginInfo.clearValueCount = 1;
 				renderPassBeginInfo.pClearValues = &clearColor;
 
 				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
-				node.pipeline->Bind(frame.cmdBuffer);
+				node.pipeline.Bind(frame.cmdBuffer);
 				node.renderFunc(frame.cmdBuffer, node.userPtr, frameIndex);
 				vkCmdEndRenderPass(frame.cmdBuffer);
 
 				// transition layouts to shader read only.
 				for (size_t i = 0; i < node.outputCount; ++i)
 				{
-					const auto& attachment = _attachments[_attachmentIndexes[attachmentIndex + i]];
-					attachment.image->TransitionLayout(frame.cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
+					auto& attachment = _attachments[_attachmentIndexes[attachmentIndex + i]];
+					ImageTransitionLayout(attachment.image, frame.cmdBuffer, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, VK_IMAGE_ASPECT_COLOR_BIT);
 				}
 
 				attachmentIndex += node.outputCount;
@@ -587,7 +576,7 @@ namespace je::vk
 
 	VkImageView RenderGraph::GetResult(const size_t frameIndex) const
 	{
-		const size_t index = _attachmentIndexes.GetLength() * (frameIndex + 1) - 1;
+		const size_t index = _attachmentIndexes.length * (frameIndex + 1) - 1;
 		const size_t finalAttachmentIndex = _attachmentIndexes[index];
 
 		const auto& attachment = _attachments[finalAttachmentIndex];

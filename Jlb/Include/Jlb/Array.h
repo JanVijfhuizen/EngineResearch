@@ -51,7 +51,7 @@ namespace je
 	}
 
 	template <typename T>
-	void DestroyArray(Array<T>& instance, Arena& arena)
+	void DestroyArray(const Array<T>& instance, Arena& arena)
 	{
 		arena.Free(instance.data);
 	}

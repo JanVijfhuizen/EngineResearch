@@ -1,15 +1,12 @@
 ﻿#pragma once
+#include "VkImage.h"
+#include "VkPipeline.h"
 #include "Jlb/Array.h"
 #include "Jlb/LinkedList.h"
 #include "Jlb/Queue.h"
-#include "Jlb/StringView.h"
-#include "Jlb/View.h"
 
 namespace je::vk
 {
-	class Pipeline;
-	class Shader;
-	class Image;
 	class Allocator;
 	class SwapChain;
 	struct App;
@@ -30,16 +27,16 @@ namespace je::vk
 		// Can be linked to the input of other nodes with the name.
 		struct Output final
 		{
-			StringView name;
+			const char* name;
 			Resource resource;
 		};
 
 		// The names of all the render graph resources that will be used as inputs.
-		View<StringView> inputs{};
+		Array<const char*> inputs{};
 		// The names of all the render graph resources that will be used as outputs.
-		View<Output> outputs{};
+		Array<Output> outputs{};
 		// The descriptor set layouts used for rendering.
-		View<VkDescriptorSetLayout> layouts{};
+		Array<VkDescriptorSetLayout> layouts{};
 		// Shader used for rendering.
 		Shader* shader = nullptr;
 
@@ -49,14 +46,14 @@ namespace je::vk
 		void* userPtr = nullptr;
 
 		// This will be filled with the image views for the inputs. View will have to be defined by the end user.
-		View<VkImageView> outImageViews{};
+		Array<VkImageView> outImageViews{};
 	};
 
 	// Tool to simplify and abstract render steps like post effects, deferred lighting and more.
 	class RenderGraph final
 	{
 	public:
-		RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const View<RenderNode>& nodes);
+		RenderGraph(Arena& arena, Arena& tempArena, App& app, Allocator& allocator, SwapChain& swapChain, const Array<RenderNode>& nodes);
 		~RenderGraph();
 
 		// Goes through the render graph nodes and renders them.
@@ -69,15 +66,15 @@ namespace je::vk
 		{
 			struct Variation final
 			{
-				StringView name{};
+				const char* name;
 				size_t lifeTimeStart = 0;
 				size_t lifeTimeEnd = 0;
 				size_t imageIndex = SIZE_MAX;
 			};
 
 			RenderNode::Resource resource{};
-			LinkedList<Variation>* variations = nullptr;
-			Queue<size_t>* imageQueue = nullptr;
+			LinkedList<Variation> variations{};
+			Queue<size_t> imageQueue{};
 			size_t count = 0;
 			size_t lifeTimeEnd = 0;
 		};
@@ -102,8 +99,8 @@ namespace je::vk
 			RenderFunc renderFunc = nullptr;
 			void* userPtr = nullptr;
 			VkRenderPass renderPass;
-			Array<VkFramebuffer>* frameBuffers = nullptr;
-			Pipeline* pipeline = nullptr;
+			Array<VkFramebuffer> frameBuffers{};
+			Pipeline pipeline{};
 			glm::ivec2 resolution;
 			size_t inputCount = 0;
 			size_t outputCount = 0;
@@ -118,12 +115,12 @@ namespace je::vk
 			};
 
 			size_t index;
-			Array<Frame>* frames = nullptr;
+			Array<Frame> frames{};
 		};
 
 		struct Attachment final
 		{
-			Image* image = nullptr;
+			Image image{};
 			VkImageView view = VK_NULL_HANDLE;
 		};
 
