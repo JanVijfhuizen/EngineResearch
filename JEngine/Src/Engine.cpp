@@ -45,7 +45,7 @@ namespace je
 			DefineAdditionalModules(initializer);
 			
 			for (auto& mod : initializer._linkedModules)
-				LinkedListAdd(linkedModules, &_persistentArena, mod);
+				LinkedListAdd(linkedModules, _persistentArena, mod);
 		}
 
 		engine::ModuleFinder finder{ _persistentArena, linkedModules };

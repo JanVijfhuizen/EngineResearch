@@ -1,6 +1,5 @@
 ﻿#include "pch.h"
 #include "Graphics/ObjLoader.h"
-#include "Jlb/FileLoader.h"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
@@ -9,7 +8,7 @@
 
 namespace je::obj
 {
-	void Load(Arena& arena, const StringView& path, const Arena::Scope& scope, Array<vk::Vertex>& outVertices, Array<vk::Vertex::Index>& outIndices, const float scale)
+	void Load(Arena& arena, const char* path, Array<vk::Vertex>& outVertices, Array<vk::Vertex::Index>& outIndices, const float scale)
 	{
 		tinyobj::attrib_t attrib;
 		std::vector<tinyobj::shape_t> shapes;
@@ -72,10 +71,10 @@ namespace je::obj
 			}
 		}
 
-		outVertices = {arena, vertices.size()};
-		outIndices = { arena, outVertices.GetLength() };
+		outVertices = CreateArray<vk::Vertex>(arena, vertices.size());
+		outIndices = CreateArray<vk::Vertex::Index>(arena, outVertices.length);
 
-		for (size_t i = 0; i < outVertices.GetLength(); ++i)
+		for (size_t i = 0; i < outVertices.length; ++i)
 		{
 			outVertices[i] = vertices[i];
 			outIndices[i] = static_cast<uint16_t>(i);

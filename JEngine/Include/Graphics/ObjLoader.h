@@ -2,13 +2,7 @@
 #include "Vertex.h"
 #include "Jlb/Array.h"
 
-namespace je
+namespace je::obj
 {
-	struct StringView;
-
-	namespace obj
-	{
-		void Load(Arena& arena, const StringView& path, const Arena::Scope& scope, Array<vk::Vertex>& outVertices, Array<vk::Vertex::Index>& outIndices, float scale = 1);
-	}
-	
+	void Load(Arena& arena, const char* path, Array<vk::Vertex>& outVertices, Array<vk::Vertex::Index>& outIndices, float scale = 1);
 }
