@@ -3,36 +3,25 @@
 #include <cstdint> 
 #include "VkAllocator.h" 
 #include "VkBuffer.h" 
-#include "Jlb/View.h" 
 #include <Graphics/Vertex.h>
 
 namespace je::vk
 {
-	class Mesh final
+	struct Mesh final
 	{
-	public:
-		Mesh() = default;
-		Mesh(const App& app, Allocator& allocator, const View<Vertex>& vertices, const View<Vertex::Index>& indices);
-		Mesh(Mesh&& other) noexcept;
-		Mesh& operator=(Mesh&& other) noexcept;
-		~Mesh();
-		
+		Buffer vertexBuffer;
+		Buffer indexBuffer;
+		size_t indexCount;
+
 		void Draw(VkCommandBuffer cmd, size_t count) const;
-
-	private:
-		Buffer _vertexBuffer;
-		Buffer _indexBuffer;
-		size_t _indexCount;
-		const App* _app = nullptr;
-		const Allocator* _allocator = nullptr;
-
-		template <typename T>
-		[[nodiscard]] static Buffer CreateBuffer(const App& app, Allocator& allocator, const View<T>& data, VkBufferUsageFlags usageFlags);
 	};
 
+	[[nodiscard]] Mesh CreateMesh(const App& app, Allocator& allocator, const Array<Vertex>& vertices, const Array<Vertex::Index>& indices);
+	void DestroyMesh(Mesh& mesh);
+
 	template <typename T>
-	Buffer Mesh::CreateBuffer(const App& app, Allocator& allocator,
-		const View<T>& data, const VkBufferUsageFlags usageFlags)
+	Buffer CreateVertexBuffer(const App& app, Allocator& allocator,
+		const Array<T>& data, const VkBufferUsageFlags usageFlags)
 	{
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
