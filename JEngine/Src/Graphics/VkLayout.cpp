@@ -5,7 +5,7 @@
 
 namespace je::vk
 {
-	VkDescriptorSetLayout layout::Create(Arena& tempArena, App& app, const Array<Binding>& bindings)
+	VkDescriptorSetLayout CreateLayout(Arena& tempArena, App& app, const Array<Binding>& bindings)
 	{
 		const auto _ = tempArena.CreateScope();
 		const auto sets = CreateArray<VkDescriptorSetLayoutBinding>(tempArena, bindings.length);
