@@ -37,8 +37,8 @@ namespace je::vk
 		Array<Output> outputs{};
 		// The descriptor set layouts used for rendering.
 		Array<VkDescriptorSetLayout> layouts{};
-		// Shader used for rendering.
-		Shader* shader = nullptr;
+		// Shader modules used for rendering.
+		Array<PipelineCreateInfo::Module> modules{};
 
 		// Function called during rendering.
 		RenderFunc renderFunc = nullptr;

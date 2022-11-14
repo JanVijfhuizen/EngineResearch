@@ -437,9 +437,9 @@ namespace je::vk
 				PipelineCreateInfo createInfo{};
 				createInfo.layouts = renderNode.layouts;
 				createInfo.renderPass = node.renderPass;
-				createInfo.shader = renderNode.shader;
+				createInfo.modules = renderNode.modules;
 				createInfo.resolution = resolution;
-				node.pipeline = arena.New<Pipeline>(1, createInfo);
+				node.pipeline = CreatePipeline(createInfo, tempArena, app);
 
 				node.resolution = resolution;
 				index += node.inputCount + node.outputCount;
@@ -487,6 +487,11 @@ namespace je::vk
 				vkDestroySemaphore(_app.device, frame.semaphore, nullptr);
 			DestroyArray(layer.frames, _arena);
 		}
+
+		DestroyArray(_layers, _arena);
+		DestroyArray(_nodes, _arena);
+		DestroyArray(_attachments, _arena);
+		DestroyArray(_attachmentIndexes, _arena);
 	}
 
 	VkSemaphore RenderGraph::Update() const
