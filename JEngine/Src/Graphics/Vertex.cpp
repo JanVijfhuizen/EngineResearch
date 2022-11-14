@@ -1,22 +1,21 @@
 ﻿#include "pch.h"
 #include "Graphics/Vertex.h"
-#include "Jlb/JMove.h"
 
 namespace je::vk
 {
 	Array<VkVertexInputBindingDescription> Vertex::GetBindingDescriptions(Arena& arena)
 	{
-		Array<VkVertexInputBindingDescription> ret{arena, 1};
+		const auto ret = CreateArray<VkVertexInputBindingDescription>(arena, 1);
 		auto& vertexData = ret[0];
 		vertexData.binding = 0;
 		vertexData.stride = sizeof(Vertex);
 		vertexData.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-		return Move(ret);
+		return ret;
 	}
 
 	Array<VkVertexInputAttributeDescription> Vertex::GetAttributeDescriptions(Arena& arena)
 	{
-		Array<VkVertexInputAttributeDescription> ret{arena, 3};
+		const auto ret = CreateArray<VkVertexInputAttributeDescription>(arena, 3);
 
 		auto& position = ret[0];
 		position.binding = 0;
@@ -36,6 +35,6 @@ namespace je::vk
 		texCoords.format = VK_FORMAT_R32G32_SFLOAT;
 		texCoords.offset = offsetof(Vertex, textureCoordinates);
 
-		return Move(ret);
+		return ret;
 	}
 }

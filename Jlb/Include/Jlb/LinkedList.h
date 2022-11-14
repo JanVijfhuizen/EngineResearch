@@ -144,7 +144,7 @@ namespace je
 	}
 
 	template <typename T>
-	void DestroyLinkedList(LinkedList<T>& instance, Arena& arena)
+	void DestroyLinkedList(const LinkedList<T>& instance, Arena& arena)
 	{
 		auto chain = instance.chain;
 		while (chain)
@@ -156,21 +156,18 @@ namespace je
 	}
 
 	template <typename T>
-	T& LinkedListAdd(LinkedList<T>* instance, Arena* arena, const T& value)
+	T& LinkedListAdd(LinkedList<T>& instance, Arena& arena, const T& value = {})
 	{
-		++instance->count;
-		auto chain = arena->New<LinkedList<T>>();
+		auto chain = arena.New<LinkedList<T>>();
 		chain->instance = value;
 		chain->next = chain;
-		instance->chain = chain;
+		instance.chain = chain;
 		return chain->instance;
 	}
 
 	template <typename T>
 	T LinkedListPop(LinkedList<T>& instance, Arena& arena)
 	{
-		assert(instance.count > 0);
-		--instance.count;
 		T chainInstance = instance.chain->instance;
 		auto next = instance.chain->next;
 		arena.Delete(instance.chain);

@@ -9,27 +9,27 @@ namespace je::vk
 	{
 		VkPhysicalDeviceMemoryProperties memProperties;
 		vkGetPhysicalDeviceMemoryProperties(app.physicalDevice, &memProperties);
-		_pools = Array<Pool>(arena, memProperties.memoryTypeCount);
+		_pools = CreateArray<Pool>(arena, memProperties.memoryTypeCount);
 
 		for (uint32_t i = 0; i < memProperties.memoryTypeCount; ++i)
 		{
 			auto& pool = _pools[i];
 			const auto& memType = memProperties.memoryTypes[i];
 			pool.memPropertyFlags = memType.propertyFlags;
-			pool.pages = arena.New<LinkedList<Page>>(1, arena);
+			pool.pages = CreateLinkedList<Page>();
 		}
 	}
 
 	Allocator::~Allocator()
 	{
-		for (int32_t i = static_cast<int32_t>(_pools.GetLength()) - 1; i >= 0; --i)
+		for (int32_t i = static_cast<int32_t>(_pools.length) - 1; i >= 0; --i)
 		{
 			const auto& pool = _pools[i];
-			for (const auto& page : *pool.pages)
+			for (const auto& page : pool.pages)
 				vkFreeMemory(_app.device, page.memory, nullptr);
-			_arena.Free(pool.pages);
+			DestroyLinkedList(pool.pages, _arena);
 		}
-		_arena.Free(_pools);
+		DestroyArray(_pools, _arena);
 	}
 
 	VkDeviceSize CalculateBufferSize(const VkDeviceSize size, const VkDeviceSize alignment)
@@ -45,8 +45,8 @@ namespace je::vk
 		const size_t size = CalculateBufferSize(memRequirements.size * count, memRequirements.alignment);
 		Page* ptr = nullptr;
 
-		const auto& pool = _pools[poolId];
-		for (auto& page : *pool.pages)
+		auto& pool = _pools[poolId];
+		for (auto& page : pool.pages)
 			if (page.remaining >= size && page.alignment == memRequirements.alignment)
 			{
 				ptr = &page;
@@ -56,7 +56,7 @@ namespace je::vk
 		// If no valid page exists, create one.
 		if(!ptr)
 		{
-			auto& page = pool.pages->Add();
+			auto& page = LinkedListAdd(pool.pages, _arena);
 			ptr = &page;
 			page.size = math::Max(size, _pageSize);
 			page.remaining = page.size;
@@ -85,7 +85,7 @@ namespace je::vk
 	bool Allocator::Free(const Memory& memory) const
 	{
 		const auto& pool = _pools[memory.poolId];
-		for (auto& page : *pool.pages)
+		for (auto& page : pool.pages)
 		{
 			if (page.memory != memory.memory)
 				continue;
@@ -99,7 +99,7 @@ namespace je::vk
 	size_t Allocator::GetPoolId(const uint32_t typeFilter, const VkMemoryPropertyFlags properties) const
 	{
 		size_t id = 0;
-		for (const auto& pool : _pools.GetView())
+		for (const auto& pool : _pools)
 		{
 			if (typeFilter & 1 << id)
 				if ((pool.memPropertyFlags & properties) == properties)

@@ -10,13 +10,13 @@ namespace je
 		T* data = nullptr;
 		size_t length = 0;
 
-		[[nodiscard]] T& operator [](size_t index);
+		[[nodiscard]] T& operator [](size_t index) const;
 		[[nodiscard]] Iterator<T> begin() const;
 		[[nodiscard]] Iterator<T> end() const;
 	};
 
 	template <typename T>
-	T& Array<T>::operator[](const size_t index)
+	T& Array<T>::operator[](const size_t index) const
 	{
 		assert(index < length);
 		return data[index];
