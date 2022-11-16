@@ -41,23 +41,28 @@ namespace je::vk
 		}
 	}
 
-	void ImageCreateImage(Image& image, const App& app, const Allocator& allocator, const VkImageUsageFlags usageFlags)
+	void ImageCreateImage(Image& image, const App& app, const Allocator& allocator, const glm::ivec3 resolution, const ImageCreateInfo& info)
 	{
+		image.resolution = resolution;
+		image.format = info.format;
+		image.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+		image.aspectFlags = info.aspectFlags;
+
 		VkImageCreateInfo imageCreateInfo{};
 		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
 		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.extent.width = image.resolution.x;
-		imageCreateInfo.extent.height = image.resolution.y;
+		imageCreateInfo.extent.width = resolution.x;
+		imageCreateInfo.extent.height = resolution.y;
 		imageCreateInfo.extent.depth = 1;
 		imageCreateInfo.mipLevels = 1;
 		imageCreateInfo.arrayLayers = 1;
-		imageCreateInfo.format = image.format;
+		imageCreateInfo.format = info.format;
 		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.initialLayout = image.layout;
-		imageCreateInfo.usage = usageFlags;
+		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageCreateInfo.usage = info.usageFlags;
 		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
 		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
+		
 		auto result = vkCreateImage(app.device, &imageCreateInfo, nullptr, &image.image);
 		assert(!result);
 
@@ -72,11 +77,7 @@ namespace je::vk
 	Image CreateImage(const App& app, const Allocator& allocator, const ImageCreateInfo& info, const glm::ivec3 resolution)
 	{
 		Image image{};
-		image.layout = VK_IMAGE_LAYOUT_UNDEFINED;
-		image.resolution = resolution;
-		image.aspectFlags = info.aspectFlags;
-
-		ImageCreateImage(image, app, allocator, info.usageFlags);
+		ImageCreateImage(image, app, allocator, resolution, info);
 
 		if (info.layout != VK_IMAGE_LAYOUT_UNDEFINED)
 		{
@@ -152,11 +153,9 @@ namespace je::vk
 	}
 
 	Image CreateImage(App& app, Allocator& allocator, const ImageCreateInfo& info, const Array<unsigned char>& pixels,
-		glm::ivec3 resolution)
+		const glm::ivec3 resolution)
 	{
 		Image image{};
-		image.layout = VK_IMAGE_LAYOUT_UNDEFINED;
-		image.resolution = resolution;
 		VkImageUsageFlags usageFlags = info.usageFlags | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
 		const size_t imageSize = static_cast<size_t>(resolution.x) * static_cast<size_t>(resolution.y) * 4;
@@ -183,7 +182,7 @@ namespace je::vk
 		memcpy(data, pixels.data, imageSize);
 		vkUnmapMemory(app.device, stagingMem.memory);
 
-		ImageCreateImage(image, app, allocator, usageFlags);
+		ImageCreateImage(image, app, allocator, resolution, info);
 
 		// Record and execute copy. 
 		VkCommandBuffer cmd;

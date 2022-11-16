@@ -110,7 +110,7 @@ namespace je
 	template <typename T>
 	size_t LinkedList<T>::GetCount() const
 	{
-		return 1 + next ? next->GetCount() : 0;
+		return 1 + (next ? next->GetCount() : -1);
 	}
 
 	template <typename T>
@@ -160,7 +160,7 @@ namespace je
 	{
 		auto chain = arena.New<LinkedList<T>>();
 		chain->instance = value;
-		chain->next = chain;
+		chain->next = instance.next;
 		instance.next = chain;
 		return chain->instance;
 	}

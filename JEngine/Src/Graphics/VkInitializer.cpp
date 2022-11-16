@@ -432,7 +432,7 @@ namespace je::vk::init
 		// Add khronos validation if not present.
 		bool khronosValidationPresent = false;
 		for (const auto& validationLayer : info.validationLayers)
-			if(strcmp(validationLayer, "VK_LAYER_KHRONOS_validation"))
+			if(strcmp(validationLayer, "VK_LAYER_KHRONOS_validation") == 0)
 			{
 				khronosValidationPresent = true;
 				break;

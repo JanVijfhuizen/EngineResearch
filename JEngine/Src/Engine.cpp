@@ -36,7 +36,7 @@ namespace je
 		Finder<Module> finder{_persistentArena};
 
 		{
-			Finder<Module>::Initializer initializer{_tempArena};
+			Finder<Module>::Initializer initializer{_persistentArena, _tempArena};
 			
 			initializer.Add<engine::WindowModule>();
 			initializer.Add<engine::TimeModule>();

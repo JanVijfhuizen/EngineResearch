@@ -20,11 +20,12 @@ namespace je
 			template <typename U>
 			void Add();
 
-			Initializer(Arena& arena);
+			Initializer(Arena& arena, Arena& tempArena);
 			~Initializer();
 
 		private:
 			Arena& _arena;
+			Arena& _tempArena;
 			LinkedList<KeyPair<T*>> _linkedList{};
 		};
 
@@ -51,12 +52,12 @@ namespace je
 	{
 		KeyPair<T*> pair{};
 		pair.value = _arena.New<U>();
-		pair.key = typeid(T).hash_code();
-		LinkedListAdd(_linkedList, _arena, pair);
+		pair.key = typeid(U).hash_code();
+		LinkedListAdd(_linkedList, _tempArena, pair);
 	}
 
 	template <typename T>
-	Finder<T>::Initializer::Initializer(Arena& arena) : _arena(arena)
+	Finder<T>::Initializer::Initializer(Arena& arena, Arena& tempArena) : _arena(arena), _tempArena(tempArena)
 	{
 		_linkedList = CreateLinkedList<KeyPair<T*>>();
 	}
@@ -90,10 +91,10 @@ namespace je
 		_array = CreateArray<T*>(_arena, length);
 		_map = CreateMap<T*>(_arena, length);
 
-		size_t i = 0;
+		size_t i = length - 1;
 		for (auto& linked : initializer._linkedList)
 		{
-			_array[i++] = linked.value;
+			_array[i--] = linked.value;
 			_map.Insert(linked.value, linked.key);
 		}
 	}
