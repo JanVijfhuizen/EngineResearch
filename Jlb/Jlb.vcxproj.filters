@@ -72,6 +72,9 @@
     <ClInclude Include="Include\Jlb\JMove.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Jlb\Finder.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Jlb.cpp">

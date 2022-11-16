@@ -145,6 +145,7 @@
     <ClInclude Include="Include\Jlb\Array.h" />
     <ClInclude Include="Include\framework.h" />
     <ClInclude Include="Include\Jlb\FileLoader.h" />
+    <ClInclude Include="Include\Jlb\Finder.h" />
     <ClInclude Include="Include\Jlb\Heap.h" />
     <ClInclude Include="Include\Jlb\Iterator.h" />
     <ClInclude Include="Include\Jlb\JMap.h" />
