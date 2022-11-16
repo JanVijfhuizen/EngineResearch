@@ -246,8 +246,8 @@ namespace je::engine
 
 		info.persistentArena.Delete(_renderGraph);
 		DestroyImage(_image, _app, *_allocator);
-		DestroyMesh(_mesh2);
-		DestroyMesh(_mesh);
+		DestroyMesh(_mesh2, _app, *_allocator);
+		DestroyMesh(_mesh, _app, *_allocator);
 		DestroyPipeline(_pipeline, _app);
 		vkDestroyDescriptorSetLayout(_app.device, _layout, nullptr);
 		for (const auto& mod : _modules)

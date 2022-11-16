@@ -13,11 +13,11 @@ namespace je
 		return persistentArenaSize + dumpArenaSize;
 	}
 
-	Engine::Engine(const CreateInfo* info) :
-		_memory(malloc(info->GetMemorySpaceRequired())),
-		_persistentArena(_memory, info->persistentArenaSize),
-		_tempArena(static_cast<unsigned char*>(_memory) + info->persistentArenaSize, info->tempArenaSize),
-		_dumpArena(static_cast<unsigned char*>(_memory) + info->persistentArenaSize + info->tempArenaSize, info->dumpArenaSize)
+	Engine::Engine(const CreateInfo& info) :
+		_memory(malloc(info.GetMemorySpaceRequired())),
+		_persistentArena(_memory, info.persistentArenaSize),
+		_tempArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize, info.tempArenaSize),
+		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize)
 	{
 	}
 

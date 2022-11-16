@@ -105,7 +105,7 @@ namespace je
 	[[nodiscard]] Map<T> CreateMap(Arena& arena, const size_t length)
 	{
 		Map<T> instance{};
-		instance.data = arena.New<T>(length);
+		instance.data = arena.New<KeyPair<T>>(length);
 		instance.length = length;
 		return instance;
 	}

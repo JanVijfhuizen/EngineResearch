@@ -106,7 +106,7 @@ namespace je
 	[[nodiscard]] Heap<T> CreateHeap(Arena& arena, const size_t length)
 	{
 		Heap<T> instance{};
-		instance.data = arena.New<T>(length + 1);
+		instance.data = arena.New<KeyPair<T>>(length + 1);
 		instance.length = length;
 		return instance;
 	}

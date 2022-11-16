@@ -8,7 +8,7 @@ namespace je::packing
 	struct Ref final
 	{
 		glm::ivec2 shape;
-		size_t length;
+		float length;
 		size_t index;
 	};
 
@@ -42,7 +42,7 @@ namespace je::packing
 		{
 			auto& ref = refs[i];
 			ref.shape = shapes[i];
-			ref.length = glm::length(ref.shape);
+			ref.length = glm::length(static_cast<glm::vec2>(static_cast<float>(ref.shape.x), static_cast<float>(ref.shape.y)));
 			ref.index = i;
 			assert(ref.shape.x > 0 && ref.shape.y > 0);
 		}

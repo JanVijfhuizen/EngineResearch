@@ -5,23 +5,25 @@
 
 namespace je
 {
-	Array<char> CreateStringArray(Arena* arena, const char* string, size_t length)
+	Array<char> CreateStringArray(Arena& arena, const char* string, size_t length)
 	{
+		/*
 		length = length == SIZE_MAX ? strlen(string) + 1 : length;
+		const auto instance = CreateArray<char>(arena, length);
 
-		Array<char> instance{};
-		instance.data = arena->New<char>(length);
+		const auto instance = CreateArray<char>(arena, length);
 		for (size_t i = 0; i < length - 1; ++i)
 			instance.data[i] = string[i];
 		instance.data[length - 1] = '\0';
 		return instance;
+		*/
+		return {};
 	}
 
-	Array<char> CreateStringArray(Arena* arena, const size_t number)
+	Array<char> CreateStringArray(Arena& arena, const size_t number)
 	{
-		Array<char> instance{};
-		instance.length = math::GetFractals<size_t>(number) + 1;
-		instance.data = arena->New<char>(instance.length);
+		/*
+		const auto instance = CreateArray<char>(arena, math::GetFractals<size_t>(number) + 1);
 		instance.data[instance.length - 1] = '\0';
 
 		size_t d = 10;
@@ -34,5 +36,7 @@ namespace je
 			d *= 10;
 		}
 		return instance;
+		*/
+		return {};
 	}
 }

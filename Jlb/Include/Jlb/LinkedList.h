@@ -117,7 +117,7 @@ namespace je
 	typename LinkedList<T>::Iterator LinkedList<T>::begin() const
 	{
 		Iterator iterator{};
-		iterator.chain = next;
+		iterator.linked = next;
 		return iterator;
 	}
 
@@ -146,7 +146,7 @@ namespace je
 	template <typename T>
 	void DestroyLinkedList(const LinkedList<T>& instance, Arena& arena)
 	{
-		auto chain = instance.chain;
+		auto chain = instance.next;
 		while (chain)
 		{
 			auto next = chain->next;

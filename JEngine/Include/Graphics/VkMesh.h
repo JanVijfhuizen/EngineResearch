@@ -17,7 +17,7 @@ namespace je::vk
 	};
 
 	[[nodiscard]] Mesh CreateMesh(const App& app, Allocator& allocator, const Array<Vertex>& vertices, const Array<Vertex::Index>& indices);
-	void DestroyMesh(Mesh& mesh);
+	void DestroyMesh(const Mesh& mesh, const App& app, const Allocator& allocator);
 
 	template <typename T>
 	Buffer CreateVertexBuffer(const App& app, Allocator& allocator,
@@ -25,7 +25,7 @@ namespace je::vk
 	{
 		VkBufferCreateInfo bufferInfo{};
 		bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		bufferInfo.size = sizeof(T) * data.GetLength();
+		bufferInfo.size = sizeof(T) * data.length;
 		bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
@@ -43,7 +43,7 @@ namespace je::vk
 		// Move vertex/index data to a staging buffer. 
 		void* stagingData;
 		vkMapMemory(app.device, stagingMem.memory, stagingMem.offset, stagingMem.size, 0, &stagingData);
-		memcpy(stagingData, static_cast<const void*>(data.GetData()), bufferInfo.size);
+		memcpy(stagingData, static_cast<const void*>(data.data), bufferInfo.size);
 		vkUnmapMemory(app.device, stagingMem.memory);
 
 		bufferInfo.usage = usageFlags | VK_BUFFER_USAGE_TRANSFER_DST_BIT;

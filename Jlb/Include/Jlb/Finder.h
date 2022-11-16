@@ -4,6 +4,7 @@
 #include "JMap.h"
 #include "KeyPair.h"
 #include "LinkedList.h"
+#include "vcruntime_typeinfo.h"
 
 namespace je 
 {
@@ -86,8 +87,8 @@ namespace je
 	{
 		assert(!_map.data);
 		const size_t length = initializer._linkedList.GetCount();
-		_array = CreateArray<T*>(arena, length);
-		_map = CreateMap<T*>(arena, length);
+		_array = CreateArray<T*>(_arena, length);
+		_map = CreateMap<T*>(_arena, length);
 
 		size_t i = 0;
 		for (auto& linked : initializer._linkedList)
