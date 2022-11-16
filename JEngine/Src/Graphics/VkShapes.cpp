@@ -5,8 +5,8 @@ namespace je::vk
 {
 	void CreateQuadShape(Arena& arena, Array<Vertex>& outVertices, Array<Vertex::Index>& outIndices, const float scale)
 	{
-		outVertices = { arena, 4 };
-		outIndices = {arena, 6 };
+		outVertices = CreateArray<Vertex>(arena, 4);
+		outIndices = CreateArray<Vertex::Index>(arena, 6);
 
 		outVertices[0].position = { -1, -1, 0 };
 		outVertices[1].position = { -1, 1, 0 };

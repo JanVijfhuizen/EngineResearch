@@ -1,7 +1,5 @@
 ﻿#include "pch.h"
 #include "Algorithms/PackingFFDH.h"
-
-#include "Jlb/JMove.h"
 #include "Jlb/JVector.h"
 #include "Jlb/LinSort.h"
 
@@ -19,8 +17,10 @@ namespace je::packing
 		return a.length < b.length;
 	}
 
-	Array<glm::ivec2> Pack(Arena& arena, Arena& tempArena, const View<glm::ivec2>& shapes, const glm::ivec2 area)
+	Array<glm::ivec2> Pack(Arena& arena, Arena& tempArena, const Array<glm::ivec2>& shapes, const glm::ivec2 area)
 	{
+		const auto _ = tempArena.CreateScope();
+
 		struct Node final
 		{
 			glm::ivec2 position{};
@@ -28,8 +28,8 @@ namespace je::packing
 		};
 
 		// Collect metadata from the shapes.
-		const size_t length = shapes.GetLength();
-		Vector<Node> nodes{tempArena, length };
+		const size_t length = shapes.length;
+		auto nodes = CreateVector<Node>(tempArena, length);
 
 		{
 			auto& root = nodes.Add();
@@ -37,7 +37,7 @@ namespace je::packing
 			assert(area.x > 0 && area.y > 0);
 		}
 
-		const Array<Ref> refs{tempArena, length };
+		const auto refs = CreateArray<Ref>(tempArena, length);
 		for (size_t i = 0; i < length; ++i)
 		{
 			auto& ref = refs[i];
@@ -48,14 +48,14 @@ namespace je::packing
 		}
 
 		// Sort from largest to smallest.
-		LinSort(refs.GetData(), length, RefSorter);
+		LinSort(refs.data, length, RefSorter);
 
-		Vector<glm::ivec2> ret{arena, length};
+		Vector<glm::ivec2> ret = CreateVector<glm::ivec2>(tempArena, length);
 
 		// Iterate over all the references and put them in nodes.
-		for (const auto& ref : refs.GetView())
+		for (const auto& ref : refs)
 		{
-			const size_t nodeCount = nodes.GetCount();
+			const size_t nodeCount = nodes.count;
 			const auto& shape = ref.shape;
 
 			for (size_t i = 0; i < nodeCount; ++i)
@@ -89,6 +89,9 @@ namespace je::packing
 			}
 		}
 
-		return static_cast<Array<glm::ivec2>>(Move(ret));
+		const auto result = CreateArray<glm::ivec2>(arena, ret.length);
+		for (size_t i = 0; i < ret.length; ++i)
+			result[i] = ret[i];
+		return result;
 	}
 }

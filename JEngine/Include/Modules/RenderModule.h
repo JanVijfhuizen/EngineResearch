@@ -2,6 +2,7 @@
 #include "Module.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkImage.h"
+#include "Graphics/VkMesh.h"
 #include "Graphics/VkRenderGraph.h"
 #include "Jlb/Array.h"
 
@@ -11,10 +12,6 @@ namespace je
 
 	namespace vk
 	{
-		class Layout;
-		class Pipeline;
-		class Shader;
-		class Mesh;
 		class SwapChain;
 		class Allocator;
 	}
@@ -26,17 +23,14 @@ namespace je
 			vk::App _app{};
 			vk::Allocator* _allocator = nullptr;
 			vk::SwapChain* _swapChain = nullptr;
-
-			vk::Shader* _shader = nullptr;
-			vk::Shader* _shader2 = nullptr;
-			vk::Layout* _layout = nullptr;
-			vk::Pipeline* _pipeline = nullptr;
-
-			vk::Mesh* _mesh = nullptr;
-			vk::Mesh* _mesh2 = nullptr;
-			vk::Image* _image = nullptr;
+			
+			vk::Pipeline _pipeline;
+			vk::Mesh _mesh, _mesh2;
+			vk::Image _image;
 			vk::RenderGraph* _renderGraph;
 
+			VkShaderModule _modules[4]{};
+			VkDescriptorSetLayout _layout;
 			VkImageView _view;
 			VkDescriptorPool _descriptorPool;
 			Array<VkDescriptorSet> _descriptorSets{};
