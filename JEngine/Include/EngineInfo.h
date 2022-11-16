@@ -1,4 +1,6 @@
 #pragma once
+#include "Module.h"
+#include "Jlb/Finder.h"
 
 namespace je
 {
@@ -7,8 +9,6 @@ namespace je
 
 	namespace engine
 	{
-		struct ModuleFinder;
-
 		// Used to communicate with the engine from the modules.
 		struct Info final
 		{
@@ -19,11 +19,11 @@ namespace je
 			// Doesn't get deallocated automatically, meant for temporary 
 			Arena& tempArena;
 			Arena& dumpArena;
-			const ModuleFinder& finder;
+			const Finder<Module>& finder;
 			bool quit = false;
 
 		private:
-			explicit Info(Engine& engine, const ModuleFinder& finder);
+			explicit Info(Engine& engine, const Finder<Module>& finder);
 		};
 	}
 }

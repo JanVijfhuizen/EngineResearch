@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
 #include "Modules/RenderModule.h"
 #include "EngineInfo.h"
-#include "ModuleFinder.h"
 #include "Graphics/ObjLoader.h"
 #include "Graphics/Vertex.h"
 #include "Graphics/VkApp.h"
@@ -14,7 +13,7 @@
 #include "Graphics/VkPipeline.h"
 #include "Graphics/VkRenderGraph.h"
 #include "Graphics/VkShader.h"
-#include "Graphics/VkShape.h"
+#include "Graphics/VkShapes.h"
 #include "Graphics/VkSwapChain.h"
 
 namespace je::engine
@@ -25,7 +24,7 @@ namespace je::engine
 
 		size_t windowExtensionCount;
 		const auto windowExtensions = WindowModule::GetRequiredExtensions(windowExtensionCount);
-		const Array<StringView> windowExtensionsArr{ info.tempArena, windowExtensionCount };
+		const Array<const char*> windowExtensionsArr{ info.tempArena, windowExtensionCount };
 		memcpy(windowExtensionsArr.GetData(), windowExtensions, sizeof(const char*) * windowExtensionCount);
 
 		vk::init::Info vkInfo{};
