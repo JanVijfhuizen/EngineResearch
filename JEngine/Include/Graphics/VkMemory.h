@@ -4,9 +4,9 @@ namespace je::vk
 {
 	struct Memory final
 	{
-		VkDeviceMemory memory;
-		VkDeviceSize size;
-		VkDeviceSize offset;
-		size_t poolId;
+		VkDeviceMemory memory = VK_NULL_HANDLE;
+		VkDeviceSize size = 0;
+		VkDeviceSize offset = 0;
+		size_t poolId = SIZE_MAX;
 	};
 }

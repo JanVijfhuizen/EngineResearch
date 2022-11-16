@@ -18,7 +18,7 @@ namespace je
 			~Allocator();
 
 			[[nodiscard]] Memory Alloc(VkMemoryRequirements memRequirements, VkMemoryPropertyFlags properties, size_t count = 1) const;
-			bool Free(const Memory& memory) const;
+			[[nodiscard]] bool Free(const Memory& memory) const;
 
 		private:
 			struct Page final
@@ -32,7 +32,7 @@ namespace je
 			struct Pool final
 			{
 				VkFlags memPropertyFlags;
-				LinkedList<Page>* pages = nullptr;
+				LinkedList<Page> pages{};
 			};
 
 			Arena& _arena;

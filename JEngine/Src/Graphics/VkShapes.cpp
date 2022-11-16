@@ -1,12 +1,12 @@
 ﻿#include "pch.h"
-#include "Graphics/VkShape.h"
+#include "Graphics/VkShapes.h"
 
 namespace je::vk
 {
 	void CreateQuadShape(Arena& arena, Array<Vertex>& outVertices, Array<Vertex::Index>& outIndices, const float scale)
 	{
-		outVertices = { arena, 4 };
-		outIndices = {arena, 6 };
+		outVertices = CreateArray<Vertex>(arena, 4);
+		outIndices = CreateArray<Vertex::Index>(arena, 6);
 
 		outVertices[0].position = { -1, -1, 0 };
 		outVertices[1].position = { -1, 1, 0 };
@@ -25,7 +25,7 @@ namespace je::vk
 		outIndices[4] = 2;
 		outIndices[5] = 3;
 
-		for (auto& vertex : outVertices.GetView())
+		for (auto& vertex : outVertices)
 			vertex.position *= scale;
 	}
 }

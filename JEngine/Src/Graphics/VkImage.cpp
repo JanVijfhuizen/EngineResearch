@@ -9,108 +9,8 @@
 #include <exception>
 #include <stb_image_write.h>
 
-#include "Jlb/JMove.h"
-
 namespace je::vk
 {
-	Image::Image(const CreateInfo& info) :
-		_app(info.app), _allocator(info.allocator),
-		_format(info.format), _aspectFlags(info.aspectFlags), _resolution(info.resolution)
-	{
-		if(info.pixels)
-			Load(info.pixels, info.usageFlags, info.layout);
-		else if(info.path)
-		{
-			// Load pixels.
-			int texWidth, texHeight, texChannels;
-			stbi_uc* pixels = stbi_load(info.path.GetData(), &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-			const VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4;
-			assert(pixels);
-			_resolution = { texWidth, texHeight, 4 };
-
-			const View<stbi_uc> view{ pixels, imageSize };
-			
-			Load(view, info.usageFlags, info.layout);
-			stbi_image_free(pixels);
-		}
-		else
-		{
-			CreateImage(info.usageFlags);
-
-			if (info.layout != VK_IMAGE_LAYOUT_UNDEFINED)
-			{
-				// Record and execute initial layout transition. 
-				VkCommandBuffer cmdBuffer;
-				VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
-				cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-				cmdBufferAllocInfo.commandPool = _app->commandPool;
-				cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-				cmdBufferAllocInfo.commandBufferCount = 1;
-
-				auto result = vkAllocateCommandBuffers(_app->device, &cmdBufferAllocInfo, &cmdBuffer);
-				assert(!result);
-
-				VkFence fence;
-				VkFenceCreateInfo fenceInfo{};
-				fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-				fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-				result = vkCreateFence(_app->device, &fenceInfo, nullptr, &fence);
-				assert(!result);
-				result = vkResetFences(_app->device, 1, &fence);
-				assert(!result);
-
-				VkCommandBufferBeginInfo cmdBeginInfo{};
-				cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-				cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-				vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
-
-				TransitionLayout(cmdBuffer, info.layout, _aspectFlags);
-
-				// End recording.
-				result = vkEndCommandBuffer(cmdBuffer);
-				assert(!result);
-
-				VkSubmitInfo cmdSubmitInfo{};
-				cmdSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-				cmdSubmitInfo.commandBufferCount = 1;
-				cmdSubmitInfo.pCommandBuffers = &cmdBuffer;
-				cmdSubmitInfo.waitSemaphoreCount = 0;
-				cmdSubmitInfo.pWaitSemaphores = nullptr;
-				cmdSubmitInfo.signalSemaphoreCount = 0;
-				cmdSubmitInfo.pSignalSemaphores = nullptr;
-				cmdSubmitInfo.pWaitDstStageMask = nullptr;
-				result = vkQueueSubmit(_app->queues[App::Queue::renderQueue], 1, &cmdSubmitInfo, fence);
-				assert(!result);
-
-				result = vkWaitForFences(_app->device, 1, &fence, VK_TRUE, UINT64_MAX);
-				assert(!result);
-
-				vkDestroyFence(_app->device, fence, nullptr);
-			}
-		}
-	}
-
-	Image::Image(Image&& other) noexcept
-	{
-		DeepCopy(Move(other));
-	}
-
-	Image& Image::operator=(Image&& other) noexcept
-	{
-		DeepCopy(Move(other));
-		return *this;
-	}
-
-	Image::~Image()
-	{
-		if (!_app)
-			return;
-		vkDestroyImage(_app->device, _image, nullptr);
-		const bool freeResult = _allocator->Free(_memory);
-		assert(freeResult);
-	}
-
 	void GetLayoutMasks(const VkImageLayout layout, VkAccessFlags& outAccessFlags,
 		VkPipelineStageFlags& outPipelineStageFlags)
 	{
@@ -141,68 +41,124 @@ namespace je::vk
 		}
 	}
 
-	void Image::TransitionLayout(const VkCommandBuffer cmd, const VkImageLayout newLayout, const VkImageAspectFlags aspectFlags)
+	void ImageCreateImage(Image& image, const App& app, const Allocator& allocator, const glm::ivec3 resolution, const ImageCreateInfo& info)
 	{
-		VkImageMemoryBarrier barrier{};
-		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
-		barrier.oldLayout = _layout;
-		barrier.newLayout = newLayout;
-		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
-		barrier.image = _image;
-		barrier.subresourceRange.aspectMask = aspectFlags;
-		barrier.subresourceRange.baseMipLevel = 0;
-		barrier.subresourceRange.levelCount = 1;
-		barrier.subresourceRange.baseArrayLayer = 0;
-		barrier.subresourceRange.layerCount = 1;
+		image.resolution = resolution;
+		image.format = info.format;
+		image.layout = VK_IMAGE_LAYOUT_UNDEFINED;
+		image.aspectFlags = info.aspectFlags;
 
-		VkPipelineStageFlags srcStage = 0;
-		VkPipelineStageFlags dstStage = 0;
+		VkImageCreateInfo imageCreateInfo{};
+		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+		imageCreateInfo.extent.width = resolution.x;
+		imageCreateInfo.extent.height = resolution.y;
+		imageCreateInfo.extent.depth = 1;
+		imageCreateInfo.mipLevels = 1;
+		imageCreateInfo.arrayLayers = 1;
+		imageCreateInfo.format = info.format;
+		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
+		imageCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+		imageCreateInfo.usage = info.usageFlags;
+		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		
+		auto result = vkCreateImage(app.device, &imageCreateInfo, nullptr, &image.image);
+		assert(!result);
 
-		GetLayoutMasks(_layout, barrier.srcAccessMask, srcStage);
-		GetLayoutMasks(newLayout, barrier.dstAccessMask, dstStage);
+		VkMemoryRequirements memRequirements;
+		vkGetImageMemoryRequirements(app.device, image.image, &memRequirements);
 
-		vkCmdPipelineBarrier(cmd,
-			srcStage, dstStage,
-			0,
-			0, nullptr,
-			0, nullptr,
-			1, &barrier
-		);
-
-		_layout = newLayout;
+		image.memory = allocator.Alloc(memRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		result = vkBindImageMemory(app.device, image.image, image.memory.memory, image.memory.offset);
+		assert(!result);
 	}
 
-	glm::ivec3 Image::GetResolution() const
+	Image CreateImage(const App& app, const Allocator& allocator, const ImageCreateInfo& info, const glm::ivec3 resolution)
 	{
-		return _resolution;
+		Image image{};
+		ImageCreateImage(image, app, allocator, resolution, info);
+
+		if (info.layout != VK_IMAGE_LAYOUT_UNDEFINED)
+		{
+			// Record and execute initial layout transition. 
+			VkCommandBuffer cmdBuffer;
+			VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
+			cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+			cmdBufferAllocInfo.commandPool = app.commandPool;
+			cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+			cmdBufferAllocInfo.commandBufferCount = 1;
+
+			auto result = vkAllocateCommandBuffers(app.device, &cmdBufferAllocInfo, &cmdBuffer);
+			assert(!result);
+
+			VkFence fence;
+			VkFenceCreateInfo fenceInfo{};
+			fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+			fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+			result = vkCreateFence(app.device, &fenceInfo, nullptr, &fence);
+			assert(!result);
+			result = vkResetFences(app.device, 1, &fence);
+			assert(!result);
+
+			VkCommandBufferBeginInfo cmdBeginInfo{};
+			cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+			cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+			vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
+
+			ImageTransitionLayout(image, cmdBuffer, info.layout, image.aspectFlags);
+
+			// End recording.
+			result = vkEndCommandBuffer(cmdBuffer);
+			assert(!result);
+
+			VkSubmitInfo cmdSubmitInfo{};
+			cmdSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+			cmdSubmitInfo.commandBufferCount = 1;
+			cmdSubmitInfo.pCommandBuffers = &cmdBuffer;
+			cmdSubmitInfo.waitSemaphoreCount = 0;
+			cmdSubmitInfo.pWaitSemaphores = nullptr;
+			cmdSubmitInfo.signalSemaphoreCount = 0;
+			cmdSubmitInfo.pSignalSemaphores = nullptr;
+			cmdSubmitInfo.pWaitDstStageMask = nullptr;
+			result = vkQueueSubmit(app.queues[App::Queue::renderQueue], 1, &cmdSubmitInfo, fence);
+			assert(!result);
+
+			result = vkWaitForFences(app.device, 1, &fence, VK_TRUE, UINT64_MAX);
+			assert(!result);
+
+			vkDestroyFence(app.device, fence, nullptr);
+		}
+
+		return image;
 	}
 
-	VkFormat Image::GetFormat() const
+	Image CreateImage(App& app, Allocator& allocator, const ImageCreateInfo& info, const char* path)
 	{
-		return _format;
+		// Load pixels.
+		int texWidth, texHeight, texChannels;
+		stbi_uc* pixels = stbi_load(path, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
+		const VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4;
+		assert(pixels);
+		const glm::ivec3 resolution{ texWidth, texHeight, 4 };
+
+		Array<stbi_uc> pixelArray{};
+		pixelArray.data = pixels;
+		pixelArray.length = imageSize;
+
+		const auto image = CreateImage(app, allocator, info, pixelArray, resolution);
+		stbi_image_free(pixels);
+		return image;
 	}
 
-	VkImageLayout Image::GetLayout() const
+	Image CreateImage(App& app, Allocator& allocator, const ImageCreateInfo& info, const Array<unsigned char>& pixels,
+		const glm::ivec3 resolution)
 	{
-		return _layout;
-	}
+		Image image{};
+		VkImageUsageFlags usageFlags = info.usageFlags | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
 
-	VkImageAspectFlags Image::GetAspectFlags() const
-	{
-		return _aspectFlags;
-	}
-
-	Image::operator VkImage() const
-	{
-		return _image;
-	}
-
-	void Image::Load(const View<unsigned char>& pixels, VkImageUsageFlags usageFlags, VkImageLayout layout)
-	{
-		usageFlags |= VK_IMAGE_USAGE_TRANSFER_DST_BIT;
-
-		const size_t imageSize = static_cast<size_t>(_resolution.x) * static_cast<size_t>(_resolution.y) * 4;
+		const size_t imageSize = static_cast<size_t>(resolution.x) * static_cast<size_t>(resolution.y) * 4;
 
 		VkBuffer stagingBuffer;
 		VkBufferCreateInfo bufferInfo{};
@@ -210,33 +166,33 @@ namespace je::vk
 		bufferInfo.size = imageSize;
 		bufferInfo.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 		bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-		auto result = vkCreateBuffer(_app->device, &bufferInfo, nullptr, &stagingBuffer);
+		auto result = vkCreateBuffer(app.device, &bufferInfo, nullptr, &stagingBuffer);
 		assert(!result);
 
 		VkMemoryRequirements stagingMemRequirements;
-		vkGetBufferMemoryRequirements(_app->device, stagingBuffer, &stagingMemRequirements);
+		vkGetBufferMemoryRequirements(app.device, stagingBuffer, &stagingMemRequirements);
 
-		const auto stagingMem = _allocator->Alloc(stagingMemRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		result = vkBindBufferMemory(_app->device, stagingBuffer, stagingMem.memory, stagingMem.offset);
+		const auto stagingMem = allocator.Alloc(stagingMemRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+		result = vkBindBufferMemory(app.device, stagingBuffer, stagingMem.memory, stagingMem.offset);
 		assert(!result);
 
 		// Copy pixels to staging buffer.
 		void* data;
-		vkMapMemory(_app->device, stagingMem.memory, stagingMem.offset, imageSize, 0, &data);
-		memcpy(data, pixels.GetData(), imageSize);
-		vkUnmapMemory(_app->device, stagingMem.memory);
+		vkMapMemory(app.device, stagingMem.memory, stagingMem.offset, imageSize, 0, &data);
+		memcpy(data, pixels.data, imageSize);
+		vkUnmapMemory(app.device, stagingMem.memory);
 
-		CreateImage(usageFlags);
+		ImageCreateImage(image, app, allocator, resolution, info);
 
 		// Record and execute copy. 
-		VkCommandBuffer cmdBuffer;
+		VkCommandBuffer cmd;
 		VkCommandBufferAllocateInfo cmdBufferAllocInfo{};
 		cmdBufferAllocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		cmdBufferAllocInfo.commandPool = _app->commandPool;
+		cmdBufferAllocInfo.commandPool = app.commandPool;
 		cmdBufferAllocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
 		cmdBufferAllocInfo.commandBufferCount = 1;
 
-		result = vkAllocateCommandBuffers(_app->device, &cmdBufferAllocInfo, &cmdBuffer);
+		result = vkAllocateCommandBuffers(app.device, &cmdBufferAllocInfo, &cmd);
 		assert(!result);
 
 		VkFence fence;
@@ -244,17 +200,17 @@ namespace je::vk
 		fenceInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 		fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
-		result = vkCreateFence(_app->device, &fenceInfo, nullptr, &fence);
+		result = vkCreateFence(app.device, &fenceInfo, nullptr, &fence);
 		assert(!result);
-		result = vkResetFences(_app->device, 1, &fence);
+		result = vkResetFences(app.device, 1, &fence);
 		assert(!result);
 
 		VkCommandBufferBeginInfo cmdBeginInfo{};
 		cmdBeginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 		cmdBeginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-		vkBeginCommandBuffer(cmdBuffer, &cmdBeginInfo);
+		vkBeginCommandBuffer(cmd, &cmdBeginInfo);
 
-		TransitionLayout(cmdBuffer, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, _aspectFlags);
+		ImageTransitionLayout(image, cmd, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, image.aspectFlags);
 
 		VkBufferImageCopy region{};
 		region.bufferOffset = 0;
@@ -269,85 +225,86 @@ namespace je::vk
 		region.imageOffset = { 0, 0, 0 };
 		region.imageExtent =
 		{
-			static_cast<uint32_t>(_resolution.x),
-			static_cast<uint32_t>(_resolution.y),
+			static_cast<uint32_t>(resolution.x),
+			static_cast<uint32_t>(resolution.y),
 			1
 		};
 
 		vkCmdCopyBufferToImage(
-			cmdBuffer,
+			cmd,
 			stagingBuffer,
-			_image,
+			image.image,
 			VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
 			1,
 			&region
 		);
 
-		TransitionLayout(cmdBuffer, layout, _aspectFlags);
+		ImageTransitionLayout(image, cmd, info.layout, image.aspectFlags);
 
 		// End recording.
-		result = vkEndCommandBuffer(cmdBuffer);
+		result = vkEndCommandBuffer(cmd);
 		assert(!result);
 
 		VkSubmitInfo cmdSubmitInfo{};
 		cmdSubmitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 		cmdSubmitInfo.commandBufferCount = 1;
-		cmdSubmitInfo.pCommandBuffers = &cmdBuffer;
+		cmdSubmitInfo.pCommandBuffers = &cmd;
 		cmdSubmitInfo.waitSemaphoreCount = 0;
 		cmdSubmitInfo.pWaitSemaphores = nullptr;
 		cmdSubmitInfo.signalSemaphoreCount = 0;
 		cmdSubmitInfo.pSignalSemaphores = nullptr;
 		cmdSubmitInfo.pWaitDstStageMask = nullptr;
-		result = vkQueueSubmit(_app->queues[App::Queue::renderQueue], 1, &cmdSubmitInfo, fence);
+		result = vkQueueSubmit(app.queues[App::Queue::renderQueue], 1, &cmdSubmitInfo, fence);
 		assert(!result);
 
-		result = vkWaitForFences(_app->device, 1, &fence, VK_TRUE, UINT64_MAX);
+		result = vkWaitForFences(app.device, 1, &fence, VK_TRUE, UINT64_MAX);
 		assert(!result);
 
-		vkDestroyFence(_app->device, fence, nullptr);
-		vkDestroyBuffer(_app->device, stagingBuffer, nullptr);
-		const bool freeResult = _allocator->Free(stagingMem);
+		vkDestroyFence(app.device, fence, nullptr);
+		vkDestroyBuffer(app.device, stagingBuffer, nullptr);
+		const bool freeResult = allocator.Free(stagingMem);
 		assert(freeResult);
+
+		return image;
 	}
 
-	void Image::CreateImage(const VkImageUsageFlags usageFlags)
+	void ImageTransitionLayout(Image& image, const VkCommandBuffer cmd,	
+		const VkImageLayout newLayout, const VkImageAspectFlags aspectFlags)
 	{
-		VkImageCreateInfo imageCreateInfo{};
-		imageCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
-		imageCreateInfo.imageType = VK_IMAGE_TYPE_2D;
-		imageCreateInfo.extent.width = _resolution.x;
-		imageCreateInfo.extent.height = _resolution.y;
-		imageCreateInfo.extent.depth = 1;
-		imageCreateInfo.mipLevels = 1;
-		imageCreateInfo.arrayLayers = 1;
-		imageCreateInfo.format = _format;
-		imageCreateInfo.tiling = VK_IMAGE_TILING_OPTIMAL;
-		imageCreateInfo.initialLayout = _layout;
-		imageCreateInfo.usage = usageFlags;
-		imageCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
-		imageCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+		VkImageMemoryBarrier barrier{};
+		barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+		barrier.oldLayout = image.layout;
+		barrier.newLayout = newLayout;
+		barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+		barrier.image = image.image;
+		barrier.subresourceRange.aspectMask = aspectFlags;
+		barrier.subresourceRange.baseMipLevel = 0;
+		barrier.subresourceRange.levelCount = 1;
+		barrier.subresourceRange.baseArrayLayer = 0;
+		barrier.subresourceRange.layerCount = 1;
 
-		auto result = vkCreateImage(_app->device, &imageCreateInfo, nullptr, &_image);
-		assert(!result);
+		VkPipelineStageFlags srcStage = 0;
+		VkPipelineStageFlags dstStage = 0;
 
-		VkMemoryRequirements memRequirements;
-		vkGetImageMemoryRequirements(_app->device, _image, &memRequirements);
+		GetLayoutMasks(image.layout, barrier.srcAccessMask, srcStage);
+		GetLayoutMasks(newLayout, barrier.dstAccessMask, dstStage);
 
-		_memory = _allocator->Alloc(memRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
-		result = vkBindImageMemory(_app->device, _image, _memory.memory, _memory.offset);
-		assert(!result);
+		vkCmdPipelineBarrier(cmd,
+			srcStage, dstStage,
+			0,
+			0, nullptr,
+			0, nullptr,
+			1, &barrier
+		);
+
+		image.layout = newLayout;
 	}
 
-	void Image::DeepCopy(Image&& other)
+	void DestroyImage(const Image& image, const App& app, const Allocator& allocator)
 	{
-		_app = other._app;
-		_allocator = other._allocator;
-		_image = other._image;
-		_layout = other._layout;
-		_format = other._format;
-		_aspectFlags = other._aspectFlags;
-		_resolution = other._resolution;
-		_memory = other._memory;
-		other._app = nullptr;
+		vkDestroyImage(app.device, image.image, nullptr);
+		const bool freeResult = allocator.Free(image.memory);
+		assert(freeResult);
 	}
 }

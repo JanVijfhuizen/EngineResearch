@@ -109,7 +109,7 @@ namespace je::engine
 		_resolution = resolution;
 	}
 
-	void WindowModule::SetName(const StringView& name)
+	void WindowModule::SetName(const char* name)
 	{
 		assert(!internalWindow.running);
 		_name = name;

@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Module.h"
-#include "Jlb/StringView.h"
 
 namespace je::engine
 {
@@ -18,10 +17,10 @@ namespace je::engine
 
 		[[nodiscard]] glm::ivec2 GetResolution() const;
 		void SetResolution(const glm::ivec2& resolution);
-		void SetName(const StringView& name);
+		void SetName(const char* name);
 
 	private:
-		StringView _name = "JEngine";
+		const char* _name = "JEngine";
 		glm::ivec2 _resolution{800, 600};
 
 		void OnInitialize(Info& info) override;

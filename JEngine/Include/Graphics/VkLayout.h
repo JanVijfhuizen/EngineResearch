@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Jlb/View.h"
+#include "Jlb/Array.h"
 
 namespace je
 {
@@ -9,27 +9,14 @@ namespace je
 	{
 		struct App;
 
-		class Layout final
+		struct Binding final
 		{
-		public:
-			struct Binding final
-			{
-				VkDescriptorType type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-				size_t size = sizeof(int32_t);
-				uint32_t count = 1;
-				VkShaderStageFlagBits flag;
-			};
-
-			explicit Layout(App& app, Arena& tempArena, const View<Binding>& bindings);
-			Layout(Layout&& other) noexcept;
-			Layout& operator=(Layout&& other) noexcept;
-			~Layout();
-
-			[[nodiscard]] operator VkDescriptorSetLayout() const;
-
-		private:
-			VkDescriptorSetLayout _layout;
-			App* _app = nullptr;
+			VkDescriptorType type = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+			size_t size = sizeof(int32_t);
+			uint32_t count = 1;
+			VkShaderStageFlagBits flag = VK_SHADER_STAGE_ALL;
 		};
+
+		[[nodiscard]] VkDescriptorSetLayout CreateLayout(Arena& tempArena, App& app, const Array<Binding>& bindings);
 	}
 }

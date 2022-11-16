@@ -1,11 +1,9 @@
 ﻿#include "pch.h"
 #include "Engine.h"
 #include "EngineInfo.h"
-#include "EngineInitializer.h"
-#include "ModuleFinder.h"
+#include "Jlb/Finder.h"
 #include "Modules/TimeModule.h"
 #include "Modules/WindowModule.h"
-#include "Jlb/LinkedList.h"
 #include "Modules/RenderModule.h"
 
 namespace je
@@ -34,49 +32,45 @@ namespace je
 		_running = true;
 
 		const auto _ = _persistentArena.CreateScope();
-
-		LinkedList<KeyPair<Module*>> linkedModules{_persistentArena};
+		
+		Finder<Module> finder{_persistentArena};
 
 		{
-			engine::Initializer initializer{ *this };
-			initializer.AddModule<engine::WindowModule>();
-			initializer.AddModule<engine::TimeModule>();
-			initializer.AddModule<engine::RenderModule>();
+			Finder<Module>::Initializer initializer{_persistentArena, _tempArena};
+			
+			initializer.Add<engine::WindowModule>();
+			initializer.Add<engine::TimeModule>();
+			initializer.Add<engine::RenderModule>();
 			DefineAdditionalModules(initializer);
 			
-			for (auto& mod : initializer._linkedModules)
-				linkedModules.Add(mod);
+			finder.Compile(initializer);
 		}
-
-		engine::ModuleFinder finder{ _persistentArena, linkedModules };
-		for (auto& [ptr, hashCode] : linkedModules)
-			finder._map.Insert(ptr, hashCode);
-
+		
 		engine::Info info{*this, finder};
 
 		{
 			const auto _ = _dumpArena.CreateScope();
 
-			for (const auto& [value, hashCode] : linkedModules)
-				value->OnInitialize(info);
-			for (const auto& [value, hashCode] : linkedModules)
-				value->OnBegin(info);
+			for (const auto& mod : finder)
+				mod->OnInitialize(info);
+			for (const auto& mod : finder)
+				mod->OnBegin(info);
 		}
 
 		while(!info.quit)
 		{
 			const auto _ = _dumpArena.CreateScope();
 
-			for (const auto& [ptr, hashCode] : linkedModules)
-				ptr->OnUpdate(info);
-			for (const auto& [ptr, hashCode] : linkedModules)
-				ptr->OnPostUpdate(info);
+			for (const auto& mod : finder)
+				mod->OnUpdate(info);
+			for (const auto& mod : finder)
+				mod->OnPostUpdate(info);
 		}
 
 		{
 			const auto _ = _dumpArena.CreateScope();
-			for (const auto& [ptr, hashCode] : linkedModules)
-				ptr->OnExit(info);
+			for (const auto& mod : finder)
+				mod->OnExit(info);
 		}
 		
 		_running = false;

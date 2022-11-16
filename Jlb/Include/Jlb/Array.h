@@ -1,90 +1,58 @@
 #pragma once
-#include "View.h"
 #include "Arena.h"
+#include "Iterator.h"
 
 namespace je
 {
-	// Standard array.
 	template <typename T>
-	class Array
+	struct Array final
 	{
-	public:
-		Array() = default;
-		Array(Arena& arena, size_t length);
-		Array(Array&& other) noexcept;
-		Array& operator=(Array&& other) noexcept;
-		virtual ~Array();
+		T* data = nullptr;
+		size_t length = 0;
 
-		virtual View<T> GetView() const;
-
-		[[nodiscard]] operator View<T>() const;
-		[[nodiscard]] operator T*() const;
-		[[nodiscard]] size_t GetLength() const;
-
-		[[nodiscard]] T* GetData() const;
-
-	private:
-		Arena* _arena = nullptr;
-		T* _data = nullptr;
-		size_t _length = 0;
+		[[nodiscard]] T& operator [](size_t index) const;
+		[[nodiscard]] Iterator<T> begin() const;
+		[[nodiscard]] Iterator<T> end() const;
 	};
 
 	template <typename T>
-	Array<T>::Array(Arena& arena, const size_t length) : _arena(&arena), _data(arena.New<T>(length)), _length(length)
+	T& Array<T>::operator[](const size_t index) const
 	{
+		assert(index < length);
+		return data[index];
 	}
 
 	template <typename T>
-	Array<T>::Array(Array&& other) noexcept : _arena(other._arena), _data(other._data), _length(other._length)
+	Iterator<T> Array<T>::begin() const
 	{
-		other._arena = nullptr;
+		Iterator<T> it{};
+		it.length = length;
+		it.data = data;
+		return it;
 	}
 
 	template <typename T>
-	Array<T>& Array<T>::operator=(Array&& other) noexcept
+	Iterator<T> Array<T>::end() const
 	{
-		_arena = other._arena;
-		_data = other._data;
-		_length = other._length;
-		other._arena = nullptr;
-		return *this;
+		Iterator<T> it{};
+		it.length = length;
+		it.index = length;
+		it.data = data;
+		return it;
 	}
 
 	template <typename T>
-	Array<T>::~Array()
+	[[nodiscard]] Array<T> CreateArray(Arena& arena, const size_t length)
 	{
-		if(_arena)
-			_arena->Free(_data);
-		_arena = nullptr;
+		Array<T> instance{};
+		instance.data = arena.New<T>(length);
+		instance.length = length;
+		return instance;
 	}
 
 	template <typename T>
-	View<T> Array<T>::GetView() const
+	void DestroyArray(const Array<T>& instance, Arena& arena)
 	{
-		return { _data, _length };
-	}
-
-	template <typename T>
-	Array<T>::operator View<T>() const
-	{
-		return GetView();
-	}
-
-	template <typename T>
-	Array<T>::operator T*() const
-	{
-		return _data;
-	}
-
-	template <typename T>
-	size_t Array<T>::GetLength() const
-	{
-		return _length;
-	}
-
-	template <typename T>
-	T* Array<T>::GetData() const
-	{
-		return _data;
+		arena.Free(instance.data);
 	}
 }

@@ -1,20 +1,19 @@
 ﻿#pragma once
 #include "Module.h"
 #include "Jlb/Arena.h"
+#include "Jlb/Finder.h"
 
 namespace je
 {
 	namespace engine
 	{
 		struct Info;
-		struct Initializer;
 	}
 
 	// Engine class that manages all the modules, like the windowing, resource manager or rendering.
 	class Engine
 	{
 		friend engine::Info;
-		friend engine::Initializer;
 
 	public:
 		struct CreateInfo final
@@ -33,7 +32,7 @@ namespace je
 
 	protected:
 		// Define what additional modules are loaded into the engine. This can include a game manager, or a movement system for example.
-		virtual void DefineAdditionalModules(engine::Initializer& initializer) = 0;
+		virtual void DefineAdditionalModules(Finder<Module>::Initializer& initializer) = 0;
 
 	private:
 		void* _memory;

@@ -24,7 +24,7 @@ namespace je
 
 			void WaitForImage();
 			[[nodiscard]] VkCommandBuffer BeginFrame(bool manuallyCallWaitForImage = false);
-			void EndFrame(Arena& tempArena, const View<VkSemaphore>& waitSemaphores = {});
+			void EndFrame(Arena& tempArena, const Array<VkSemaphore>& waitSemaphores = {});
 
 			[[nodiscard]] size_t GetLength() const;
 			[[nodiscard]] VkRenderPass GetRenderPass() const;

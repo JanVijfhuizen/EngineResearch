@@ -30,13 +30,7 @@
     <ClCompile Include="Src\Module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\ModuleFinder.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\EngineInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\EngineInitializer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Modules\TimeModule.cpp">
@@ -69,7 +63,7 @@
     <ClCompile Include="Src\Graphics\Vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\VkShape.cpp">
+    <ClCompile Include="Src\Graphics\VkShapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\VkImage.cpp">
@@ -98,13 +92,7 @@
     <ClInclude Include="Include\Module.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\ModuleFinder.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\EngineInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\EngineInitializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Modules\TimeModule.h">
@@ -146,7 +134,7 @@
     <ClInclude Include="Include\Graphics\Vertex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Graphics\VkShape.h">
+    <ClInclude Include="Include\Graphics\VkShapes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VkImage.h">

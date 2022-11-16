@@ -3,6 +3,7 @@
 #include <cstring>
 #include <iostream>
 #include "Graphics/VkApp.h"
+#include "Jlb/Array.h"
 #include "Jlb/Heap.h"
 #include "Jlb/JMap.h"
 #include "Jlb/JVector.h"
@@ -11,7 +12,7 @@ namespace je::vk::init
 {
 	SwapChainSupportDetails::operator bool() const
 	{
-		return formats && presentModes;
+		return formats.data && presentModes.data;
 	}
 
 	size_t SwapChainSupportDetails::GetRecommendedImageCount() const
@@ -51,7 +52,7 @@ namespace je::vk::init
 		return deviceFeatures;
 	}
 
-	void CheckValidationSupport(Arena& tempArena, const Array<StringView>& validationLayers)
+	void CheckValidationSupport(Arena& tempArena, const Array<const char*>& validationLayers)
 	{
 #ifdef NDEBUG
 		return;
@@ -62,18 +63,15 @@ namespace je::vk::init
 		uint32_t layerCount;
 		vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
 
-		const Array<VkLayerProperties> availableLayers{tempArena, layerCount};
-		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.GetData());
-
-		const auto validationLayersView = validationLayers.GetView();
-		const auto availableLayersView = availableLayers.GetView();
-
+		const auto availableLayers = CreateArray<VkLayerProperties>(tempArena, layerCount);
+		vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data);
+		
 		// Iterate over all the layers to see if they are available.
-		for (const auto& layer : validationLayersView)
+		for (const auto& layer : validationLayers)
 		{
 			bool layerFound = false;
 
-			for (const auto& layerProperties : availableLayersView)
+			for (const auto& layerProperties : availableLayers)
 				if (strcmp(layer, layerProperties.layerName) == 0)
 				{
 					layerFound = true;
@@ -118,22 +116,22 @@ namespace je::vk::init
 		return info;
 	}
 
-	VkInstance CreateInstance(const Array<StringView>& validationLayers, const Array<StringView>& instanceExtensions)
+	VkInstance CreateInstance(const Array<const char*>& validationLayers, const Array<const char*>& instanceExtensions)
 	{
 		const auto appInfo = CreateApplicationInfo();
 
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 		createInfo.pApplicationInfo = &appInfo;
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.GetLength());
-		createInfo.ppEnabledExtensionNames = reinterpret_cast<const char**>(instanceExtensions.GetData());
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(instanceExtensions.length);
+		createInfo.ppEnabledExtensionNames = instanceExtensions.data;
 
 		const auto validationCreateInfo = CreateDebugInfo();
 
 		createInfo.enabledLayerCount = 0;
 #ifdef _DEBUG
-		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.GetLength());
-		createInfo.ppEnabledLayerNames = reinterpret_cast<const char**>(validationLayers.GetData());
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.length);
+		createInfo.ppEnabledLayerNames = reinterpret_cast<const char**>(validationLayers.data);
 		createInfo.pNext = &validationCreateInfo;
 #endif
 
@@ -185,11 +183,11 @@ namespace je::vk::init
 		uint32_t queueFamilyCount = 0;
 		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, nullptr);
 
-		const Array<VkQueueFamilyProperties> queueFamilies{arena, queueFamilyCount};
-		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.GetData());
+		const auto queueFamilies = CreateArray<VkQueueFamilyProperties>(arena, queueFamilyCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyCount, queueFamilies.data);
 
 		uint32_t i = 0;
-		for (const auto& queueFamily : queueFamilies.GetView())
+		for (const auto& queueFamily : queueFamilies)
 		{
 			if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 				families.graphics = i;
@@ -211,22 +209,20 @@ namespace je::vk::init
 		return families;
 	}
 
-	bool CheckDeviceExtensionSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const View<StringView>&extensions)
+	bool CheckDeviceExtensionSupport(Arena& arena, const VkPhysicalDevice physicalDevice, const Array<const char*>& extensions)
 	{
 		uint32_t extensionCount;
 		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, nullptr);
 
-		const Array<VkExtensionProperties> availableExtensions{arena, extensionCount};
-		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.GetData());
-
-		const auto extensionsView = availableExtensions.GetView();
-
+		const auto availableExtensions = CreateArray<VkExtensionProperties>(arena, extensionCount);
+		vkEnumerateDeviceExtensionProperties(physicalDevice, nullptr, &extensionCount, availableExtensions.data);
+		
 		bool found = true;
 		for (const auto& extension : extensions)
 		{
 			found = false;
-			for (const auto& availableExtension : extensionsView)
-				if (strcmp(extension.GetData(), availableExtension.extensionName) == 0)
+			for (const auto& availableExtension : availableExtensions)
+				if (strcmp(extension, availableExtension.extensionName) == 0)
 				{
 					found = true;
 					break;
@@ -250,8 +246,8 @@ namespace je::vk::init
 		if (formatCount != 0)
 		{
 			auto& formats = details.formats;
-			formats = Array<VkSurfaceFormatKHR>{ arena, formatCount }.GetView();
-			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, formats.GetData());
+			formats = CreateArray<VkSurfaceFormatKHR>(arena, formatCount);
+			vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &formatCount, formats.data);
 		}
 
 		uint32_t presentModeCount;
@@ -260,10 +256,10 @@ namespace je::vk::init
 		if (presentModeCount != 0)
 		{
 			auto& presentModes = details.presentModes;
-			presentModes = Array<VkPresentModeKHR>{ arena, presentModeCount }.GetView();
+			presentModes = CreateArray<VkPresentModeKHR>(arena, presentModeCount);
 
 			vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface,
-				&presentModeCount, presentModes.GetData());
+				&presentModeCount, presentModes.data);
 		}
 
 		return details;
@@ -281,12 +277,12 @@ namespace je::vk::init
 		vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 		assert(deviceCount);
 
-		const Array<VkPhysicalDevice> devices{arena, deviceCount};
-		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.GetData());
+		const auto devices = CreateArray<VkPhysicalDevice>(arena, deviceCount);
+		vkEnumeratePhysicalDevices(instance, &deviceCount, devices.data);
 
-		Heap<VkPhysicalDevice> candidates{arena, deviceCount};
+		auto candidates = CreateHeap<VkPhysicalDevice>(arena, deviceCount);
 		
-		for (const auto& device : devices.GetView())
+		for (const auto& device : devices)
 		{
 			VkPhysicalDeviceProperties deviceProperties;
 			vkGetPhysicalDeviceProperties(device, &deviceProperties);
@@ -319,7 +315,7 @@ namespace je::vk::init
 			candidates.Insert(device, info.getPhysicalDeviceRating(physicalDeviceInfo));
 		}
 
-		assert(candidates.GetCount() > 0);
+		assert(candidates.count > 0);
 		return candidates.Peek();
 	}
 	
@@ -330,8 +326,8 @@ namespace je::vk::init
 		const auto queueFamilies = GetQueueFamilies(arena, physicalDevice, surface);
 
 		constexpr size_t queueFamiliesCount = sizeof(size_t) * 3;
-		Vector<VkDeviceQueueCreateInfo> queueCreateInfos{arena, queueFamiliesCount};
-		Map<size_t> familyIndexes{arena, queueFamiliesCount};
+		auto queueCreateInfos = CreateVector<VkDeviceQueueCreateInfo>(arena, queueFamiliesCount);
+		auto familyIndexes = CreateMap<size_t>(arena, queueFamiliesCount);
 
 		const size_t queueFamiliesIndexes[3]
 		{
@@ -360,17 +356,17 @@ namespace je::vk::init
 
 		VkDeviceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.GetCount());
-		createInfo.pQueueCreateInfos = queueCreateInfos.GetData();
+		createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.count);
+		createInfo.pQueueCreateInfos = queueCreateInfos.data;
 		createInfo.pEnabledFeatures = &features;
-		createInfo.enabledExtensionCount = static_cast<uint32_t>(info.deviceExtensions.GetLength());
-		createInfo.ppEnabledExtensionNames = reinterpret_cast<const char**>(info.deviceExtensions.GetData());
+		createInfo.enabledExtensionCount = static_cast<uint32_t>(info.deviceExtensions.length);
+		createInfo.ppEnabledExtensionNames = reinterpret_cast<const char**>(info.deviceExtensions.data);
 
 		createInfo.enabledLayerCount = 0;
 #ifdef _DEBUG
 		const auto& validationLayers = info.validationLayers;
-		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.GetLength());
-		createInfo.ppEnabledLayerNames = reinterpret_cast<const char**>(validationLayers.GetData());
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.length);
+		createInfo.ppEnabledLayerNames = reinterpret_cast<const char**>(validationLayers.data);
 #endif
 		
 		const auto result = vkCreateDevice(physicalDevice, &createInfo, nullptr, &app.device);
@@ -409,58 +405,46 @@ namespace je::vk::init
 		bool debugExtensionPresent = true;
 #ifdef _DEBUG
 		debugExtensionPresent = false;
-		for (auto& instanceExtension : info.instanceExtensions)
+		for (const auto& instanceExtension : info.instanceExtensions)
 			if (instanceExtension == VK_EXT_DEBUG_UTILS_EXTENSION_NAME)
 			{
 				debugExtensionPresent = true;
 				break;
 			}
 #endif
-		const Array<StringView> instanceExtensions
-		{
-			*info.tempArena,
-			 info.instanceExtensions.GetLength() + !debugExtensionPresent
-		};
+		const auto instanceExtensions = CreateArray<const char*>(*info.tempArena, info.instanceExtensions.length + !debugExtensionPresent);
 		if (!debugExtensionPresent)
-			instanceExtensions[instanceExtensions.GetLength() - 1] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+			instanceExtensions.data[instanceExtensions.length - 1] = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
 
 		// Add swap chain extension if not present.
 		bool swapChainExtensionPresent = false;
-		for (auto& deviceExtension : info.deviceExtensions)
-			if(deviceExtension == VK_KHR_SWAPCHAIN_EXTENSION_NAME)
+		for (const auto& deviceExtension : info.deviceExtensions)
+			if(strcmp(deviceExtension, VK_KHR_SWAPCHAIN_EXTENSION_NAME) == 0)
 			{
 				swapChainExtensionPresent = true;
 				break;
 			}
 
-		const Array<StringView> deviceExtensions
-		{
-			*info.tempArena,
-			info.deviceExtensions.GetLength() + !swapChainExtensionPresent
-		};
+		const auto deviceExtensions = CreateArray<const char*>(*info.tempArena, info.deviceExtensions.length + !swapChainExtensionPresent);
 		if (!swapChainExtensionPresent)
-			deviceExtensions[deviceExtensions.GetLength() - 1] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+			deviceExtensions.data[deviceExtensions.length - 1] = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
 
 		// Add khronos validation if not present.
 		bool khronosValidationPresent = false;
-		for (auto& validationLayer : info.validationLayers)
-			if(validationLayer == "VK_LAYER_KHRONOS_validation")
+		for (const auto& validationLayer : info.validationLayers)
+			if(strcmp(validationLayer, "VK_LAYER_KHRONOS_validation") == 0)
 			{
 				khronosValidationPresent = true;
 				break;
 			}
 
-		const Array<StringView> validationLayers
-		{
-			*info.tempArena,
-			info.validationLayers.GetLength() + !khronosValidationPresent
-		};
+		const auto validationLayers = CreateArray<const char*>(*info.tempArena, info.validationLayers.length + !khronosValidationPresent);
 		if (!khronosValidationPresent)
-			validationLayers[validationLayers.GetLength() - 1] = "VK_LAYER_KHRONOS_validation";
+			validationLayers.data[validationLayers.length - 1] = "VK_LAYER_KHRONOS_validation";
 
-		memcpy(validationLayers.GetData(), info.validationLayers.GetData(), sizeof(StringView) * info.validationLayers.GetLength());
-		memcpy(instanceExtensions.GetData(), info.instanceExtensions.GetData(), sizeof(StringView) * info.instanceExtensions.GetLength());
-		memcpy(deviceExtensions.GetData(), info.deviceExtensions.GetData(), sizeof(StringView) * info.deviceExtensions.GetLength());
+		memcpy(validationLayers.data, info.validationLayers.data, sizeof(const char*) * info.validationLayers.length);
+		memcpy(instanceExtensions.data, info.instanceExtensions.data, sizeof(const char*) * info.instanceExtensions.length);
+		memcpy(deviceExtensions.data, info.deviceExtensions.data, sizeof(const char*) * info.deviceExtensions.length);
 
 		Info updatedInfo = info;
 		updatedInfo.validationLayers = validationLayers;
