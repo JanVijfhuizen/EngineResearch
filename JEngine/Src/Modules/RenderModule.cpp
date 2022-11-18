@@ -124,6 +124,21 @@ namespace je::engine
 		result = vkCreateDescriptorPool(_app.device, &poolInfo, nullptr, &_descriptorPool);
 		assert(!result);
 
+		{
+			// Create descriptor pool.
+			VkDescriptorPoolSize poolSize;
+			poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			poolSize.descriptorCount = _swapChain->GetLength();
+			VkDescriptorPoolCreateInfo poolInfo{};
+			poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+			poolInfo.poolSizeCount = 1;
+			poolInfo.pPoolSizes = &poolSize;
+			poolInfo.maxSets = _swapChain->GetLength();
+
+			result = vkCreateDescriptorPool(_app.device, &poolInfo, nullptr, &_descriptorPoolNode);
+			assert(!result);
+		}
+
 		auto layouts = CreateArray<VkDescriptorSetLayout>(info.tempArena, _swapChain->GetLength());
 		for (auto& layout : layouts)
 			layout = _layout;
@@ -137,6 +152,18 @@ namespace je::engine
 		_descriptorSets = CreateArray<VkDescriptorSet>(info.persistentArena, _swapChain->GetLength());
 		result = vkAllocateDescriptorSets(_app.device, &allocInfo, _descriptorSets.data);
 		assert(!result);
+
+		{
+			VkDescriptorSetAllocateInfo allocInfo{};
+			allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+			allocInfo.descriptorPool = _descriptorPoolNode;
+			allocInfo.descriptorSetCount = layouts.length;
+			allocInfo.pSetLayouts = layouts.data;
+
+			_descriptorSetsNode = CreateArray<VkDescriptorSet>(info.persistentArena, _swapChain->GetLength());
+			result = vkAllocateDescriptorSets(_app.device, &allocInfo, _descriptorSetsNode.data);
+			assert(!result);
+		}
 
 		VkPhysicalDeviceProperties properties{};
 		vkGetPhysicalDeviceProperties(_app.physicalDevice, &properties);
@@ -171,7 +198,6 @@ namespace je::engine
 
 		auto views = CreateArray<VkImageView>(info.tempArena, _swapChain->GetLength() * 0);
 
-
 		vk::PipelineCreateInfo::Module shader2Modules[2];
 		shader2Modules[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 		shader2Modules[0].module = _modules[2];
@@ -187,6 +213,8 @@ namespace je::engine
 		node.userPtr = this;
 		node.modules = shader2;
 		node.outImageViews = views;
+		node.layouts.length = 1;
+		node.layouts.data = &_layout;
 		Array<vk::RenderNode> nodes{};
 		nodes.data = &node;
 		nodes.length = 1;
@@ -232,6 +260,43 @@ namespace je::engine
 
 			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
 		}
+
+		// Bind descriptor sets for the render node.
+		for (size_t i = 0; i < _swapChain->GetLength(); ++i)
+		{
+			VkWriteDescriptorSet write{};
+			/*
+			// Bind instance buffer.
+			VkDescriptorBufferInfo instanceInfo{};
+			instanceInfo.buffer = _instanceBuffers[i].buffer;
+			instanceInfo.offset = 0;
+			instanceInfo.range = sizeof(Job) * JobSystem<Job>::GetLength();
+
+			auto& instanceWrite = writes[0];
+			instanceWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			instanceWrite.dstBinding = 0;
+			instanceWrite.dstSet = _descriptorSets[i];
+			instanceWrite.descriptorCount = 1;
+			instanceWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+			instanceWrite.pBufferInfo = &instanceInfo;
+			instanceWrite.dstArrayElement = 0;
+			*/
+			// Bind texture atlas.
+			VkDescriptorImageInfo  atlasInfo{};
+			atlasInfo.imageLayout = _image.layout;
+			atlasInfo.imageView = _view;
+			atlasInfo.sampler = _sampler;
+
+			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			write.dstBinding = 0;
+			write.dstSet = _descriptorSetsNode[i];
+			write.descriptorCount = 1;
+			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			write.pImageInfo = &atlasInfo;
+			write.dstArrayElement = 0;
+
+			vkUpdateDescriptorSets(_app.device, 1, &write, 0, nullptr);
+		}
 	}
 
 	void RenderModule::OnExit(Info& info)
@@ -240,10 +305,12 @@ namespace je::engine
 		assert(!result);
 
 		vkDestroySampler(_app.device, _sampler, nullptr);
+		DestroyArray(_descriptorSetsNode, info.persistentArena);
 		DestroyArray(_descriptorSets, info.persistentArena);
+		vkDestroyDescriptorPool(_app.device, _descriptorPoolNode, nullptr);
 		vkDestroyDescriptorPool(_app.device, _descriptorPool, nullptr);
 		vkDestroyImageView(_app.device, _view, nullptr);
-
+		
 		info.persistentArena.Delete(_renderGraph);
 		DestroyImage(_image, _app, *_allocator);
 		DestroyMesh(_mesh2, _app, *_allocator);
@@ -281,9 +348,11 @@ namespace je::engine
 		_swapChain->EndFrame(info.tempArena, semaphores);
 	}
 
-	void RenderModule::Render(const VkCommandBuffer cmd, void* userPtr, const size_t frameIndex)
+	void RenderModule::Render(const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)
 	{
 		const auto ptr = static_cast<RenderModule*>(userPtr);
+		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, layout,
+			0, 1, &ptr->_descriptorSetsNode[frameIndex], 0, nullptr);
 		ptr->_mesh2.Draw(cmd, 1);
 	}
 }

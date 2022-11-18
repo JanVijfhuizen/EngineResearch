@@ -12,7 +12,7 @@ namespace je::vk
 	struct App;
 
 	// Render function used by the render graph.
-	typedef void(*RenderFunc)(VkCommandBuffer cmdBuffer, void* userPtr, size_t frameIndex);
+	typedef void(*RenderFunc)(VkCommandBuffer cmdBuffer, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
 
 	// Defines the behaviour of a node in a render graph.
 	struct RenderNode final

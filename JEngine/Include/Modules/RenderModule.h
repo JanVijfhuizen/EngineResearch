@@ -33,7 +33,9 @@ namespace je
 			VkDescriptorSetLayout _layout;
 			VkImageView _view;
 			VkDescriptorPool _descriptorPool;
+			VkDescriptorPool _descriptorPoolNode;
 			Array<VkDescriptorSet> _descriptorSets{};
+			Array<VkDescriptorSet> _descriptorSetsNode{};
 			VkSampler _sampler;
 
 			void OnInitialize(Info& info) override;
@@ -41,7 +43,7 @@ namespace je
 
 			void OnUpdate(Info& info) override;
 
-			static void Render(VkCommandBuffer cmd, void* userPtr, const size_t frameIndex);
+			static void Render(VkCommandBuffer cmd, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
 		};
 	}
 }
