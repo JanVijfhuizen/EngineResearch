@@ -14,7 +14,7 @@ namespace je::packing
 
 	bool RefSorter(Ref& a, Ref& b)
 	{
-		return a.length < b.length;
+		return a.length > b.length;
 	}
 
 	Array<glm::ivec2> Pack(Arena& arena, Arena& tempArena, const Array<glm::ivec2>& shapes, glm::ivec2& outArea)
@@ -35,7 +35,8 @@ namespace je::packing
 		{
 			auto& ref = refs[i];
 			ref.shape = shapes[i];
-			ref.length = glm::length(static_cast<glm::vec2>(static_cast<float>(ref.shape.x), static_cast<float>(ref.shape.y)));
+			glm::vec2 l = { ref.shape.x, ref.shape.y };
+			ref.length = glm::length(l);
 			ref.index = i;
 			assert(ref.shape.x > 0 && ref.shape.y > 0);
 		}
@@ -48,7 +49,7 @@ namespace je::packing
 		{
 			const auto _ = tempArena.CreateScope();
 
-			auto nodes = CreateVector<Node>(tempArena, length * 2);
+			auto nodes = CreateVector<Node>(tempArena, length * 2 + 1);
 
 			{
 				auto& root = nodes.Add();
@@ -110,7 +111,7 @@ namespace je::packing
 
 			const auto result = CreateArray<glm::ivec2>(arena, ret.length);
 			for (size_t i = 0; i < ret.length; ++i)
-				result[i] = ret[i];
+				result[refs[i].index] = ret[i];
 			outArea = area;
 			return result;
 		}
