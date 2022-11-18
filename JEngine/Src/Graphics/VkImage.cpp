@@ -2,12 +2,7 @@
 #include "Graphics/VkImage.h"
 #include "Graphics/VkAllocator.h"
 #include "Graphics/VkApp.h"
-
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <exception>
-#include <stb_image_write.h>
 
 namespace je::vk
 {
@@ -131,24 +126,6 @@ namespace je::vk
 			vkDestroyFence(app.device, fence, nullptr);
 		}
 
-		return image;
-	}
-
-	Image CreateImage(App& app, Allocator& allocator, const ImageCreateInfo& info, const char* path)
-	{
-		// Load pixels.
-		int texWidth, texHeight, texChannels;
-		stbi_uc* pixels = stbi_load(path, &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
-		const VkDeviceSize imageSize = static_cast<VkDeviceSize>(texWidth) * texHeight * 4;
-		assert(pixels);
-		const glm::ivec3 resolution{ texWidth, texHeight, 4 };
-
-		Array<stbi_uc> pixelArray{};
-		pixelArray.data = pixels;
-		pixelArray.length = imageSize;
-
-		const auto image = CreateImage(app, allocator, info, pixelArray, resolution);
-		stbi_image_free(pixels);
 		return image;
 	}
 

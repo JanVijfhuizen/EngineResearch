@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Graphics\Texture.cpp" />
     <ClCompile Include="Src\Graphics\ObjLoader.cpp" />
     <ClCompile Include="Src\Graphics\VkLayout.cpp" />
     <ClCompile Include="Src\Graphics\VkImage.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
     <ClInclude Include="Include\Graphics\ObjLoader.h" />
+    <ClInclude Include="Include\Graphics\Texture.h" />
     <ClInclude Include="Include\Graphics\Vertex.h" />
     <ClInclude Include="Include\Graphics\VkAllocator.h" />
     <ClInclude Include="Include\Graphics\VkBuffer.h" />

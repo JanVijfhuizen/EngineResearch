@@ -2,6 +2,7 @@
 #include "Modules/RenderModule.h"
 #include "EngineInfo.h"
 #include "Graphics/ObjLoader.h"
+#include "Graphics/Texture.h"
 #include "Graphics/Vertex.h"
 #include "Graphics/VkApp.h"
 #include "Graphics/VkInitializer.h"
@@ -90,8 +91,16 @@ namespace je::engine
 			_mesh2 = CreateMesh(_app, *_allocator, verts, inds);
 		}
 
-		vk::ImageCreateInfo imageCreateInfo{};
-		_image = CreateImage(_app, *_allocator, imageCreateInfo, "Textures/test.jpg");
+#ifdef _DEBUG
+		const auto textures = CreateArray<const char*>(info.tempArena, 4);
+		textures.data[0] = "Textures/humanoid.png";
+		textures.data[1] = "Textures/moveArrow.png";
+		textures.data[2] = "Textures/bash-card.png";
+		textures.data[3] = "Textures/tile.png";
+		texture::GenerateAtlas(info.persistentArena, info.tempArena, textures, "Textures/atlas.png", "atlas.txt");
+#endif
+
+		_image = texture::LoadAtlas(_app, *_allocator, "Textures/atlas.png", "atlas.txt");
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
