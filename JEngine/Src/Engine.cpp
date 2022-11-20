@@ -60,11 +60,8 @@ namespace je
 		while(!info.quit)
 		{
 			const auto _ = _dumpArena.CreateScope();
-
 			for (const auto& mod : finder)
 				mod->OnUpdate(info);
-			for (const auto& mod : finder)
-				mod->OnPostUpdate(info);
 		}
 
 		{

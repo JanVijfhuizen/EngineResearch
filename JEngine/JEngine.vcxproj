@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Cecsar.cpp" />
     <ClCompile Include="Src\Graphics\Texture.cpp" />
     <ClCompile Include="Src\Graphics\ObjLoader.cpp" />
     <ClCompile Include="Src\Graphics\VkLayout.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Cecsar.h" />
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
     <ClInclude Include="Include\Graphics\ObjLoader.h" />

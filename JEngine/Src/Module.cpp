@@ -15,10 +15,6 @@ namespace je
 	{
 	}
 
-	void Module::OnPostUpdate(engine::Info& info)
-	{
-	}
-
 	void Module::OnExit(engine::Info& info)
 	{
 	}
