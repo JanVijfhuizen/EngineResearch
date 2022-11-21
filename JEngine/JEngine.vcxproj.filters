@@ -84,6 +84,9 @@
     <ClCompile Include="Src\Modules\ThreadModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\ECS\Archetype.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\pch.h">
@@ -162,6 +165,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Modules\JobSystem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ECS\Archetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
