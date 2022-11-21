@@ -13,10 +13,6 @@ namespace je
 	// Examples can be: windowing, rendering, collision system, etc.
 	class Module
 	{
-	public:
-		virtual ~Module() = default;
-
-	private:
 		friend Engine;
 
 	protected:

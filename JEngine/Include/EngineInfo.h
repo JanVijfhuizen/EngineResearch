@@ -14,10 +14,11 @@ namespace je
 		{
 			friend Engine;
 
-			// Doesn't get deallocated until the engine goes out of scope. No destructors will be called.
+			// Meant for stable allocations. Will be deallocated at the end of the program.
 			Arena& persistentArena;
-			// Doesn't get deallocated automatically, meant for temporary 
+			// Meant for temporary allocations, will be deallocated at the end of every phase.
 			Arena& tempArena;
+			// Will be deallocated at the end of every frame.
 			Arena& dumpArena;
 			const Finder<Module>& finder;
 			bool quit = false;
