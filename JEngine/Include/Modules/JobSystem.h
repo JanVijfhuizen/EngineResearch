@@ -18,7 +18,7 @@ namespace je
 		[[nodiscard]] bool TryAdd(const T& job);
 
 	protected:
-		virtual void OnUpdate(engine::Info& info, const Array<T>& tasks, const LinkedList<Array<T>>& overflowingTasks) = 0;
+		virtual void OnUpdate(engine::Info& info, const LinkedList<Array<T>>& jobs) = 0;
 		virtual bool Validate(const T& job);
 
 	private:
@@ -53,13 +53,8 @@ namespace je
 	template <typename T>
 	void JobSystem<T>::OnExit(engine::Info& info)
 	{
-		Module::OnExit(info);
-	}
-
-	template <typename T>
-	JobSystem<T>::~JobSystem()
-	{
 		DestroyArray(_tasks, _arena);
+		Module::OnExit(info);
 	}
 
 	template <typename T>
@@ -76,7 +71,12 @@ namespace je
 		}
 
 		if(index - _tasks.length > _overflowingTasks.GetCount() * _chunkCapacity)
+		{
+			if (_chunkCapacity == 0)
+				return false;
 			LinkedListAdd(_overflowingTasks, _dumpArena, CreateArray<T>(_dumpArena, _chunkCapacity));
+		}
+			
 		_overflowingTasks[0][index % _chunkCapacity] = job;
 		return true;
 	}
@@ -91,8 +91,16 @@ namespace je
 	void JobSystem<T>::OnUpdate(engine::Info& info)
 	{
 		Module::OnUpdate(info);
-		OnUpdate(info, _tasks, _overflowingTasks);
+
+		// Adjust linked list to also host the original tasks.
+		LinkedList<Array<T>> node{};
+		node.instance = _tasks;
+		node.next = _overflowingTasks.next;
+		_overflowingTasks.next = node;
+		
+		OnUpdate(info, _overflowingTasks);
 		_count = 0;
+		// It's in the dump arena so it will get deallocated correctly anyway.
 		_overflowingTasks = CreateLinkedList<Array<T>>();
 	}
 }
