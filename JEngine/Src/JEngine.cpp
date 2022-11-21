@@ -13,8 +13,8 @@ struct SomeTask final
 class SomeSystem final : public je::JobSystem<SomeTask>
 {
 public:
-	SomeSystem(const size_t constCapacity, const size_t chunkCapacity)
-		: JobSystem<SomeTask>(constCapacity, chunkCapacity)
+	SomeSystem(const size_t capacity, const size_t chunkCapacity)
+		: JobSystem<SomeTask>(capacity, chunkCapacity)
 	{
 		
 	}
@@ -22,11 +22,11 @@ public:
 	void OnBegin(je::engine::Info& info) override;
 
 protected:
-	void OnUpdate(je::engine::Info& info, const je::LinkedList<je::Vector<SomeTask>>& jobs) override
+	void OnUpdate(je::engine::Info& info, const Jobs& jobs) override
 	{
-		for (auto& someTasks : jobs)
-			for (const auto& someTask : someTasks)
-				std::cout << someTask.number << std::endl;
+		for (const auto& batch : jobs)
+			for (const auto& task : batch)
+				std::cout << task.number << std::endl;
 		std::cout << "end of frame" << std::endl;
 	}
 };

@@ -11,30 +11,33 @@ namespace je
 	class JobSystem : public Module
 	{
 	public:
-		JobSystem(size_t constCapacity, size_t chunkCapacity);
+		JobSystem(size_t capacity, size_t chunkCapacity);
 		void OnBegin(engine::Info& info) override;
 		void OnExit(engine::Info& info) override;
 
 		[[nodiscard]] bool TryAdd(const T& job);
 
 	protected:
-		virtual void OnUpdate(engine::Info& info, const LinkedList<Vector<T>>& jobs) = 0;
+		using Batch = Vector<T>;
+		using Jobs = LinkedList<Batch>;
+
+		virtual void OnUpdate(engine::Info& info, const Jobs& jobs) = 0;
 		virtual bool Validate(const T& job);
 
 	private:
-		const size_t _constCapacity;
+		const size_t _capacity;
 		const size_t _chunkCapacity;
 		Arena* _arena = nullptr;
 		Arena* _dumpArena = nullptr;
-		Vector<T> _tasks{};
-		LinkedList<Vector<T>> _overflowingTasks{};
+		Batch _mainBatch{};
+		LinkedList<Batch> _additionalBatches{};
 
 		void OnUpdate(engine::Info& info) override;
 	};
 
 	template <typename T>
-	JobSystem<T>::JobSystem(const size_t constCapacity, const size_t chunkCapacity) :
-		_constCapacity(constCapacity), _chunkCapacity(chunkCapacity)
+	JobSystem<T>::JobSystem(const size_t capacity, const size_t chunkCapacity) :
+		_capacity(capacity), _chunkCapacity(chunkCapacity)
 	{
 		
 	}
@@ -45,14 +48,14 @@ namespace je
 		Module::OnBegin(info);
 		_arena = &info.persistentArena;
 		_dumpArena = &info.dumpArena;
-		_tasks = CreateVector<T>(*_arena, _constCapacity);
-		_overflowingTasks = CreateLinkedList<Vector<T>>();
+		_mainBatch = CreateVector<T>(*_arena, _capacity);
+		_additionalBatches = CreateLinkedList<Vector<T>>();
 	}
 
 	template <typename T>
 	void JobSystem<T>::OnExit(engine::Info& info)
 	{
-		DestroyVector(_tasks, *_arena);
+		DestroyVector(_mainBatch, *_arena);
 		Module::OnExit(info);
 	}
 
@@ -62,20 +65,20 @@ namespace je
 		if (!Validate(job))
 			return false;
 
-		if(_tasks.count < _tasks.length)
+		if(_mainBatch.count < _mainBatch.length)
 		{
-			_tasks.Add(job);
+			_mainBatch.Add(job);
 			return true;
 		}
 
-		if(_overflowingTasks.GetCount() == 0 || _overflowingTasks[0].count == _overflowingTasks[0].length)
+		if(_additionalBatches.GetCount() == 0 || _additionalBatches[0].count == _additionalBatches[0].length)
 		{
 			if (_chunkCapacity == 0)
 				return false;
-			LinkedListAdd(_overflowingTasks, *_dumpArena, CreateVector<T>(*_dumpArena, _chunkCapacity));
+			LinkedListAdd(_additionalBatches, *_dumpArena, CreateVector<T>(*_dumpArena, _chunkCapacity));
 		}
 			
-		_overflowingTasks[0].Add(job);
+		_additionalBatches[0].Add(job);
 		return true;
 	}
 
@@ -92,13 +95,13 @@ namespace je
 
 		// Adjust linked list to also host the original tasks.
 		LinkedList<Vector<T>> node{};
-		node.instance = _tasks;
-		node.next = _overflowingTasks.next;
-		_overflowingTasks.next = &node;
+		node.instance = _mainBatch;
+		node.next = _additionalBatches.next;
+		_additionalBatches.next = &node;
 		
-		OnUpdate(info, _overflowingTasks);
-		_tasks.Clear();
+		OnUpdate(info, _additionalBatches);
+		_mainBatch.Clear();
 		// It's in the dump arena so it will get deallocated correctly anyway.
-		_overflowingTasks = CreateLinkedList<Vector<T>>();
+		_additionalBatches = CreateLinkedList<Vector<T>>();
 	}
 }
