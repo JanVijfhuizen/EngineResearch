@@ -2,7 +2,7 @@
 #include "EngineInfo.h"
 #include "Module.h"
 #include "Jlb/Arena.h"
-#include "Jlb/Array.h"
+#include "Jlb/JVector.h"
 #include "Jlb/LinkedList.h"
 
 namespace je
@@ -18,7 +18,7 @@ namespace je
 		[[nodiscard]] bool TryAdd(const T& job);
 
 	protected:
-		virtual void OnUpdate(engine::Info& info, const LinkedList<Array<T>>& jobs) = 0;
+		virtual void OnUpdate(engine::Info& info, const LinkedList<Vector<T>>& jobs) = 0;
 		virtual bool Validate(const T& job);
 
 	private:
@@ -26,9 +26,8 @@ namespace je
 		const size_t _chunkCapacity;
 		Arena* _arena = nullptr;
 		Arena* _dumpArena = nullptr;
-		Array<T> _tasks{};
-		LinkedList<Array<T>> _overflowingTasks{};
-		size_t _count = 0;
+		Vector<T> _tasks{};
+		LinkedList<Vector<T>> _overflowingTasks{};
 
 		void OnUpdate(engine::Info& info) override;
 	};
@@ -46,14 +45,14 @@ namespace je
 		Module::OnBegin(info);
 		_arena = &info.persistentArena;
 		_dumpArena = &info.dumpArena;
-		_tasks = CreateArray<T>(_arena, _constCapacity);
-		_overflowingTasks = CreateLinkedList<Array<T>>();
+		_tasks = CreateVector<T>(*_arena, _constCapacity);
+		_overflowingTasks = CreateLinkedList<Vector<T>>();
 	}
 
 	template <typename T>
 	void JobSystem<T>::OnExit(engine::Info& info)
 	{
-		DestroyArray(_tasks, _arena);
+		DestroyVector(_tasks, *_arena);
 		Module::OnExit(info);
 	}
 
@@ -63,21 +62,20 @@ namespace je
 		if (!Validate(job))
 			return false;
 
-		size_t index = _count++;
-		if(index < _tasks.length)
+		if(_tasks.count < _tasks.length)
 		{
-			_tasks[index] = job;
+			_tasks.Add(job);
 			return true;
 		}
 
-		if(index - _tasks.length > _overflowingTasks.GetCount() * _chunkCapacity)
+		if(_overflowingTasks.GetCount() == 0 || _overflowingTasks[0].count == _overflowingTasks[0].length)
 		{
 			if (_chunkCapacity == 0)
 				return false;
-			LinkedListAdd(_overflowingTasks, _dumpArena, CreateArray<T>(_dumpArena, _chunkCapacity));
+			LinkedListAdd(_overflowingTasks, *_dumpArena, CreateVector<T>(*_dumpArena, _chunkCapacity));
 		}
 			
-		_overflowingTasks[0][index % _chunkCapacity] = job;
+		_overflowingTasks[0].Add(job);
 		return true;
 	}
 
@@ -93,14 +91,14 @@ namespace je
 		Module::OnUpdate(info);
 
 		// Adjust linked list to also host the original tasks.
-		LinkedList<Array<T>> node{};
+		LinkedList<Vector<T>> node{};
 		node.instance = _tasks;
 		node.next = _overflowingTasks.next;
-		_overflowingTasks.next = node;
+		_overflowingTasks.next = &node;
 		
 		OnUpdate(info, _overflowingTasks);
-		_count = 0;
+		_tasks.Clear();
 		// It's in the dump arena so it will get deallocated correctly anyway.
-		_overflowingTasks = CreateLinkedList<Array<T>>();
+		_overflowingTasks = CreateLinkedList<Vector<T>>();
 	}
 }

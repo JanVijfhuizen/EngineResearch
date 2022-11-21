@@ -51,7 +51,7 @@ namespace je
 	U& Finder<T>::Initializer::Add(Args&... args)
 	{
 		KeyPair<T*> pair{};
-		U* value = _arena.New<U>(args...);
+		U* value = _arena.New<U>(1, args...);
 		pair.value = value;
 		pair.key = typeid(U).hash_code();
 		LinkedListAdd(_linkedList, _tempArena, pair);

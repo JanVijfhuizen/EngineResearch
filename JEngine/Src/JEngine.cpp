@@ -1,17 +1,60 @@
 #include "pch.h"
-#include "Engine.h"
 
-class SomeModule final : public je::Module
+#include <iostream>
+
+#include "Engine.h"
+#include "Modules/JobSystem.h"
+
+struct SomeTask final
 {
-	
+	size_t number = SIZE_MAX;
 };
+
+class SomeSystem final : public je::JobSystem<SomeTask>
+{
+public:
+	SomeSystem(const size_t constCapacity, const size_t chunkCapacity)
+		: JobSystem<SomeTask>(constCapacity, chunkCapacity)
+	{
+		
+	}
+
+	void OnBegin(je::engine::Info& info) override;
+
+protected:
+	void OnUpdate(je::engine::Info& info, const je::LinkedList<je::Vector<SomeTask>>& jobs) override
+	{
+		for (auto& someTasks : jobs)
+			for (const auto& someTask : someTasks)
+				std::cout << someTask.number << std::endl;
+		std::cout << "end of frame" << std::endl;
+	}
+};
+
+void SomeSystem::OnBegin(je::engine::Info& info)
+{
+	JobSystem<SomeTask>::OnBegin(info);
+
+	SomeTask aTask{};
+	aTask.number = 8;
+	SomeTask bTask{};
+	bTask.number = 14;
+	SomeTask cTask{};
+	cTask.number = 1;
+
+	TryAdd(aTask);
+	TryAdd(bTask);
+	TryAdd(cTask);
+}
 
 class MyEngine final : public je::Engine
 {
 protected:
 	void DefineAdditionalModules(je::Finder<je::Module>::Initializer& initializer) override
 	{
-		initializer.Add<SomeModule>();
+		size_t capacity = 2;
+		size_t chunkCapacity = 4;
+		initializer.Add<SomeSystem>(capacity, chunkCapacity);
 	}
 };
 
