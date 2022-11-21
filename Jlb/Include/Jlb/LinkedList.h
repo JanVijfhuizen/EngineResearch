@@ -76,7 +76,7 @@ namespace je
 	T& LinkedList<T>::operator[](const size_t index)
 	{
 		auto current = next;
-		for (size_t i = 1; i < index; ++i)
+		for (size_t i = 0; i < index; ++i)
 			current = current->next;
 		return current->instance;
 	}

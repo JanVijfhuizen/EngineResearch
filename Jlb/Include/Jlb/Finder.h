@@ -17,8 +17,8 @@ namespace je
 			friend Finder;
 
 		public:
-			template <typename U>
-			void Add();
+			template <typename U, typename ...Args>
+			U& Add(Args&... args);
 
 			Initializer(Arena& arena, Arena& tempArena);
 			~Initializer();
@@ -47,13 +47,15 @@ namespace je
 	};
 
 	template <typename T>
-	template <typename U>
-	void Finder<T>::Initializer::Add()
+	template <typename U, typename ... Args>
+	U& Finder<T>::Initializer::Add(Args&... args)
 	{
 		KeyPair<T*> pair{};
-		pair.value = _arena.New<U>();
+		U* value = _arena.New<U>(1, args...);
+		pair.value = value;
 		pair.key = typeid(U).hash_code();
 		LinkedListAdd(_linkedList, _tempArena, pair);
+		return *value;
 	}
 
 	template <typename T>
