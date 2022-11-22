@@ -7,7 +7,25 @@ namespace je::ecs
 	{
 		--_count;
 
-		// WIP.
+		const size_t c = _batches.GetCount();
+
+		const auto& dstBatch = _batches[c - index / _capacity];
+		const auto& srcBatch = _batches[c - _count / _capacity];
+
+		const size_t dstIndex = index % _capacity;
+		const size_t srcIndex = _count % _capacity;
+
+		for (size_t i = 0; i < _sizes.length; ++i)
+		{
+			auto dstPtr = static_cast<unsigned char*>(dstBatch.components[i]);
+			auto srcPtr = static_cast<unsigned char*>(srcBatch.components[i]);
+
+			const size_t size = _sizes[i];
+			dstPtr += size * dstIndex;
+			srcPtr += size * srcIndex;
+
+			memcpy(dstPtr, srcPtr, size);
+		}
 
 		return _count;
 	}

@@ -50,10 +50,11 @@ namespace je::ecs
 	template <typename ... Args>
 	size_t Archetype::Add(const Tuple<Args...>& entity)
 	{
-		if (_count == _batches.GetCount() * _capacity)
+		const size_t c = _batches.GetCount();
+		if (_count == c * _capacity)
 			AddBatch();
 
-		auto& batch = _batches[0];
+		auto& batch = _batches[c - _count / _capacity];
 		const size_t index = _count % _capacity;
 
 		DefineComponents<0, Args..., Args...>(batch, entity, index);
