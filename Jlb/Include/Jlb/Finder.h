@@ -67,7 +67,7 @@ namespace je
 	template <typename T>
 	Finder<T>::Initializer::~Initializer()
 	{
-		DestroyLinkedList(_linkedList, _arena);
+		DestroyLinkedList(_linkedList, _tempArena);
 	}
 
 	template <typename T>

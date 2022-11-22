@@ -6,6 +6,9 @@ namespace je
 	struct TupleLeaf
 	{
 		T value{};
+
+		TupleLeaf() = default;
+		explicit TupleLeaf(const T& value);
 	};
 
 	template <size_t I, typename ...Args>
@@ -20,8 +23,21 @@ namespace je
 	template <size_t I, typename Head, typename ...Tail>
 	struct TupleImpl<I, Head, Tail...> : TupleLeaf<I, Head>, TupleImpl<I + 1, Tail...>
 	{
-		
+		TupleImpl() = default;
+		explicit TupleImpl(const Head& head, const Tail&... tail);
 	};
+
+	template <size_t I, typename T>
+	TupleLeaf<I, T>::TupleLeaf(const T& value) : value(value)
+	{
+
+	}
+
+	template <size_t I, typename Head, typename ... Tail>
+	TupleImpl<I, Head, Tail...>::TupleImpl(const Head& head, const Tail&... tail) : TupleLeaf<I, Head>(head), TupleImpl<I + 1, Tail...>(tail...)
+	{
+
+	}
 
 	template<typename ...Args>
 	using Tuple = TupleImpl<0, Args...>;

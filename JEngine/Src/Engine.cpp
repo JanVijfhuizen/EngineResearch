@@ -19,6 +19,7 @@ namespace je
 		_tempArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize, info.tempArenaSize),
 		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize)
 	{
+		
 	}
 
 	Engine::~Engine()

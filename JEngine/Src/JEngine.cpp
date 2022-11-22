@@ -47,13 +47,10 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	TryAdd(bTask);
 	TryAdd(cTask);
 
+	/*
 	auto a = je::ecs::Archetype::Create<int, float, bool>(info.dumpArena, 12);
 
-	je::Tuple<int, float, bool> prototype{};
-	je::Get<0>(prototype) = 0;
-	je::Get<1>(prototype) = 7.5;
-	je::Get<2>(prototype) = true;
-
+	je::Tuple<int, float, bool> prototype{0, 14, true};
 
 	for (int i = 0; i < 17; ++i)
 	{
@@ -81,6 +78,9 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 			std::cout << iPtr[j] << " " << fPtr[j] << " " << bPtr[j] << std::endl;
 		}
 	}
+	*/
+
+	info.quit = true;
 }
 
 class MyEngine final : public je::Engine
