@@ -2,6 +2,7 @@
 #include "Jlb/Array.h"
 #include "Jlb/LinkedList.h"
 #include "Jlb/Tuple.h"
+#include "vcruntime_typeinfo.h"
 
 namespace je::ecs
 {
@@ -44,13 +45,17 @@ namespace je::ecs
 		[[nodiscard]] size_t Add(Tuple<Args...>& entity);
 		[[nodiscard]] size_t Remove(size_t index);
 
-		[[nodicard]] Iterator begin() const;
+		template <typename T>
+		[[nodiscard]] bool Contains() const;
+
+		[[nodiscard]] Iterator begin() const;
 		[[nodicard]] static Iterator end();
 
 	private:
 		Arena* _arena = nullptr;
 		LinkedList<Batch> _batches{};
 		Array<size_t> _sizes{};
+		Array<size_t> _typeIds{};
 		size_t _capacity = 0;
 		size_t _count = 0;
 
@@ -58,6 +63,8 @@ namespace je::ecs
 
 		template <typename Head, typename ...Tail>
 		void DefineSizes(size_t index);
+		template <typename Head, typename ...Tail>
+		void DefineTypeIds(size_t index);
 		template <size_t I, typename U, typename Head, typename ...Tail>
 		void DefineComponents(Batch& batch, U& entity, size_t entityIndex);
 	};
@@ -70,7 +77,9 @@ namespace je::ecs
 		archetype._batches = CreateLinkedList<Batch>();
 		archetype._capacity = capacity;
 		archetype._sizes = CreateArray<size_t>(arena, sizeof...(Args));
+		archetype._typeIds = CreateArray<size_t>(arena, sizeof...(Args));
 		archetype.DefineSizes<Args...>(0);
+		archetype.DefineTypeIds<Args...>(0);
 		return archetype;
 	}
 
@@ -88,10 +97,28 @@ namespace je::ecs
 		return _count++;
 	}
 
+	template <typename T>
+	bool Archetype::Contains() const
+	{
+		const size_t tId = typeid(T).hash_code();
+		for (const auto& typeId : _typeIds)
+			if (typeId == tId)
+				return true;
+		return false;
+	}
+
 	template <typename Head, typename ... Tail>
 	void Archetype::DefineSizes(const size_t index)
 	{
 		_sizes[index] = sizeof(Head);
+		if constexpr (sizeof...(Tail) > 0)
+			DefineSizes<Tail...>(index + 1);
+	}
+
+	template <typename Head, typename ... Tail>
+	void Archetype::DefineTypeIds(size_t index)
+	{
+		_typeIds[index] = typeid(Head).hash_code();
 		if constexpr (sizeof...(Tail) > 0)
 			DefineSizes<Tail...>(index + 1);
 	}
