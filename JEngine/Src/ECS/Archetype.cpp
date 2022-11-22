@@ -3,14 +3,43 @@
 
 namespace je::ecs
 {
+	const Archetype::Batch& Archetype::Iterator::operator*() const
+	{
+		return linked->instance;
+	}
+
+	const Archetype::Batch& Archetype::Iterator::operator->() const
+	{
+		return linked->instance;
+	}
+
+	const Archetype::Iterator& Archetype::Iterator::operator++()
+	{
+		linked = linked->next;
+		count = capacity;
+		return *this;
+	}
+
+	Archetype::Iterator Archetype::Iterator::operator++(int)
+	{
+		Iterator temp{};
+		temp.linked = linked;
+		temp.count = count;
+		temp.capacity = capacity;
+		linked = linked->next;
+		count = capacity;
+		return temp;
+	}
+
 	size_t Archetype::Remove(const size_t index)
 	{
 		--_count;
 
 		const size_t c = _batches.GetCount();
 
-		const auto& dstBatch = _batches[c - index / _capacity];
-		const auto& srcBatch = _batches[c - _count / _capacity];
+		const auto& dstBatch = _batches[c - 1 - index / _capacity];
+		auto& srcBatch = _batches[c - 1 - _count / _capacity];
+		--srcBatch.count;
 
 		const size_t dstIndex = index % _capacity;
 		const size_t srcIndex = _count % _capacity;
@@ -28,6 +57,20 @@ namespace je::ecs
 		}
 
 		return _count;
+	}
+
+	Archetype::Iterator Archetype::begin() const
+	{
+		Iterator it{};
+		it.linked = _batches.next;
+		it.count = (_capacity + _count) % _capacity;
+		it.capacity = _capacity;
+		return it;
+	}
+
+	Archetype::Iterator Archetype::end()
+	{
+		return {};
 	}
 
 	void Archetype::AddBatch()

@@ -8,19 +8,46 @@ namespace je::ecs
 	class Archetype final
 	{
 	public:
+		struct Batch final
+		{
+			void** components = nullptr;
+			size_t count = 0;
+		};
+
+		struct Iterator final
+		{
+			LinkedList<Batch>* linked = nullptr;
+			size_t count = 0;
+			size_t capacity = 0;
+
+			const Batch& operator*() const;
+			const Batch& operator->() const;
+
+			const Iterator& operator++();
+			Iterator operator++(int);
+
+			friend bool operator==(const Iterator& a, const Iterator& b)
+			{
+				return a.linked == b.linked;
+			}
+
+			friend bool operator!= (const Iterator& a, const Iterator& b)
+			{
+				return !(a == b);
+			}
+		};
+
 		template <typename ...Args>
 		[[nodiscard]] static Archetype Create(Arena& arena, size_t capacity);
 
 		template <typename ...Args>
-		[[nodiscard]] size_t Add(const Tuple<Args...>& entity);
+		[[nodiscard]] size_t Add(Tuple<Args...>& entity);
 		[[nodiscard]] size_t Remove(size_t index);
 
-	private:
-		struct Batch final
-		{
-			void** components;
-		};
+		[[nodicard]] Iterator begin() const;
+		[[nodicard]] static Iterator end();
 
+	private:
 		Arena* _arena = nullptr;
 		LinkedList<Batch> _batches{};
 		Array<size_t> _sizes{};
@@ -31,8 +58,8 @@ namespace je::ecs
 
 		template <typename Head, typename ...Tail>
 		void DefineSizes(size_t index);
-		template <size_t I, typename ...Args, typename Head, typename ...Tail>
-		void DefineComponents(Batch& batch, const Tuple<Args...>& entity, size_t entityIndex);
+		template <size_t I, typename U, typename Head, typename ...Tail>
+		void DefineComponents(Batch& batch, U& entity, size_t entityIndex);
 	};
 
 	template <typename ...Args>
@@ -47,35 +74,35 @@ namespace je::ecs
 		return archetype;
 	}
 
-	template <typename ... Args>
-	size_t Archetype::Add(const Tuple<Args...>& entity)
+	template <typename ...Args>
+	size_t Archetype::Add(Tuple<Args...>& entity)
 	{
-		const size_t c = _batches.GetCount();
-		if (_count == c * _capacity)
+		if (_count == _batches.GetCount() * _capacity)
 			AddBatch();
 
-		auto& batch = _batches[c - _count / _capacity];
+		auto& batch = _batches[_batches.GetCount() - 1 - _count / _capacity];
+		++batch.count;
 		const size_t index = _count % _capacity;
 
-		DefineComponents<0, Args..., Args...>(batch, entity, index);
+		DefineComponents<0, Tuple<Args...>, Args...>(batch, entity, index);
 		return _count++;
 	}
 
 	template <typename Head, typename ... Tail>
 	void Archetype::DefineSizes(const size_t index)
 	{
-		static_assert(sizeof(Head) >= sizeof(void*));
 		_sizes[index] = sizeof(Head);
 		if constexpr (sizeof...(Tail) > 0)
 			DefineSizes<Tail...>(index + 1);
 	}
 
-	template <size_t I, typename ...Args, typename Head, typename ...Tail>
-	void Archetype::DefineComponents(Batch& batch, const Tuple<Args...>& entity, const size_t entityIndex)
+	template <size_t I, typename U, typename Head, typename ... Tail>
+	void Archetype::DefineComponents(Batch& batch, U& entity, size_t entityIndex)
 	{
-		Head* arr = static_cast<Head>(batch.components);
+		void* vPtr = batch.components[I];
+		Head* arr = static_cast<Head*>(vPtr);
 		arr[entityIndex] = Get<I>(entity);
 		if constexpr (sizeof...(Tail) > 0)
-			DefineComponents<I + 1, Args..., Tail>(batch, entity, entityIndex);
+			DefineComponents<I + 1, U, Tail...>(batch, entity, entityIndex);
 	}
 }

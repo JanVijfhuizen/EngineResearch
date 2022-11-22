@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Engine.h"
+#include "ECS/Archetype.h"
 #include "Modules/JobSystem.h"
 
 struct SomeTask final
@@ -45,6 +46,41 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	TryAdd(aTask);
 	TryAdd(bTask);
 	TryAdd(cTask);
+
+	auto a = je::ecs::Archetype::Create<int, float, bool>(info.dumpArena, 12);
+
+	je::Tuple<int, float, bool> prototype{};
+	je::Get<0>(prototype) = 0;
+	je::Get<1>(prototype) = 7.5;
+	je::Get<2>(prototype) = true;
+
+
+	for (int i = 0; i < 17; ++i)
+	{
+		++Get(prototype);
+		const size_t key = a.Add<int, float, bool>(prototype);
+	}
+	
+	//const size_t key2 = a.Add(prototype);
+	//const size_t rKey = a.Remove(5);
+	a.Remove(3);
+	a.Remove(5);
+	a.Remove(3);
+	a.Remove(0);
+
+	for (auto& batch : a)
+	{
+		std::cout << batch.count << std::endl;
+
+		const auto iPtr = static_cast<int*>(batch.components[0]);
+		const auto fPtr = static_cast<float*>(batch.components[1]);
+		const auto bPtr = static_cast<bool*>(batch.components[2]);
+
+		for (int j = 0; j < batch.count; ++j)
+		{
+			std::cout << iPtr[j] << " " << fPtr[j] << " " << bPtr[j] << std::endl;
+		}
+	}
 }
 
 class MyEngine final : public je::Engine
