@@ -64,6 +64,7 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	a.Remove(3);
 	a.Remove(0);
 
+	/*
 	for (auto& batch : a)
 	{
 		std::cout << batch.count << std::endl;
@@ -77,8 +78,13 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 			std::cout << iPtr[j] << " " << fPtr[j] << " " << bPtr[j] << std::endl;
 		}
 	}
+	*/
 
 	const auto view =	 a.GetView<int, bool>();
+	view.Iterate([](int& i, bool& b)
+		{
+			std::cout << i << " " << b << std::endl;
+		});
 
 	info.quit = true;
 }

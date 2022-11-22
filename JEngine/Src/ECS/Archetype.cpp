@@ -3,34 +3,6 @@
 
 namespace je::ecs
 {
-	const Archetype::Batch& Archetype::Iterator::operator*() const
-	{
-		return linked->instance;
-	}
-
-	const Archetype::Batch& Archetype::Iterator::operator->() const
-	{
-		return linked->instance;
-	}
-
-	const Archetype::Iterator& Archetype::Iterator::operator++()
-	{
-		linked = linked->next;
-		count = capacity;
-		return *this;
-	}
-
-	Archetype::Iterator Archetype::Iterator::operator++(int)
-	{
-		Iterator temp{};
-		temp.linked = linked;
-		temp.count = count;
-		temp.capacity = capacity;
-		linked = linked->next;
-		count = capacity;
-		return temp;
-	}
-
 	size_t Archetype::Remove(const size_t index)
 	{
 		--_count;
@@ -57,20 +29,6 @@ namespace je::ecs
 		}
 
 		return _count;
-	}
-
-	Archetype::Iterator Archetype::begin() const
-	{
-		Iterator it{};
-		it.linked = _batches.next;
-		it.count = (_capacity + _count) % _capacity;
-		it.capacity = _capacity;
-		return it;
-	}
-
-	Archetype::Iterator Archetype::end()
-	{
-		return {};
 	}
 
 	void Archetype::AddBatch()

@@ -8,44 +8,21 @@ namespace je::ecs
 {
 	class Archetype final
 	{
-	public:
-		struct Batch final
-		{
-			void** components = nullptr;
-			size_t count = 0;
-		};
+		template <typename ...Args>
+		friend struct View;
+		struct Batch;
 
+	public:
 		template <typename ...Args>
 		struct View final
 		{
 			friend Archetype;
 
+			void Iterate(void(*func)(Args&...)) const;
+
 		private:
 			size_t _indexes[sizeof...(Args)]{};
 			Archetype* _archetype{};
-		};
-
-		struct Iterator final
-		{
-			LinkedList<Batch>* linked = nullptr;
-			size_t count = 0;
-			size_t capacity = 0;
-
-			const Batch& operator*() const;
-			const Batch& operator->() const;
-
-			const Iterator& operator++();
-			Iterator operator++(int);
-
-			friend bool operator==(const Iterator& a, const Iterator& b)
-			{
-				return a.linked == b.linked;
-			}
-
-			friend bool operator!= (const Iterator& a, const Iterator& b)
-			{
-				return !(a == b);
-			}
 		};
 
 		template <typename ...Args>
@@ -58,13 +35,16 @@ namespace je::ecs
 		template <typename T>
 		[[nodiscard]] bool Contains(size_t& outIndex) const;
 
-		[[nodiscard]] Iterator begin() const;
-		[[nodicard]] static Iterator end();
-
 		template <typename ...Args>
 		[[nodiscard]] View<Args...> GetView();
 
 	private:
+		struct Batch final
+		{
+			void** components = nullptr;
+			size_t count = 0;
+		};
+
 		Arena* _arena = nullptr;
 		LinkedList<Batch> _batches{};
 		Array<size_t> _sizes{};
@@ -83,6 +63,12 @@ namespace je::ecs
 		template <typename T, typename Head, typename ...Tail>
 		void DefineViewIndex(T& view, size_t index);
 	};
+
+	template <typename ... Args>
+	void Archetype::View<Args...>::Iterate(void(* func)(Args&...)) const
+	{
+
+	}
 
 	template <typename ...Args>
 	Archetype Archetype::Create(Arena& arena, const size_t capacity)
@@ -131,7 +117,7 @@ namespace je::ecs
 		return false;
 	}
 
-	template <typename ... Args>
+	template <typename ...Args>
 	Archetype::View<Args...> Archetype::GetView()
 	{
 		View<Args...> view{};
@@ -140,7 +126,7 @@ namespace je::ecs
 		return view;
 	}
 
-	template <typename Head, typename ... Tail>
+	template <typename Head, typename ...Tail>
 	void Archetype::DefineSizes(const size_t index)
 	{
 		_sizes[index] = sizeof(Head);
@@ -148,7 +134,7 @@ namespace je::ecs
 			DefineSizes<Tail...>(index + 1);
 	}
 
-	template <typename Head, typename ... Tail>
+	template <typename Head, typename ...Tail>
 	void Archetype::DefineTypeIds(size_t index)
 	{
 		_typeIds[index] = typeid(Head).hash_code();
@@ -156,7 +142,7 @@ namespace je::ecs
 			DefineSizes<Tail...>(index + 1);
 	}
 
-	template <size_t I, typename U, typename Head, typename ... Tail>
+	template <size_t I, typename U, typename Head, typename ...Tail>
 	void Archetype::DefineComponents(Batch& batch, U& entity, size_t entityIndex)
 	{
 		void* vPtr = batch.components[I];
@@ -166,7 +152,7 @@ namespace je::ecs
 			DefineComponents<I + 1, U, Tail...>(batch, entity, entityIndex);
 	}
 
-	template <typename T, typename Head, typename ... Tail>
+	template <typename T, typename Head, typename ...Tail>
 	void Archetype::DefineViewIndex(T& view, const size_t index)
 	{
 		_typeIds[index] = typeid(Head).hash_code();
