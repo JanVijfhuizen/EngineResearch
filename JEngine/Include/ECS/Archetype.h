@@ -15,6 +15,16 @@ namespace je::ecs
 			size_t count = 0;
 		};
 
+		template <typename ...Args>
+		struct View final
+		{
+			friend Archetype;
+
+		private:
+			size_t _indexes[sizeof...(Args)]{};
+			Archetype* _archetype{};
+		};
+
 		struct Iterator final
 		{
 			LinkedList<Batch>* linked = nullptr;
@@ -46,10 +56,13 @@ namespace je::ecs
 		[[nodiscard]] size_t Remove(size_t index);
 
 		template <typename T>
-		[[nodiscard]] bool Contains() const;
+		[[nodiscard]] bool Contains(size_t& outIndex) const;
 
 		[[nodiscard]] Iterator begin() const;
 		[[nodicard]] static Iterator end();
+
+		template <typename ...Args>
+		[[nodiscard]] View<Args...> GetView();
 
 	private:
 		Arena* _arena = nullptr;
@@ -67,6 +80,8 @@ namespace je::ecs
 		void DefineTypeIds(size_t index);
 		template <size_t I, typename U, typename Head, typename ...Tail>
 		void DefineComponents(Batch& batch, U& entity, size_t entityIndex);
+		template <typename T, typename Head, typename ...Tail>
+		void DefineViewIndex(T& view, size_t index);
 	};
 
 	template <typename ...Args>
@@ -98,13 +113,31 @@ namespace je::ecs
 	}
 
 	template <typename T>
-	bool Archetype::Contains() const
+	bool Archetype::Contains(size_t& outIndex) const
 	{
 		const size_t tId = typeid(T).hash_code();
+
+		size_t i = 0;
 		for (const auto& typeId : _typeIds)
+		{
 			if (typeId == tId)
+			{
+				outIndex = i;
 				return true;
+			}
+			++i;
+		}
+			
 		return false;
+	}
+
+	template <typename ... Args>
+	Archetype::View<Args...> Archetype::GetView()
+	{
+		View<Args...> view{};
+		view._archetype = this;
+		DefineViewIndex<View<Args...>, Args...>(view, 0);
+		return view;
 	}
 
 	template <typename Head, typename ... Tail>
@@ -131,5 +164,19 @@ namespace je::ecs
 		arr[entityIndex] = Get<I>(entity);
 		if constexpr (sizeof...(Tail) > 0)
 			DefineComponents<I + 1, U, Tail...>(batch, entity, entityIndex);
+	}
+
+	template <typename T, typename Head, typename ... Tail>
+	void Archetype::DefineViewIndex(T& view, const size_t index)
+	{
+		_typeIds[index] = typeid(Head).hash_code();
+
+		size_t i = 0;
+		const auto contains = Contains<Head>(i);
+		assert(contains);
+		view._indexes[index] = i;
+
+		if constexpr (sizeof...(Tail) > 0)
+			DefineSizes<Tail...>(index + 1);
 	}
 }

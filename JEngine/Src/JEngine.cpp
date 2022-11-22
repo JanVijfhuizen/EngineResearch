@@ -78,6 +78,8 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 		}
 	}
 
+	const auto view =	 a.GetView<int, bool>();
+
 	info.quit = true;
 }
 
