@@ -47,7 +47,6 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	TryAdd(bTask);
 	TryAdd(cTask);
 
-	/*
 	auto a = je::ecs::Archetype::Create<int, float, bool>(info.dumpArena, 12);
 
 	je::Tuple<int, float, bool> prototype{0, 14, true};
@@ -78,7 +77,6 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 			std::cout << iPtr[j] << " " << fPtr[j] << " " << bPtr[j] << std::endl;
 		}
 	}
-	*/
 
 	info.quit = true;
 }
