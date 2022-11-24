@@ -23,6 +23,9 @@ namespace je::ecs
 		private:
 			size_t _indexes[sizeof...(Args)]{};
 			Archetype* _archetype{};
+
+			template <typename T>
+			[[nodiscard]] T& GetMember(Batch& batch, size_t& memberIndex, size_t entityIndex) const;
 		};
 
 		template <typename ...Args>
@@ -61,13 +64,32 @@ namespace je::ecs
 		template <size_t I, typename U, typename Head, typename ...Tail>
 		void DefineComponents(Batch& batch, U& entity, size_t entityIndex);
 		template <typename T, typename Head, typename ...Tail>
-		void DefineViewIndex(T& view, size_t index);
+		void DefineViewIndexes(T& view, size_t index);
 	};
 
-	template <typename ... Args>
+	template <typename ...Args>
 	void Archetype::View<Args...>::Iterate(void(* func)(Args&...)) const
 	{
+		const size_t capacity = _archetype->_capacity;
 
+		size_t count = _archetype->_count % capacity;
+		for (auto& batch : _archetype->_batches)
+		{
+			for (size_t i = 0; i < count; ++i)
+			{
+				size_t m = sizeof...(Args) - 1;
+				func(GetMember<Args>(batch, m, i)...);
+			}
+			count = capacity;
+		}
+	}
+
+	template <typename ...Args>
+	template <typename T>
+	T& Archetype::View<Args...>::GetMember(Batch& batch, size_t& memberIndex, const size_t entityIndex) const
+	{
+		T* ptr = static_cast<T*>(batch.components[_indexes[memberIndex--]]);
+		return ptr[entityIndex];
 	}
 
 	template <typename ...Args>
@@ -122,7 +144,7 @@ namespace je::ecs
 	{
 		View<Args...> view{};
 		view._archetype = this;
-		DefineViewIndex<View<Args...>, Args...>(view, 0);
+		DefineViewIndexes<View<Args...>, Args...>(view, 0);
 		return view;
 	}
 
@@ -135,11 +157,11 @@ namespace je::ecs
 	}
 
 	template <typename Head, typename ...Tail>
-	void Archetype::DefineTypeIds(size_t index)
+	void Archetype::DefineTypeIds(const size_t index)
 	{
 		_typeIds[index] = typeid(Head).hash_code();
 		if constexpr (sizeof...(Tail) > 0)
-			DefineSizes<Tail...>(index + 1);
+			DefineTypeIds<Tail...>(index + 1);
 	}
 
 	template <size_t I, typename U, typename Head, typename ...Tail>
@@ -153,16 +175,14 @@ namespace je::ecs
 	}
 
 	template <typename T, typename Head, typename ...Tail>
-	void Archetype::DefineViewIndex(T& view, const size_t index)
+	void Archetype::DefineViewIndexes(T& view, const size_t index)
 	{
-		_typeIds[index] = typeid(Head).hash_code();
-
 		size_t i = 0;
 		const auto contains = Contains<Head>(i);
 		assert(contains);
 		view._indexes[index] = i;
 
 		if constexpr (sizeof...(Tail) > 0)
-			DefineSizes<Tail...>(index + 1);
+			DefineViewIndexes<T, Tail...>(view, index + 1);
 	}
 }

@@ -59,26 +59,6 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	
 	//const size_t key2 = a.Add(prototype);
 	//const size_t rKey = a.Remove(5);
-	a.Remove(3);
-	a.Remove(5);
-	a.Remove(3);
-	a.Remove(0);
-
-	/*
-	for (auto& batch : a)
-	{
-		std::cout << batch.count << std::endl;
-
-		const auto iPtr = static_cast<int*>(batch.components[0]);
-		const auto fPtr = static_cast<float*>(batch.components[1]);
-		const auto bPtr = static_cast<bool*>(batch.components[2]);
-
-		for (int j = 0; j < batch.count; ++j)
-		{
-			std::cout << iPtr[j] << " " << fPtr[j] << " " << bPtr[j] << std::endl;
-		}
-	}
-	*/
 
 	const auto view =	 a.GetView<int, bool>();
 	view.Iterate([](int& i, bool& b)
