@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include "Engine.h"
+#include "ECS/Archetype.h"
 #include "Modules/JobSystem.h"
 
 struct SomeTask final
@@ -45,6 +46,27 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	TryAdd(aTask);
 	TryAdd(bTask);
 	TryAdd(cTask);
+
+	auto a = je::ecs::Archetype::Create<int, float, bool>(info.dumpArena, 12);
+
+	je::Tuple<int, float, bool> prototype{0, 14, true};
+
+	for (int i = 0; i < 17; ++i)
+	{
+		++Get(prototype);
+		const size_t key = a.Add(prototype);
+	}
+	
+	//const size_t key2 = a.Add(prototype);
+	//const size_t rKey = a.Remove(5);
+
+	const auto view =	 a.GetView<int, bool>();
+	view.Iterate([](int& i, bool& b)
+		{
+			std::cout << i << " " << b << std::endl;
+		});
+
+	info.quit = true;
 }
 
 class MyEngine final : public je::Engine

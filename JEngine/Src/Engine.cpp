@@ -10,7 +10,7 @@ namespace je
 {
 	size_t Engine::CreateInfo::GetMemorySpaceRequired() const
 	{
-		return persistentArenaSize + dumpArenaSize;
+		return persistentArenaSize + tempArenaSize + dumpArenaSize;
 	}
 
 	Engine::Engine(const CreateInfo& info) :
@@ -19,6 +19,7 @@ namespace je
 		_tempArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize, info.tempArenaSize),
 		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize)
 	{
+		
 	}
 
 	Engine::~Engine()

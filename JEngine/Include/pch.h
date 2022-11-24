@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cassert>
 #include <climits>
+#include <cstdint>
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>

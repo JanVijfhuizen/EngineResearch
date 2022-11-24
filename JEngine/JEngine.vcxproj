@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\ECS\Archetype.cpp" />
     <ClCompile Include="Src\Modules\ThreadModule.cpp" />
     <ClCompile Include="Src\Graphics\Texture.cpp" />
     <ClCompile Include="Src\Graphics\ObjLoader.cpp" />
@@ -162,6 +163,7 @@
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\ECS\Archetype.h" />
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
     <ClInclude Include="Include\Graphics\ObjLoader.h" />
