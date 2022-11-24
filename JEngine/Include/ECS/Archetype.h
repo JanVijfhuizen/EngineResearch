@@ -18,11 +18,13 @@ namespace je::ecs
 		{
 			friend Archetype;
 
-			void Iterate(void(*func)(Args&...)) const;
+			bool TryIterate(void(*func)(Args&...)) const;
+			[[nodiscard]] operator bool() const;
 
 		private:
 			size_t _indexes[sizeof...(Args)]{};
 			Archetype* _archetype{};
+			bool _isValid = true;
 
 			template <typename T>
 			[[nodiscard]] T& GetMember(Batch& batch, size_t& memberIndex, size_t entityIndex) const;
@@ -34,10 +36,7 @@ namespace je::ecs
 		template <typename ...Args>
 		[[nodiscard]] size_t Add(Tuple<Args...>& entity);
 		[[nodiscard]] size_t Remove(size_t index);
-
-		template <typename T>
-		[[nodiscard]] bool Contains(size_t& outIndex) const;
-
+		
 		template <typename ...Args>
 		[[nodiscard]] View<Args...> GetView();
 
@@ -59,11 +58,17 @@ namespace je::ecs
 		void DefineComponents(Batch& batch, U& entity, size_t entityIndex);
 		template <typename T, typename Head, typename ...Tail>
 		void DefineViewIndexes(T& view, size_t index);
+
+		template <typename T>
+		[[nodiscard]] bool Contains(size_t& outIndex) const;
 	};
 
 	template <typename ...Args>
-	void Archetype::View<Args...>::Iterate(void(* func)(Args&...)) const
+	bool Archetype::View<Args...>::TryIterate(void(* func)(Args&...)) const
 	{
+		if (!_isValid)
+			return false;
+
 		const size_t capacity = _archetype->_capacity;
 
 		size_t count = _archetype->_count % capacity;
@@ -76,6 +81,14 @@ namespace je::ecs
 			}
 			count = capacity;
 		}
+
+		return true;
+	}
+
+	template <typename ... Args>
+	Archetype::View<Args...>::operator bool() const
+	{
+		return _isValid;
 	}
 
 	template <typename ...Args>
@@ -172,7 +185,12 @@ namespace je::ecs
 	{
 		size_t i = 0;
 		const auto contains = Contains<Head>(i);
-		assert(contains);
+		if(!contains)
+		{
+			view._isValid = false;
+			return;
+		}
+
 		view._indexes[index] = i;
 
 		if constexpr (sizeof...(Tail) > 0)

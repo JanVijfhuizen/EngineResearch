@@ -61,7 +61,13 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	//const size_t rKey = a.Remove(5);
 
 	const auto view =	 a.GetView<int, bool>();
-	view.Iterate([](int& i, bool& b)
+	view.TryIterate([](int& i, bool& b)
+		{
+			std::cout << i << " " << b << std::endl;
+		});
+
+	const auto view2 = a.GetView<int, glm::ivec2, bool>();
+	view2.TryIterate([](int& i, glm::ivec2& v, bool& b)
 		{
 			std::cout << i << " " << b << std::endl;
 		});
