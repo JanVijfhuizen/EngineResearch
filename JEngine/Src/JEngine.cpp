@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "ECS/Archetype.h"
 #include "Modules/JobSystem.h"
+#include "ECS/Cecsar.h"
 
 struct SomeTask final
 {
