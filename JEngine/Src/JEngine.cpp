@@ -54,7 +54,7 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	for (int i = 0; i < 17; ++i)
 	{
 		++Get(prototype);
-		const size_t key = a.Add<int, float, bool>(prototype);
+		const size_t key = a.Add(prototype);
 	}
 	
 	//const size_t key2 = a.Add(prototype);

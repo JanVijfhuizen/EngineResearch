@@ -10,16 +10,15 @@ namespace je::ecs
 		const size_t c = _batches.GetCount();
 
 		const auto& dstBatch = _batches[c - 1 - index / _capacity];
-		auto& srcBatch = _batches[c - 1 - _count / _capacity];
-		--srcBatch.count;
+		const auto& srcBatch = _batches[c - 1 - _count / _capacity];
 
 		const size_t dstIndex = index % _capacity;
 		const size_t srcIndex = _count % _capacity;
 
 		for (size_t i = 0; i < _sizes.length; ++i)
 		{
-			auto dstPtr = static_cast<unsigned char*>(dstBatch.components[i]);
-			auto srcPtr = static_cast<unsigned char*>(srcBatch.components[i]);
+			auto dstPtr = static_cast<unsigned char*>(dstBatch[i]);
+			auto srcPtr = static_cast<unsigned char*>(srcBatch[i]);
 
 			const size_t size = _sizes[i];
 			dstPtr += size * dstIndex;
@@ -33,12 +32,9 @@ namespace je::ecs
 
 	void Archetype::AddBatch()
 	{
-		Batch batch{};
-
-		const auto components = _arena->New<void*>(_sizes.length);
-		batch.components = components;
+		const auto batch = _arena->New<void*>(_sizes.length);
 		for (size_t i = 0; i < _sizes.length; ++i)
-			components[i] = _arena->Alloc(_sizes[i] * _capacity);
+			batch[i] = _arena->Alloc(_sizes[i] * _capacity);
 
 		LinkedListAdd(_batches, *_arena, batch);
 	}

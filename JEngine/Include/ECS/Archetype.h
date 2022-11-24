@@ -10,7 +10,7 @@ namespace je::ecs
 	{
 		template <typename ...Args>
 		friend struct View;
-		struct Batch;
+		using Batch = void**;
 
 	public:
 		template <typename ...Args>
@@ -42,12 +42,6 @@ namespace je::ecs
 		[[nodiscard]] View<Args...> GetView();
 
 	private:
-		struct Batch final
-		{
-			void** components = nullptr;
-			size_t count = 0;
-		};
-
 		Arena* _arena = nullptr;
 		LinkedList<Batch> _batches{};
 		Array<size_t> _sizes{};
@@ -88,7 +82,7 @@ namespace je::ecs
 	template <typename T>
 	T& Archetype::View<Args...>::GetMember(Batch& batch, size_t& memberIndex, const size_t entityIndex) const
 	{
-		T* ptr = static_cast<T*>(batch.components[_indexes[memberIndex--]]);
+		T* ptr = static_cast<T*>(batch[_indexes[memberIndex--]]);
 		return ptr[entityIndex];
 	}
 
@@ -113,7 +107,6 @@ namespace je::ecs
 			AddBatch();
 
 		auto& batch = _batches[_batches.GetCount() - 1 - _count / _capacity];
-		++batch.count;
 		const size_t index = _count % _capacity;
 
 		DefineComponents<0, Tuple<Args...>, Args...>(batch, entity, index);
@@ -167,7 +160,7 @@ namespace je::ecs
 	template <size_t I, typename U, typename Head, typename ...Tail>
 	void Archetype::DefineComponents(Batch& batch, U& entity, size_t entityIndex)
 	{
-		void* vPtr = batch.components[I];
+		void* vPtr = batch[I];
 		Head* arr = static_cast<Head*>(vPtr);
 		arr[entityIndex] = Get<I>(entity);
 		if constexpr (sizeof...(Tail) > 0)
