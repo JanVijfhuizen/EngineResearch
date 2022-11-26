@@ -4,18 +4,32 @@
 
 namespace je::ecs
 {
+	class Cecsar;
+
 	struct CEntityInfo final
 	{
+		friend Cecsar;
+
 		bool markedForDelete = false;
+
+		[[nodiscard]] size_t GetIndex() const;
+
+	private:
+		size_t _index = SIZE_MAX;
 	};
 
 	struct Entity final
 	{
-		size_t index;
-		size_t id;
+		size_t index = SIZE_MAX;
+		size_t id = SIZE_MAX;
 
 		[[nodiscard]] bool operator==(const Entity& other) const;
 	};
+
+	inline size_t CEntityInfo::GetIndex() const
+	{
+		return _index;
+	}
 
 	inline bool Entity::operator==(const Entity& other) const
 	{
@@ -36,6 +50,8 @@ namespace je::ecs
 
 		template <typename ...Args>
 		void Iterate(void(*func)(Args&...));
+		template <typename ...Args>
+		void TryInstance(const Entity& entity, void(*func)(Args&...));
 
 		void RemoveMarked();
 
@@ -75,6 +91,8 @@ namespace je::ecs
 		size_t j = 0;
 		bool fit = false;
 
+		Get<0>(entity)._index = _globalId;
+
 		for (auto& batch : _batches)
 		{
 			size_t index = batch.count;
@@ -91,7 +109,7 @@ namespace je::ecs
 				IntEntity intEntity{};
 				intEntity.archetype = _archetypes[archetype];
 				intEntity.archetypeIndex = intEntity.archetype->Add(entity);
-				intEntity.id = _globalId++;
+				intEntity.id = _globalId;
 
 				batch.entities[index] = intEntity;
 				j = index;
@@ -111,7 +129,7 @@ namespace je::ecs
 		}
 
 		Entity entity{};
-		entity.id = _globalId - 1;
+		entity.id = _globalId++;
 		entity.index = (_batches.GetCount() - 1 - i) * _batchSize + j;
 		return entity;
 	}
@@ -121,9 +139,17 @@ namespace je::ecs
 	{
 		for (auto& archetype : _archetypes)
 		{
-			const auto view = archetype->GetView<Args...>();
+			const auto view = archetype->GetView<CEntityInfo, Args...>();
 			view.TryIterate(func);
 		}
+	}
+
+	template <typename ...Args>
+	void Cecsar::TryInstance(const Entity& entity, void(*func)(Args&...))
+	{
+		const auto& archetype = _archetypes[_archetypes.GetCount() - 1 - entity.index / _batchSize];
+		const auto view = archetype->GetView<CEntityInfo, Args...>();
+		view.TryInstance(func);
 	}
 
 	inline bool Cecsar::IsAlive(const Entity& entity)
