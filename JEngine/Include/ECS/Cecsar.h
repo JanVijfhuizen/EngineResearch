@@ -1,5 +1,4 @@
 #pragma once
-#include "Jlb/JVector.h"
 #include "Jlb/LinkedList.h"
 #include "Jlb/Tuple.h"
 
@@ -34,22 +33,32 @@ namespace je::ecs
 		template <typename ...Args>
 		Entity Add(size_t archetype, const Tuple<CEntityInfo, Args...>& entity);
 		[[nodiscard]] bool IsAlive(const Entity& entity);
-		[[nodiscard]] Archetype* TryGetArchetype(const Entity& entity);
+
+		template <typename ...Args>
+		void Iterate(void(*func)(Args&...));
+
+		void RemoveMarked();
 
 	private:
 		struct IntEntity final
 		{
-			size_t id = 0;
-			Archetype* archetype;
-			size_t archetypeIndex;
+			size_t id = SIZE_MAX;
+			Archetype* archetype = 0;
+			size_t archetypeIndex = SIZE_MAX;
 		};
 
-		using Batch = Vector<IntEntity>;
-
+		struct Batch final
+		{
+			size_t open = SIZE_MAX;
+			size_t count = 0;
+			IntEntity* entities = nullptr;
+		};
+		
 		Arena& _arena;
 		const size_t _batchSize;
 		LinkedList<Batch> _batches;
 		LinkedList<Archetype*> _archetypes;
+		size_t _globalId = 0;
 	};
 
 	template <typename ...Args>
@@ -62,15 +71,75 @@ namespace je::ecs
 	template <typename ... Args>
 	Entity Cecsar::Add(const size_t archetype, const Tuple<CEntityInfo, Args...>& entity)
 	{
-		IntEntity intEntity{};
-		intEntity.archetype = _archetypes[archetype];
-		intEntity.archetypeIndex = intEntity.archetype->Add(entity);
+		size_t i = 0;
+		size_t j = 0;
+		bool fit = false;
 
-		
+		for (auto& batch : _batches)
+		{
+			size_t index = batch.count;
+
+			if(batch.open != SIZE_MAX)
+			{
+				index = batch.open;
+				// Use the id as a pointer to the next open slot, if there is one.
+				batch.open = batch.entities[batch.open].id;
+			}
+
+			if(index < _batchSize)
+			{
+				IntEntity intEntity{};
+				intEntity.archetype = _archetypes[archetype];
+				intEntity.archetypeIndex = intEntity.archetype->Add(entity);
+				intEntity.id = _globalId++;
+
+				batch.entities[index] = intEntity;
+				j = index;
+				fit = true;
+				++batch.count;
+				break;
+			}
+
+			i += _batchSize;
+		}
+
+		if(!fit)
+		{
+			auto& batch = LinkedListAdd(_batches, _arena);
+			batch.entities = _arena.New<IntEntity>(_batchSize);
+			return Add(archetype, entity);
+		}
+
+		Entity entity{};
+		entity.id = _globalId - 1;
+		entity.index = (_batches.GetCount() - 1 - i) * _batchSize + j;
+		return entity;
+	}
+
+	template <typename ... Args>
+	void Cecsar::Iterate(void(* func)(Args&...))
+	{
+		for (auto& archetype : _archetypes)
+		{
+			const auto view = archetype->GetView<Args...>();
+			view.TryIterate(func);
+		}
 	}
 
 	inline bool Cecsar::IsAlive(const Entity& entity)
 	{
+		const size_t c = _batches.GetCount();
+		const auto& batch = _batches[c - 1 - entity.index / _batchSize];
+		return batch.entities[entity.index % _batchSize].id == entity.id;
+	}
+
+	inline void Cecsar::RemoveMarked()
+	{
+		for (auto& archetype : _archetypes)
+		{
+			const auto view = archetype->GetView<CEntityInfo>();
+			// Remove.
+		}
 	}
 
 	inline Cecsar::Cecsar(Arena& arena, const size_t batchSize) : _arena(arena), _batchSize(batchSize)
