@@ -170,5 +170,11 @@
     <ClInclude Include="Include\ECS\Archetype.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\ECS\Cecsar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\ECS\SparseSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

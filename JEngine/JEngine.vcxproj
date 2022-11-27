@@ -164,6 +164,8 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\ECS\Archetype.h" />
+    <ClInclude Include="Include\ECS\Cecsar.h" />
+    <ClInclude Include="Include\ECS\SparseSet.h" />
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\EngineInfo.h" />
     <ClInclude Include="Include\Graphics\ObjLoader.h" />

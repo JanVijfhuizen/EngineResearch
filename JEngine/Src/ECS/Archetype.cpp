@@ -3,17 +3,17 @@
 
 namespace je::ecs
 {
-	size_t Archetype::Remove(const size_t index)
+	void Archetype::Remove(const size_t index)
 	{
 		--_count;
 
 		const size_t c = _batches.GetCount();
 
-		const auto& dstBatch = _batches[c - 1 - index / _capacity];
-		const auto& srcBatch = _batches[c - 1 - _count / _capacity];
+		const auto& dstBatch = _batches[c - 1 - index / _batchSize];
+		const auto& srcBatch = _batches[c - 1 - _count / _batchSize];
 
-		const size_t dstIndex = index % _capacity;
-		const size_t srcIndex = _count % _capacity;
+		const size_t dstIndex = index % _batchSize;
+		const size_t srcIndex = _count % _batchSize;
 
 		for (size_t i = 0; i < _sizes.length; ++i)
 		{
@@ -26,15 +26,13 @@ namespace je::ecs
 
 			memcpy(dstPtr, srcPtr, size);
 		}
-
-		return _count;
 	}
 
 	void Archetype::AddBatch()
 	{
 		const auto batch = _arena->New<void*>(_sizes.length);
 		for (size_t i = 0; i < _sizes.length; ++i)
-			batch[i] = _arena->Alloc(_sizes[i] * _capacity);
+			batch[i] = _arena->Alloc(_sizes[i] * _batchSize);
 
 		LinkedListAdd(_batches, *_arena, batch);
 	}

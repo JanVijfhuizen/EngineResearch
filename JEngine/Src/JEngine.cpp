@@ -5,6 +5,7 @@
 #include "Engine.h"
 #include "ECS/Archetype.h"
 #include "Modules/JobSystem.h"
+#include "ECS/Cecsar.h"
 
 struct SomeTask final
 {
@@ -47,29 +48,27 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	TryAdd(bTask);
 	TryAdd(cTask);
 
-	auto a = je::ecs::Archetype::Create<int, float, bool>(info.dumpArena, 12);
+	je::ecs::Cecsar cecsar{info.dumpArena};
+	const size_t testArchetype = cecsar.DefineArchetype<int, float, bool>();
 
 	je::Tuple<int, float, bool> prototype{0, 14, true};
 
 	for (int i = 0; i < 17; ++i)
 	{
 		++Get(prototype);
-		const size_t key = a.Add(prototype);
+		cecsar.Add(testArchetype, prototype);
 	}
-	
-	//const size_t key2 = a.Add(prototype);
-	//const size_t rKey = a.Remove(5);
 
-	const auto view =	 a.GetView<int, bool>();
-	view.TryIterate([](int& i, bool& b)
-		{
-			std::cout << i << " " << b << std::endl;
-		});
+	struct Info final
+	{
+		size_t i = 0;
+	} in;
 
-	const auto view2 = a.GetView<int, glm::ivec2, bool>();
-	view2.TryIterate([](int& i, glm::ivec2& v, bool& b)
+	auto scope = cecsar.CreateScope<int>();
+	scope.Iterate([&in](int& i)
 		{
-			std::cout << i << " " << b << std::endl;
+			std::cout << i << " " << in.i++ << std::endl;
+			return true;
 		});
 
 	info.quit = true;
