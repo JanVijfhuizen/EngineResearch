@@ -18,8 +18,10 @@ namespace je::ecs
 		{
 			friend Archetype;
 
-			bool TryIterate(void(*func)(Args&...)) const;
-			bool TryInstance(size_t index, void(*func)(Args&...));
+			template <typename T>
+			bool TryIterate(const T& func) const;
+			template <typename T>
+			bool TryInstance(size_t index, const T& func) const;
 			[[nodiscard]] operator bool() const;
 
 		private:
@@ -65,7 +67,8 @@ namespace je::ecs
 	};
 
 	template <typename ...Args>
-	bool Archetype::View<Args...>::TryIterate(void(*func)(Args&...)) const
+	template <typename T>
+	bool Archetype::View<Args...>::TryIterate(const T& func) const
 	{
 		if (!_isValid)
 			return false;
@@ -87,7 +90,8 @@ namespace je::ecs
 	}
 
 	template <typename ... Args>
-	bool Archetype::View<Args...>::TryInstance(const size_t index, void(*func)(Args&...))
+	template <typename T>
+	bool Archetype::View<Args...>::TryInstance(const size_t index, const T& func) const
 	{
 		if (!_isValid)
 			return false;

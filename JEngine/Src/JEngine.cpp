@@ -62,7 +62,7 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	//const size_t rKey = a.Remove(5);
 
 	const auto view =	 a.GetView<int, bool>();
-	view.TryIterate([](int& i, bool& b)
+	view.TryIterate([&a](int& i, bool& b)
 		{
 			std::cout << i << " " << b << std::endl;
 		});
