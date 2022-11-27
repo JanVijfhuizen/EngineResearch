@@ -51,11 +51,11 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	je::ecs::Cecsar cecsar{info.dumpArena};
 	const size_t testArchetype = cecsar.DefineArchetype<int, float, bool>();
 
-	je::Tuple<int, float, bool> prototype{0, 14, true};
+	je::Tuple<je::ecs::Entity, int, float, bool> prototype{ {}, 0, 14, true };
 
 	for (int i = 0; i < 17; ++i)
 	{
-		++Get(prototype);
+		++je::Get<1>(prototype);
 		cecsar.Add(testArchetype, prototype);
 	}
 
@@ -68,7 +68,6 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	scope.Iterate([&in](int& i)
 		{
 			std::cout << i << " " << in.i++ << std::endl;
-			return true;
 		});
 
 	info.quit = true;

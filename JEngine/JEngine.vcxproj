@@ -136,6 +136,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\ECS\Archetype.cpp" />
+    <ClCompile Include="Src\ECS\Cecsar.cpp" />
     <ClCompile Include="Src\Modules\ThreadModule.cpp" />
     <ClCompile Include="Src\Graphics\Texture.cpp" />
     <ClCompile Include="Src\Graphics\ObjLoader.cpp" />
