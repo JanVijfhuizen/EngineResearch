@@ -78,7 +78,7 @@ namespace je::ecs
 		size_t count = _archetype->_count % capacity;
 		for (auto& batch : _archetype->_batches)
 		{
-			for (size_t i = 0; i < count; ++i)
+			for (int64_t i = count - 1; i >= 0; --i)
 			{
 				size_t m = sizeof...(Args) - 1;
 				func(GetMember<Args>(batch, m, i)...);
