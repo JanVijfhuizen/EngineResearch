@@ -20,13 +20,11 @@ namespace je::ecs
 
 			template <typename T>
 			bool TryIterate(const T& func) const;
-			template <typename T>
-			bool TryInstance(size_t index, const T& func) const;
 			[[nodiscard]] operator bool() const;
 
 		private:
 			size_t _indexes[sizeof...(Args)]{};
-			Archetype* _archetype{};
+			Archetype* _archetype = nullptr;
 			bool _isValid = true;
 
 			template <typename T>
@@ -37,8 +35,7 @@ namespace je::ecs
 		[[nodiscard]] static Archetype Create(Arena& arena, size_t batchSize);
 
 		template <typename ...Args>
-		[[nodiscard]] size_t Add(Tuple<Args...>& entity);
-		[[nodiscard]] size_t Remove(size_t index);
+		void Add(Tuple<Args...>& entity);
 		
 		template <typename ...Args>
 		[[nodiscard]] View<Args...> GetView();
@@ -64,6 +61,7 @@ namespace je::ecs
 
 		template <typename T>
 		[[nodiscard]] bool Contains(size_t& outIndex) const;
+		void Remove(size_t index);
 	};
 
 	template <typename ...Args>
@@ -73,33 +71,31 @@ namespace je::ecs
 		if (!_isValid)
 			return false;
 
-		const size_t capacity = _archetype->_batchSize;
+		const size_t batchSize = _archetype->_batchSize;
 
-		size_t count = _archetype->_count % capacity;
+		size_t count = _archetype->_count % batchSize;
+		size_t index = _archetype->_count - 1;
+
+		size_t skipCount = _archetype->_batches.GetCount() - index / batchSize - (_archetype->_count % batchSize != 0);
+
 		for (auto& batch : _archetype->_batches)
 		{
+			if (skipCount > 0)
+			{
+				--skipCount;
+				continue;
+			}
+
 			for (int64_t i = count - 1; i >= 0; --i)
 			{
 				size_t m = sizeof...(Args) - 1;
-				func(GetMember<Args>(batch, m, i)...);
+				if (!func(GetMember<Args>(batch, m, i)...))
+					_archetype->Remove(index);
+				--index;
 			}
-			count = capacity;
+			count = batchSize;
 		}
 
-		return true;
-	}
-
-	template <typename ... Args>
-	template <typename T>
-	bool Archetype::View<Args...>::TryInstance(const size_t index, const T& func) const
-	{
-		if (!_isValid)
-			return false;
-
-		auto& batches = _archetype->_batches;
-		auto& batch = batches[batches.GetCount() - 1 - index / _archetype->_batchSize];
-		size_t m = sizeof...(Args) - 1;
-		func(GetMember<Args>(batch, m, index % _archetype->_batchSize)...);
 		return true;
 	}
 
@@ -132,7 +128,7 @@ namespace je::ecs
 	}
 
 	template <typename ...Args>
-	size_t Archetype::Add(Tuple<Args...>& entity)
+	void Archetype::Add(Tuple<Args...>& entity)
 	{
 		if (_count == _batches.GetCount() * _batchSize)
 			AddBatch();
@@ -141,7 +137,7 @@ namespace je::ecs
 		const size_t index = _count % _batchSize;
 
 		DefineComponents<0, Tuple<Args...>, Args...>(batch, entity, index);
-		return _count++;
+		_count++;
 	}
 
 	template <typename T>

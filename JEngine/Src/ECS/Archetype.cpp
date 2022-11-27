@@ -3,7 +3,7 @@
 
 namespace je::ecs
 {
-	size_t Archetype::Remove(const size_t index)
+	void Archetype::Remove(const size_t index)
 	{
 		--_count;
 
@@ -26,8 +26,6 @@ namespace je::ecs
 
 			memcpy(dstPtr, srcPtr, size);
 		}
-
-		return _count;
 	}
 
 	void Archetype::AddBatch()
