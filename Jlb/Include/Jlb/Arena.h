@@ -25,7 +25,7 @@ namespace je
 			size_t& _scopeCount;
 			size_t _current;
 		};
-
+		
 		explicit Arena(void* ptr, size_t size);
 		~Arena();
 		

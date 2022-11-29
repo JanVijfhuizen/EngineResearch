@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Src\Modules\SceneModule.cpp" />
     <ClCompile Include="Src\ECS\Archetype.cpp" />
     <ClCompile Include="Src\ECS\Cecsar.cpp" />
     <ClCompile Include="Src\Graphics\Texture.cpp" />
@@ -185,6 +186,7 @@
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\Modules\JobSystem.h" />
     <ClInclude Include="Include\Modules\RenderModule.h" />
+    <ClInclude Include="Include\Modules\SceneModule.h" />
     <ClInclude Include="Include\Modules\TimeModule.h" />
     <ClInclude Include="Include\Modules\WindowModule.h" />
     <ClInclude Include="Include\Algorithms\PackingFFDH.h" />
