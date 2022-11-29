@@ -137,7 +137,6 @@
   <ItemGroup>
     <ClCompile Include="Src\ECS\Archetype.cpp" />
     <ClCompile Include="Src\ECS\Cecsar.cpp" />
-    <ClCompile Include="Src\Modules\ThreadModule.cpp" />
     <ClCompile Include="Src\Graphics\Texture.cpp" />
     <ClCompile Include="Src\Graphics\ObjLoader.cpp" />
     <ClCompile Include="Src\Graphics\VkLayout.cpp" />
@@ -186,7 +185,6 @@
     <ClInclude Include="Include\Module.h" />
     <ClInclude Include="Include\Modules\JobSystem.h" />
     <ClInclude Include="Include\Modules\RenderModule.h" />
-    <ClInclude Include="Include\Modules\ThreadModule.h" />
     <ClInclude Include="Include\Modules\TimeModule.h" />
     <ClInclude Include="Include\Modules\WindowModule.h" />
     <ClInclude Include="Include\Algorithms\PackingFFDH.h" />
