@@ -21,10 +21,6 @@ namespace je
 	public:
 		explicit SceneModule(const Array<SceneInfo>& sceneInfos);
 
-		void OnBegin(engine::Info& info) override;
-		void OnUpdate(engine::Info& info) override;
-		void OnExit(engine::Info& info) override;
-
 		void Load(size_t index) const;
 		void Unload(size_t index) const;
 		[[nodiscard]] bool IsLoaded(size_t index) const;
@@ -44,5 +40,9 @@ namespace je
 
 		const Finder<Module>* _finder = nullptr;
 		Array<Scene> _scenes{};
+
+		void OnBegin(engine::Info& info) override;
+		void OnUpdate(engine::Info& info) override;
+		void OnExit(engine::Info& info) override;
 	};
 }
