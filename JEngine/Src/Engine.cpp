@@ -42,21 +42,19 @@ namespace je
 			initializer.Add<engine::WindowModule>();
 			initializer.Add<engine::TimeModule>();
 			initializer.Add<engine::RenderModule>();
-			DefineAdditionalModules(initializer);
+			DefineAdditionalModules(_dumpArena, initializer);
 			
 			finder.Compile(initializer);
 		}
 		
 		engine::Info info{*this, finder};
 
-		{
-			const auto _ = _dumpArena.CreateScope();
+		for (const auto& mod : finder)
+			mod->OnInitialize(info);
+		for (const auto& mod : finder)
+			mod->OnBegin(info);
 
-			for (const auto& mod : finder)
-				mod->OnInitialize(info);
-			for (const auto& mod : finder)
-				mod->OnBegin(info);
-		}
+		_dumpArena.Empty();
 
 		while(!info.quit)
 		{

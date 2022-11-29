@@ -32,7 +32,7 @@ namespace je
 
 	protected:
 		// Define what additional modules are loaded into the engine. This can include a game manager, or a movement system for example.
-		virtual void DefineAdditionalModules(Finder<Module>::Initializer& initializer) = 0;
+		virtual void DefineAdditionalModules(Arena& dumpArena, Finder<Module>::Initializer& initializer) = 0;
 
 	private:
 		void* _memory;
