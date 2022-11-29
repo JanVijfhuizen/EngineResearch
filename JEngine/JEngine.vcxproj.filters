@@ -81,9 +81,6 @@
     <ClCompile Include="Src\Graphics\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Modules\ThreadModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\ECS\Archetype.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -162,9 +159,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Modules\ThreadModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Modules\JobSystem.h">
