@@ -78,7 +78,7 @@ namespace je::texture
 		outfile.close();
 	}
 
-	vk::Image LoadAtlas(vk::App& app, vk::Allocator& allocator, const char* imageFilePath, const char* metaFilePath)
+	vk::Image LoadAtlas(const vk::App& app, const vk::Allocator& allocator, const char* imageFilePath, const char* metaFilePath)
 	{
 		// Load pixels.
 		int texWidth, texHeight, texChannels;

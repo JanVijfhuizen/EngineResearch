@@ -17,6 +17,6 @@ namespace je
 			VkShaderStageFlagBits flag = VK_SHADER_STAGE_ALL;
 		};
 
-		[[nodiscard]] VkDescriptorSetLayout CreateLayout(Arena& tempArena, App& app, const Array<Binding>& bindings);
+		[[nodiscard]] VkDescriptorSetLayout CreateLayout(Arena& tempArena, const App& app, const Array<Binding>& bindings);
 	}
 }

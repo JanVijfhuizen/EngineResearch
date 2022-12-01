@@ -8,18 +8,18 @@
 
 namespace je
 {
-	size_t Engine::CreateInfo::GetMemorySpaceRequired() const
+	size_t EngineCreateInfo::GetMemorySpaceRequired() const
 	{
 		return persistentArenaSize + tempArenaSize + dumpArenaSize;
 	}
 
-	Engine::Engine(const CreateInfo& info) :
+	Engine::Engine(const EngineCreateInfo& info) :
 		_memory(malloc(info.GetMemorySpaceRequired())),
 		_persistentArena(_memory, info.persistentArenaSize),
 		_tempArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize, info.tempArenaSize),
 		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize)
 	{
-		
+
 	}
 
 	Engine::~Engine()
@@ -27,10 +27,12 @@ namespace je
 		free(_memory);
 	}
 
-	size_t Engine::Run()
+	size_t Engine::Run(const EngineRunInfo& runInfo)
 	{
 		assert(!_running);
 		_running = true;
+
+		assert(runInfo.renderModuleCreateInfo);
 
 		const auto _ = _persistentArena.CreateScope();
 		
@@ -41,7 +43,7 @@ namespace je
 			
 			initializer.Add<engine::WindowModule>();
 			initializer.Add<engine::TimeModule>();
-			initializer.Add<engine::RenderModule>();
+			initializer.Add<engine::RenderModule>(*runInfo.renderModuleCreateInfo);
 			DefineAdditionalModules(_dumpArena, initializer);
 			
 			finder.Compile(initializer);

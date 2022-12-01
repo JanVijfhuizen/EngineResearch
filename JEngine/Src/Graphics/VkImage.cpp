@@ -129,7 +129,7 @@ namespace je::vk
 		return image;
 	}
 
-	Image CreateImage(App& app, Allocator& allocator, const ImageCreateInfo& info, const Array<unsigned char>& pixels,
+	Image CreateImage(const App& app, const Allocator& allocator, const ImageCreateInfo& info, const Array<unsigned char>& pixels,
 		const glm::ivec3 resolution)
 	{
 		Image image{};
