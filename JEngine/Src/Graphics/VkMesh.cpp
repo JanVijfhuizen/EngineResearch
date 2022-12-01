@@ -11,7 +11,7 @@ namespace je::vk
 		vkCmdDrawIndexed(cmd, static_cast<uint32_t>(indexCount), static_cast<uint32_t>(count), 0, 0, 0);
 	}
 
-	Mesh CreateMesh(const App& app, Allocator& allocator, const Array<Vertex>& vertices,
+	Mesh CreateMesh(const App& app, const Allocator& allocator, const Array<Vertex>& vertices,
 		const Array<Vertex::Index>& indices)
 	{
 		Mesh mesh{};

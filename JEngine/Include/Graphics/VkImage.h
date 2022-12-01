@@ -26,7 +26,7 @@ namespace je::vk
 	};
 
 	[[nodiscard]] Image CreateImage(const App& app, const Allocator& allocator, const ImageCreateInfo& info, glm::ivec3 resolution);
-	[[nodiscard]] Image CreateImage(App& app, Allocator& allocator, const ImageCreateInfo& info, const Array<unsigned char>& pixels, glm::ivec3 resolution);
+	[[nodiscard]] Image CreateImage(const App& app, const Allocator& allocator, const ImageCreateInfo& info, const Array<unsigned char>& pixels, glm::ivec3 resolution);
 	void ImageTransitionLayout(Image& image, VkCommandBuffer cmd, VkImageLayout newLayout, VkImageAspectFlags aspectFlags);
 	void DestroyImage(const Image& image, const App& app, const Allocator& allocator);
 }

@@ -16,11 +16,11 @@ namespace je::vk
 		void Draw(VkCommandBuffer cmd, size_t count) const;
 	};
 
-	[[nodiscard]] Mesh CreateMesh(const App& app, Allocator& allocator, const Array<Vertex>& vertices, const Array<Vertex::Index>& indices);
+	[[nodiscard]] Mesh CreateMesh(const App& app, const Allocator& allocator, const Array<Vertex>& vertices, const Array<Vertex::Index>& indices);
 	void DestroyMesh(const Mesh& mesh, const App& app, const Allocator& allocator);
 
 	template <typename T>
-	Buffer CreateVertexBuffer(const App& app, Allocator& allocator,
+	Buffer CreateVertexBuffer(const App& app, const Allocator& allocator,
 		const Array<T>& data, const VkBufferUsageFlags usageFlags)
 	{
 		VkBufferCreateInfo bufferInfo{};
