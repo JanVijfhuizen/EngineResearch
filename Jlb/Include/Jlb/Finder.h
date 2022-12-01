@@ -54,6 +54,12 @@ namespace je
 		U* value = _arena.New<U>(1, args...);
 		pair.value = value;
 		pair.key = typeid(U).hash_code();
+
+#ifdef _DEBUG
+		for (auto& keyPair : _linkedList)
+			assert(keyPair.key != pair.key);
+#endif
+
 		LinkedListAdd(_linkedList, _tempArena, pair);
 		return *value;
 	}
