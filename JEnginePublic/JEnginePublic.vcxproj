@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{34612c4b-4818-4548-9efb-b7e44fce3092}</ProjectGuid>
-    <RootNamespace>Jlb</RootNamespace>
+    <ProjectGuid>{4672cb36-399a-4248-9779-5b71d5f6b671}</ProjectGuid>
+    <RootNamespace>JEnginePublic</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -111,8 +111,8 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>jpch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(ProjectDir)/Include</AdditionalIncludeDirectories>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -131,6 +131,8 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -141,46 +143,55 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Jlb\Archetype.h" />
-    <ClInclude Include="Include\Jlb\Arena.h" />
-    <ClInclude Include="Include\Jlb\Array.h" />
+    <ClInclude Include="Include\JEngine\Algorithms\PackingFFDH.h" />
+    <ClInclude Include="Include\JEngine\EngineInfo.h" />
     <ClInclude Include="Include\framework.h" />
-    <ClInclude Include="Include\Jlb\Cecsar.h" />
-    <ClInclude Include="Include\Jlb\FileLoader.h" />
-    <ClInclude Include="Include\Jlb\Finder.h" />
-    <ClInclude Include="Include\Jlb\Heap.h" />
-    <ClInclude Include="Include\Jlb\Iterator.h" />
-    <ClInclude Include="Include\Jlb\JMap.h" />
-    <ClInclude Include="Include\Jlb\JMath.h" />
-    <ClInclude Include="Include\Jlb\JMove.h" />
-    <ClInclude Include="Include\Jlb\LinSort.h" />
-    <ClInclude Include="Include\Jlb\StringArray.h" />
-    <ClInclude Include="Include\Jlb\JVector.h" />
-    <ClInclude Include="Include\Jlb\KeyPair.h" />
-    <ClInclude Include="Include\Jlb\LinkedList.h" />
-    <ClInclude Include="Include\Jlb\Tuple.h" />
-    <ClInclude Include="Include\jpch.h" />
-    <ClInclude Include="Include\Jlb\Queue.h" />
-    <ClInclude Include="Include\Jlb\Stack.h" />
-    <ClInclude Include="Include\Jlb\Swap.h" />
+    <ClInclude Include="Include\JEngine\Graphics\ObjLoader.h" />
+    <ClInclude Include="Include\JEngine\Graphics\Texture.h" />
+    <ClInclude Include="Include\JEngine\Graphics\Vertex.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkAllocator.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkApp.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkBuffer.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkImage.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkLayout.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkMemory.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkMesh.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkPipeline.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkShader.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkShapes.h" />
+    <ClInclude Include="Include\JEngine\Module.h" />
+    <ClInclude Include="Include\JEngine\Modules\JobSystem.h" />
+    <ClInclude Include="Include\JEngine\Modules\RenderModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\SceneModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\TimeModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\WindowModule.h" />
+    <ClInclude Include="Include\pch.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Archetype.cpp" />
-    <ClCompile Include="Src\Cecsar.cpp" />
-    <ClCompile Include="Src\FileLoader.cpp" />
-    <ClCompile Include="Src\Arena.cpp" />
-    <ClCompile Include="Src\Jlb.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpch.h</PrecompiledHeaderFile>
-    </ClCompile>
-    <ClCompile Include="Src\jpch.cpp">
+    <ClCompile Include="Src\JEngine\Algorithms\PackingFFDH.cpp" />
+    <ClCompile Include="Src\JEngine\EngineInfo.cpp" />
+    <ClCompile Include="Src\JEnginePublic.cpp" />
+    <ClCompile Include="Src\JEngine\Module.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\RenderModule.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\SceneModule.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\TimeModule.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\WindowModule.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\ObjLoader.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\Texture.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\Vertex.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkAllocator.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkImage.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkLayout.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkMesh.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkPipeline.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkShader.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkShapes.cpp" />
+    <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Src\StringArray.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

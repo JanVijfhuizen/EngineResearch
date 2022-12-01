@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Graphics/ObjLoader.h"
+#include "JEngine/Graphics/ObjLoader.h"
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 

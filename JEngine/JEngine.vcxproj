@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/EnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Ext/vulkan-1.2.189.0\Lib;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\lib-vc2022;$(SolutionDir)\Jlb\Include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Ext/vulkan-1.2.189.0\Lib;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\lib-vc2022;$(SolutionDir)\JEnginePublic\Include;$(SolutionDir)\Jlb\Include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>vulkan-1.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -124,75 +124,32 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/EnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)\Jlb\Include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Ext/vulkan-1.2.189.0\Lib;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\lib-vc2022;$(SolutionDir)\JEnginePublic\Include;$(SolutionDir)\Jlb\Include;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Modules\SceneModule.cpp" />
-    <ClCompile Include="Src\ECS\Archetype.cpp" />
-    <ClCompile Include="Src\ECS\Cecsar.cpp" />
-    <ClCompile Include="Src\Graphics\Texture.cpp" />
-    <ClCompile Include="Src\Graphics\ObjLoader.cpp" />
-    <ClCompile Include="Src\Graphics\VkLayout.cpp" />
-    <ClCompile Include="Src\Graphics\VkImage.cpp" />
-    <ClCompile Include="Src\Graphics\VkShapes.cpp" />
-    <ClCompile Include="Src\Graphics\Vertex.cpp" />
-    <ClCompile Include="Src\Graphics\VkMesh.cpp" />
-    <ClCompile Include="Src\Graphics\VkPipeline.cpp" />
-    <ClCompile Include="Src\Graphics\VkShader.cpp" />
     <ClCompile Include="Src\Graphics\VkRenderGraph.cpp" />
-    <ClCompile Include="Src\Graphics\VkAllocator.cpp" />
     <ClCompile Include="Src\Graphics\VkInitializer.cpp" />
     <ClCompile Include="Src\Graphics\VkSwapChain.cpp" />
-    <ClCompile Include="Src\Modules\RenderModule.cpp" />
-    <ClCompile Include="Src\Modules\TimeModule.cpp" />
     <ClCompile Include="Src\Engine.cpp" />
-    <ClCompile Include="Src\EngineInfo.cpp" />
-    <ClCompile Include="Src\Module.cpp" />
-    <ClCompile Include="Src\Modules\WindowModule.cpp" />
-    <ClCompile Include="Src\Algorithms\PackingFFDH.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\ECS\Archetype.h" />
-    <ClInclude Include="Include\ECS\Cecsar.h" />
-    <ClInclude Include="Include\ECS\SparseSet.h" />
     <ClInclude Include="Include\Engine.h" />
-    <ClInclude Include="Include\EngineInfo.h" />
-    <ClInclude Include="Include\Graphics\ObjLoader.h" />
-    <ClInclude Include="Include\Graphics\Texture.h" />
-    <ClInclude Include="Include\Graphics\Vertex.h" />
-    <ClInclude Include="Include\Graphics\VkAllocator.h" />
-    <ClInclude Include="Include\Graphics\VkBuffer.h" />
-    <ClInclude Include="Include\Graphics\VkLayout.h" />
-    <ClInclude Include="Include\Graphics\VkMemory.h" />
-    <ClInclude Include="Include\Graphics\VkMesh.h" />
-    <ClInclude Include="Include\Graphics\VkPipeline.h" />
     <ClInclude Include="Include\Graphics\VkRenderGraph.h" />
-    <ClInclude Include="Include\Graphics\VkShader.h" />
-    <ClInclude Include="Include\Graphics\VkShapes.h" />
     <ClInclude Include="Include\Graphics\VkSwapChain.h" />
-    <ClInclude Include="Include\Graphics\VkImage.h" />
-    <ClInclude Include="Include\Module.h" />
-    <ClInclude Include="Include\Modules\JobSystem.h" />
-    <ClInclude Include="Include\Modules\RenderModule.h" />
-    <ClInclude Include="Include\Modules\SceneModule.h" />
-    <ClInclude Include="Include\Modules\TimeModule.h" />
-    <ClInclude Include="Include\Modules\WindowModule.h" />
-    <ClInclude Include="Include\Algorithms\PackingFFDH.h" />
     <ClInclude Include="Include\pch.h" />
     <ClInclude Include="Include\Graphics\VkInitializer.h" />
-    <ClInclude Include="Include\Graphics\VkApp.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jlb\Jlb.vcxproj">

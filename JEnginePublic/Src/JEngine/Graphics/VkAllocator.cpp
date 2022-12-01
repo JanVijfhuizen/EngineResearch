@@ -1,6 +1,6 @@
 #include "pch.h"
-#include "Graphics/VkAllocator.h"
-#include "Graphics/VkApp.h"
+#include "JEngine/Graphics/VkAllocator.h"
+#include "JEngine/Graphics/VkApp.h"
 #include "Jlb/JMath.h"
 
 namespace je::vk

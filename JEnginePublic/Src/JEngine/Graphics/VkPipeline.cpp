@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
-#include "Graphics/VkPipeline.h"
-#include "Graphics/Vertex.h"
-#include "Graphics/VkApp.h"
+#include "JEngine/Graphics/VkPipeline.h"
+#include "JEngine/Graphics/Vertex.h"
+#include "JEngine/Graphics/VkApp.h"
 #include "Jlb/Array.h"
 
 namespace je::vk

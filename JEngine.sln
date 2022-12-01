@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Jlb", "Jlb\Jlb.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{16FF0CF9-9294-41BE-A071-4D3710A1F5DB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JEnginePublic", "JEnginePublic\JEnginePublic.vcxproj", "{4672CB36-399A-4248-9779-5B71D5F6B671}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{16FF0CF9-9294-41BE-A071-4D3710A1F5DB}.Release|x64.Build.0 = Release|x64
 		{16FF0CF9-9294-41BE-A071-4D3710A1F5DB}.Release|x86.ActiveCfg = Release|Win32
 		{16FF0CF9-9294-41BE-A071-4D3710A1F5DB}.Release|x86.Build.0 = Release|Win32
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Debug|x64.ActiveCfg = Debug|x64
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Debug|x64.Build.0 = Debug|x64
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Debug|x86.ActiveCfg = Debug|Win32
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Debug|x86.Build.0 = Debug|Win32
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Release|x64.ActiveCfg = Release|x64
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Release|x64.Build.0 = Release|x64
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Release|x86.ActiveCfg = Release|Win32
+		{4672CB36-399A-4248-9779-5B71D5F6B671}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

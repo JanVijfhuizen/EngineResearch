@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
-#include "Graphics/VkImage.h"
-#include "Graphics/VkAllocator.h"
-#include "Graphics/VkApp.h"
+#include "JEngine/Graphics/VkImage.h"
+#include "JEngine/Graphics/VkAllocator.h"
+#include "JEngine/Graphics/VkApp.h"
 #include <exception>
 
 namespace je::vk

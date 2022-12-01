@@ -1,5 +1,5 @@
 ﻿#include "pch.h"
-#include "Graphics/Vertex.h"
+#include "JEngine/Graphics/Vertex.h"
 
 namespace je::vk
 {

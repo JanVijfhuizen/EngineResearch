@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Graphics/Texture.h"
-#include "Algorithms/PackingFFDH.h"
+#include "JEngine/Graphics/Texture.h"
+#include "JEngine/Algorithms/PackingFFDH.h"
 #include <fstream>
 
 #define STB_IMAGE_IMPLEMENTATION

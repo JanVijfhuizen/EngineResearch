@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "ECS/Archetype.h"
+#include "jpch.h"
+#include "Jlb/Archetype.h"
 
 namespace je::ecs
 {

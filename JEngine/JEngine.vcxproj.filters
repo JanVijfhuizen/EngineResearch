@@ -21,28 +21,10 @@
     <ClCompile Include="Src\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Modules\WindowModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Engine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Module.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\EngineInfo.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Modules\TimeModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Modules\RenderModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\Graphics\VkInitializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\VkAllocator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\Graphics\VkSwapChain.cpp">
@@ -51,132 +33,21 @@
     <ClCompile Include="Src\Graphics\VkRenderGraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\Graphics\VkShader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\VkPipeline.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\VkMesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\Vertex.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\VkShapes.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\VkImage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\VkLayout.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\ObjLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Algorithms\PackingFFDH.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Graphics\Texture.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ECS\Archetype.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\ECS\Cecsar.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Modules\SceneModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Include\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Modules\WindowModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Engine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Module.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\EngineInfo.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Modules\TimeModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Modules\RenderModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Graphics\VkInitializer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkApp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkAllocator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VkSwapChain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\Graphics\VkRenderGraph.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkShader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkPipeline.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkMesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkBuffer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\Vertex.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkShapes.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkImage.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\VkLayout.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\ObjLoader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Algorithms\PackingFFDH.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Graphics\Texture.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Modules\JobSystem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ECS\Archetype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ECS\Cecsar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\ECS\SparseSet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Modules\SceneModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

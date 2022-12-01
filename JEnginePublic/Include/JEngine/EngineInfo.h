@@ -5,7 +5,6 @@
 namespace je
 {
 	class Arena;
-	class Engine;
 
 	namespace engine
 	{
@@ -22,9 +21,8 @@ namespace je
 			Arena& dumpArena;
 			const Finder<Module>& finder;
 			bool quit = false;
-
-		private:
-			explicit Info(Engine& engine, const Finder<Module>& finder);
+			
+			explicit Info(Arena& persistentArena, Arena& tempArena, Arena& dumpArena, const Finder<Module>& finder);
 		};
 	}
 }

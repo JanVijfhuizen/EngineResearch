@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "Graphics/VkMesh.h"
+#include "JEngine/Graphics/VkMesh.h"
 
 namespace je::vk
 {

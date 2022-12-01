@@ -1,7 +1,6 @@
 ﻿#include "pch.h"
-#include "Modules/WindowModule.h"
-
-#include "EngineInfo.h"
+#include "JEngine/Modules/WindowModule.h"
+#include "JEngine/EngineInfo.h"
 
 namespace je::engine
 {

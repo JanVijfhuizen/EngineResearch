@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Graphics/VkShader.h"
-#include "Graphics/VkApp.h"
+#include "JEngine/Graphics/VkShader.h"
+#include "JEngine/Graphics/VkApp.h"
 #include "Jlb/FileLoader.h"
 
 namespace je::vk

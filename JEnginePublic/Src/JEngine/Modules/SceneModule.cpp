@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
-#include "Modules/SceneModule.h"
-#include "EngineInfo.h"
+#include "JEngine/Modules/SceneModule.h"
+#include "JEngine/EngineInfo.h"
 
 namespace je
 {
