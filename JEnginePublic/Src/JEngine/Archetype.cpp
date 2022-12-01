@@ -1,8 +1,16 @@
-#include "Jlb/pch.h"
-#include "Jlb/Archetype.h"
+#include "JEngine/pch.h"
+#include "JEngine/Archetype.h"
 
 namespace je::ecs
 {
+	void Archetype::AddBatch()
+	{
+		const auto batch = static_cast<void**>(_arena->Alloc(_sizes.length * sizeof(void*)));
+		for (size_t i = 0; i < _sizes.length; ++i)
+			batch[i] = _arena->Alloc(_sizes[i] * _batchSize);
+		LinkedListAdd(_batches, *_arena, batch);
+	}
+
 	void Archetype::Remove(const size_t index)
 	{
 		--_count;
@@ -26,14 +34,5 @@ namespace je::ecs
 
 			memcpy(dstPtr, srcPtr, size);
 		}
-	}
-
-	void Archetype::AddBatch()
-	{
-		const auto batch = _arena->New<void*>(_sizes.length);
-		for (size_t i = 0; i < _sizes.length; ++i)
-			batch[i] = _arena->Alloc(_sizes[i] * _batchSize);
-
-		LinkedListAdd(_batches, *_arena, batch);
 	}
 }

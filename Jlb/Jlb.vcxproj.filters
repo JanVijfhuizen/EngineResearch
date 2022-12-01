@@ -75,12 +75,6 @@
     <ClInclude Include="Include\Jlb\Finder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Jlb\Cecsar.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\Jlb\Archetype.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Jlb.cpp">
@@ -96,12 +90,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\StringArray.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Archetype.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\Cecsar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

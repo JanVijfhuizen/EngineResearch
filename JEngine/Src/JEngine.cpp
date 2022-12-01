@@ -1,12 +1,11 @@
 #include "pch.h"
-/*
 #include <iostream>
 
 #include "Engine.h"
 
-#include "Jlb/Archetype.h"
+#include "JEngine/Archetype.h"
 #include "JEngine/Modules/JobSystem.h"
-#include "Jlb/Cecsar.h"
+#include "JEngine/Cecsar.h"
 #include "JEngine/Graphics/ObjLoader.h"
 #include "JEngine/Graphics/Texture.h"
 #include "JEngine/Graphics/VkLayout.h"
@@ -55,11 +54,9 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	TryAdd(bTask);
 	TryAdd(cTask);
 }
-*/
 
 int main()
 {
-	/*
 	struct RenderResources final
 	{
 		VkDescriptorSetLayout _layout{};
@@ -230,7 +227,8 @@ int main()
 			for (size_t i = 0; i < swapChainLength; ++i)
 			{
 				VkWriteDescriptorSet write{};
-			
+
+				/*
 				// Bind instance buffer.
 				VkDescriptorBufferInfo instanceInfo{};
 				instanceInfo.buffer = _instanceBuffers[i].buffer;
@@ -245,7 +243,7 @@ int main()
 				instanceWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 				instanceWrite.pBufferInfo = &instanceInfo;
 				instanceWrite.dstArrayElement = 0;
-				
+				*/
 				// Bind texture atlas.
 				VkDescriptorImageInfo  atlasInfo{};
 				atlasInfo.imageLayout = ptr->_image.layout;
@@ -324,8 +322,5 @@ int main()
 	};
 
 	je::Engine engine{};
-	return static_cast<int>(engine.Run(runInfo));
-	*/
-
-	return 0;
+	return static_cast<int>(engine.Run(runInfo)); 
 }

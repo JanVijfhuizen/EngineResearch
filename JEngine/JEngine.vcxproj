@@ -112,7 +112,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Ext/vulkan-1.2.189.0\Lib;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\lib-vc2022;$(SolutionDir)\JEnginePublic\Include;$(SolutionDir)\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Ext/vulkan-1.2.189.0\Lib;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\lib-vc2022;$(SolutionDir)\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>Jlb.lib;JEnginePublic.lib;vulkan-1.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

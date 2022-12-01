@@ -141,11 +141,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Jlb\Archetype.h" />
     <ClInclude Include="Include\Jlb\Arena.h" />
     <ClInclude Include="Include\Jlb\Array.h" />
     <ClInclude Include="Include\Jlb\framework.h" />
-    <ClInclude Include="Include\Jlb\Cecsar.h" />
     <ClInclude Include="Include\Jlb\FileLoader.h" />
     <ClInclude Include="Include\Jlb\Finder.h" />
     <ClInclude Include="Include\Jlb\Heap.h" />
@@ -165,8 +163,6 @@
     <ClInclude Include="Include\Jlb\Swap.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Archetype.cpp" />
-    <ClCompile Include="Src\Cecsar.cpp" />
     <ClCompile Include="Src\FileLoader.cpp" />
     <ClCompile Include="Src\Arena.cpp" />
     <ClCompile Include="Src\Jlb.cpp">

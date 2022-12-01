@@ -1,7 +1,7 @@
 #pragma once
 #include "Jlb/LinkedList.h"
 #include "Jlb/Tuple.h"
-#include <Jlb/Archetype.h>
+#include "JEngine/Archetype.h"
 
 namespace je::ecs
 {

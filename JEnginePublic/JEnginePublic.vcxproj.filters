@@ -78,6 +78,15 @@
     <ClInclude Include="Include\JEngine\Algorithms\PackingFFDH.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\JEngine\Graphics\VkRenderNode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JEngine\Archetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JEngine\Cecsar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\JEngine\JEnginePublic.cpp">
@@ -129,6 +138,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\JEngine\Algorithms\PackingFFDH.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Archetype.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Cecsar.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
