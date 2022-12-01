@@ -87,6 +87,24 @@
     <ClInclude Include="Include\JEngine\Cecsar.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\JEngine\Engine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JEngine\Modules\RenderModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JEngine\Modules\WindowModule.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JEngine\Graphics\VkInitializer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JEngine\Graphics\VkRenderGraph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Include\JEngine\Graphics\VkSwapChain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\JEngine\JEnginePublic.cpp">
@@ -144,6 +162,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\JEngine\Cecsar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Engine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Modules\RenderModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Modules\WindowModule.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Graphics\VkInitializer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Graphics\VkSwapChain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\JEngine\Graphics\VkRenderGraph.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

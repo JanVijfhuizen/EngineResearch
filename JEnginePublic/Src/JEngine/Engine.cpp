@@ -1,10 +1,10 @@
-﻿#include "pch.h"
-#include "Engine.h"
+﻿#include "JEngine/pch.h"
+#include "JEngine/Engine.h"
 #include "JEngine/EngineInfo.h"
 #include "Jlb/Finder.h"
 #include "JEngine/Modules/TimeModule.h"
-#include "Modules/WindowModule.h"
-#include "Modules/RenderModule.h"
+#include "JEngine/Modules/WindowModule.h"
+#include "JEngine/Modules/RenderModule.h"
 
 namespace je
 {

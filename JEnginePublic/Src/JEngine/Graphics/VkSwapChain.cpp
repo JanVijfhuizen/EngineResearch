@@ -1,10 +1,10 @@
-#include "pch.h"
-#include "Graphics/VkSwapChain.h"
+#include "JEngine/pch.h"
+#include "JEngine/Graphics/VkSwapChain.h"
 #include "JEngine/Graphics/VkApp.h"
-#include "Graphics/VkInitializer.h"
+#include "JEngine/Graphics/VkInitializer.h"
 #include "Jlb/JMath.h"
 #include "Jlb/Arena.h"
-#include "Modules/WindowModule.h"
+#include "JEngine/Modules/WindowModule.h"
 
 namespace je::vk
 {

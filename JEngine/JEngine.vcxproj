@@ -24,6 +24,7 @@
     <ProjectGuid>{8df4beb5-8031-403e-b4bd-736266d8e6a0}</ProjectGuid>
     <RootNamespace>JEngine</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Game</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -138,12 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Graphics\VkRenderGraph.cpp" />
-    <ClCompile Include="Src\Graphics\VkInitializer.cpp" />
-    <ClCompile Include="Src\Graphics\VkSwapChain.cpp" />
-    <ClCompile Include="Src\Engine.cpp" />
-    <ClCompile Include="Src\Modules\RenderModule.cpp" />
-    <ClCompile Include="Src\Modules\WindowModule.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -151,13 +146,7 @@
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Engine.h" />
-    <ClInclude Include="Include\Graphics\VkRenderGraph.h" />
-    <ClInclude Include="Include\Graphics\VkSwapChain.h" />
-    <ClInclude Include="Include\Modules\RenderModule.h" />
-    <ClInclude Include="Include\Modules\WindowModule.h" />
     <ClInclude Include="Include\pch.h" />
-    <ClInclude Include="Include\Graphics\VkInitializer.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Jlb\Jlb.vcxproj">

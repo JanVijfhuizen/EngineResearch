@@ -24,6 +24,7 @@
     <ProjectGuid>{4672cb36-399a-4248-9779-5b71d5f6b671}</ProjectGuid>
     <RootNamespace>JEnginePublic</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>JEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -143,6 +144,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Include\JEngine\Engine.h" />
     <ClInclude Include="Include\JEngine\Algorithms\PackingFFDH.h" />
     <ClInclude Include="Include\JEngine\Archetype.h" />
     <ClInclude Include="Include\JEngine\Cecsar.h" />
@@ -155,26 +157,36 @@
     <ClInclude Include="Include\JEngine\Graphics\VkApp.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkBuffer.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkImage.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkInitializer.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkLayout.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkMemory.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkMesh.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkPipeline.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkRenderGraph.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkShader.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkShapes.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkSwapChain.h" />
     <ClInclude Include="Include\JEngine\Module.h" />
     <ClInclude Include="Include\JEngine\Modules\JobSystem.h" />
+    <ClInclude Include="Include\JEngine\Modules\RenderModule.h" />
     <ClInclude Include="Include\JEngine\Modules\SceneModule.h" />
     <ClInclude Include="Include\JEngine\Modules\TimeModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\WindowModule.h" />
     <ClInclude Include="Include\JEngine\pch.h" />
     <ClInclude Include="Include\JEngine\Graphics\VkRenderNode.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\JEngine\Engine.cpp" />
     <ClCompile Include="Src\JEngine\Archetype.cpp" />
     <ClCompile Include="Src\JEngine\Cecsar.cpp" />
     <ClCompile Include="Src\JEngine\Algorithms\PackingFFDH.cpp" />
     <ClCompile Include="Src\JEngine\EngineInfo.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkInitializer.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkRenderGraph.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkSwapChain.cpp" />
     <ClCompile Include="Src\JEngine\JEnginePublic.cpp" />
     <ClCompile Include="Src\JEngine\Module.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\RenderModule.cpp" />
     <ClCompile Include="Src\JEngine\Modules\SceneModule.cpp" />
     <ClCompile Include="Src\JEngine\Modules\TimeModule.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\ObjLoader.cpp" />
@@ -187,6 +199,7 @@
     <ClCompile Include="Src\JEngine\Graphics\VkPipeline.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\VkShader.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\VkShapes.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\WindowModule.cpp" />
     <ClCompile Include="Src\JEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
