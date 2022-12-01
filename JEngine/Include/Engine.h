@@ -23,22 +23,18 @@ namespace je
 	struct EngineRunInfo final
 	{
 		engine::RenderModuleCreateInfo* renderModuleCreateInfo = nullptr;
+		void(*defineAdditionalModules)(Arena& dumpArena, Finder<Module>::Initializer& initializer);
 	};
 
 	// Engine class that manages all the modules, like the windowing, resource manager or rendering.
-	class Engine
+	class Engine final
 	{
 		friend engine::Info;
 
 	public:
 		explicit Engine(const EngineCreateInfo& info = {});
-		virtual ~Engine();
-
+		~Engine();
 		[[nodiscard]] size_t Run(const EngineRunInfo& runInfo);
-
-	protected:
-		// Define what additional modules are loaded into the engine. This can include a game manager, or a movement system for example.
-		virtual void DefineAdditionalModules(Arena& dumpArena, Finder<Module>::Initializer& initializer) = 0;
 
 	private:
 		void* _memory;

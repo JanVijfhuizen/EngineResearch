@@ -57,51 +57,6 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 	TryAdd(cTask);
 }
 
-class MyEngine final : public je::Engine
-{
-	void DefineAdditionalModules(je::Arena& dumpArena, je::Finder<je::Module>::Initializer& initializer) override
-	{
-		size_t capacity = 2;
-		size_t chunkCapacity = 4;
-		initializer.Add<SomeSystem>(capacity, chunkCapacity);
-
-		const auto scenes = je::CreateArray<je::SceneInfo>(dumpArena, 1);
-
-		auto& scene = scenes[0];
-		scene.onBegin = [](const je::Finder<je::Module>& finder, je::ecs::Cecsar& cecsar, void* userPtr)
-		{
-			const size_t testArchetype = cecsar.DefineArchetype<int, float, bool>();
-			je::Tuple<je::ecs::Entity, int, float, bool> prototype{ {}, 0, 14, true };
-
-			for (int i = 0; i < 17; ++i)
-			{
-				++je::Get<1>(prototype);
-				cecsar.Add(testArchetype, prototype);
-			}
-
-			return true;
-		};
-		scene.onUpdate = [](const je::Finder<je::Module>& finder, je::ecs::Cecsar& cecsar, void* userPtr)
-		{
-			struct Info final
-			{
-				size_t i = 0;
-			} in;
-
-			auto scope = cecsar.CreateScope<int>();
-			scope.Iterate([&in](int& i)
-				{
-					std::cout << i << " " << in.i++ << std::endl;
-				});
-
-			finder.Get<je::SceneModule>()->Unload(0);
-			return true;
-		};
-
-		initializer.Add<je::SceneModule>(scenes);
-	}
-};
-
 int main()
 {
 	struct RenderResources final
@@ -325,7 +280,48 @@ int main()
 
 	je::EngineRunInfo runInfo{};
 	runInfo.renderModuleCreateInfo = &renderModuleCreateInfo;
+	runInfo.defineAdditionalModules = [](je::Arena& dumpArena, je::Finder<je::Module>::Initializer& initializer)
+	{
+		size_t capacity = 2;
+		size_t chunkCapacity = 4;
+		initializer.Add<SomeSystem>(capacity, chunkCapacity);
 
-	MyEngine engine{};
+		const auto scenes = je::CreateArray<je::SceneInfo>(dumpArena, 1);
+
+		auto& scene = scenes[0];
+		scene.onBegin = [](const je::Finder<je::Module>& finder, je::ecs::Cecsar& cecsar, void* userPtr)
+		{
+			const size_t testArchetype = cecsar.DefineArchetype<int, float, bool>();
+			je::Tuple<je::ecs::Entity, int, float, bool> prototype{ {}, 0, 14, true };
+
+			for (int i = 0; i < 17; ++i)
+			{
+				++je::Get<1>(prototype);
+				cecsar.Add(testArchetype, prototype);
+			}
+
+			return true;
+		};
+		scene.onUpdate = [](const je::Finder<je::Module>& finder, je::ecs::Cecsar& cecsar, void* userPtr)
+		{
+			struct Info final
+			{
+				size_t i = 0;
+			} in;
+
+			auto scope = cecsar.CreateScope<int>();
+			scope.Iterate([&in](int& i)
+				{
+					std::cout << i << " " << in.i++ << std::endl;
+				});
+
+			finder.Get<je::SceneModule>()->Unload(0);
+			return true;
+		};
+
+		initializer.Add<je::SceneModule>(scenes);
+	};
+
+	je::Engine engine{};
 	return static_cast<int>(engine.Run(runInfo));
 }
