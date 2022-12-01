@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "JEngine/Module.h"
-#include "Graphics/VkApp.h"
-#include "Graphics/VkMesh.h"
+#include "JEngine/Graphics/VkApp.h"
+#include "JEngine/Graphics/VkMesh.h"
 #include "Graphics/VkRenderGraph.h"
 #include "Jlb/Array.h"
 

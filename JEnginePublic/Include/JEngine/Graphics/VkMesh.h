@@ -3,7 +3,7 @@
 #include <cstdint> 
 #include "VkAllocator.h" 
 #include "VkBuffer.h" 
-#include <Graphics/Vertex.h>
+#include <JEngine/Graphics/Vertex.h>
 
 namespace je::vk
 {

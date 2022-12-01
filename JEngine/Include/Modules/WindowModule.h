@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Module.h"
+#include "JEngine/Module.h"
 
 namespace je::engine
 {

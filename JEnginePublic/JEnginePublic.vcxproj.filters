@@ -30,16 +30,10 @@
     <ClInclude Include="Include\JEngine\Modules\JobSystem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\JEngine\Modules\RenderModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\JEngine\Modules\SceneModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\JEngine\Modules\TimeModule.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Include\JEngine\Modules\WindowModule.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\JEngine\Graphics\ObjLoader.h">
@@ -98,16 +92,10 @@
     <ClCompile Include="Src\JEngine\EngineInfo.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\JEngine\Modules\RenderModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Src\JEngine\Modules\SceneModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\JEngine\Modules\TimeModule.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\JEngine\Modules\WindowModule.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\JEngine\Graphics\ObjLoader.cpp">

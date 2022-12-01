@@ -1,8 +1,8 @@
 ﻿#include "pch.h"
 #include "Engine.h"
-#include "EngineInfo.h"
+#include "JEngine/EngineInfo.h"
 #include "Jlb/Finder.h"
-#include "Modules/TimeModule.h"
+#include "JEngine/Modules/TimeModule.h"
 #include "Modules/WindowModule.h"
 #include "Modules/RenderModule.h"
 
@@ -50,7 +50,7 @@ namespace je
 			finder.Compile(initializer);
 		}
 		
-		engine::Info info{*this, finder};
+		engine::Info info{_persistentArena, _tempArena, _dumpArena, finder};
 
 		for (const auto& mod : finder)
 			mod->OnInitialize(info);

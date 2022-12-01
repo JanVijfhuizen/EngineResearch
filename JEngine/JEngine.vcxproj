@@ -104,7 +104,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/EnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/JEnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -124,7 +124,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/EnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/JEnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -139,6 +139,8 @@
     <ClCompile Include="Src\Graphics\VkInitializer.cpp" />
     <ClCompile Include="Src\Graphics\VkSwapChain.cpp" />
     <ClCompile Include="Src\Engine.cpp" />
+    <ClCompile Include="Src\Modules\RenderModule.cpp" />
+    <ClCompile Include="Src\Modules\WindowModule.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
@@ -148,6 +150,8 @@
     <ClInclude Include="Include\Engine.h" />
     <ClInclude Include="Include\Graphics\VkRenderGraph.h" />
     <ClInclude Include="Include\Graphics\VkSwapChain.h" />
+    <ClInclude Include="Include\Modules\RenderModule.h" />
+    <ClInclude Include="Include\Modules\WindowModule.h" />
     <ClInclude Include="Include\pch.h" />
     <ClInclude Include="Include\Graphics\VkInitializer.h" />
   </ItemGroup>

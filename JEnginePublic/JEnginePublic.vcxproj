@@ -161,10 +161,8 @@
     <ClInclude Include="Include\JEngine\Graphics\VkShapes.h" />
     <ClInclude Include="Include\JEngine\Module.h" />
     <ClInclude Include="Include\JEngine\Modules\JobSystem.h" />
-    <ClInclude Include="Include\JEngine\Modules\RenderModule.h" />
     <ClInclude Include="Include\JEngine\Modules\SceneModule.h" />
     <ClInclude Include="Include\JEngine\Modules\TimeModule.h" />
-    <ClInclude Include="Include\JEngine\Modules\WindowModule.h" />
     <ClInclude Include="Include\pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -172,10 +170,8 @@
     <ClCompile Include="Src\JEngine\EngineInfo.cpp" />
     <ClCompile Include="Src\JEnginePublic.cpp" />
     <ClCompile Include="Src\JEngine\Module.cpp" />
-    <ClCompile Include="Src\JEngine\Modules\RenderModule.cpp" />
     <ClCompile Include="Src\JEngine\Modules\SceneModule.cpp" />
     <ClCompile Include="Src\JEngine\Modules\TimeModule.cpp" />
-    <ClCompile Include="Src\JEngine\Modules\WindowModule.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\ObjLoader.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\Texture.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\Vertex.cpp" />

@@ -3,15 +3,16 @@
 #include <iostream>
 
 #include "Engine.h"
-#include "ECS/Archetype.h"
-#include "Modules/JobSystem.h"
-#include "ECS/Cecsar.h"
-#include "Graphics/ObjLoader.h"
-#include "Graphics/Texture.h"
-#include "Graphics/VkLayout.h"
-#include "Graphics/VkShader.h"
+
+#include "Jlb/Archetype.h"
+#include "JEngine/Modules/JobSystem.h"
+#include "Jlb/Cecsar.h"
+#include "JEngine/Graphics/ObjLoader.h"
+#include "JEngine/Graphics/Texture.h"
+#include "JEngine/Graphics/VkLayout.h"
+#include "JEngine/Graphics/VkShader.h"
 #include "Modules/RenderModule.h"
-#include "Modules/SceneModule.h"
+#include "JEngine/Modules/SceneModule.h"
 
 struct SomeTask final
 {
@@ -70,8 +71,8 @@ int main()
 		je::Array<VkDescriptorSet_T*> _descriptorSets{};
 		VkSampler _sampler{};
 
-		static void DefineResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app, const je::vk::Allocator& allocator, 
-		                            const size_t swapChainLength, const glm::ivec2 swapChainResolution, void* userPtr)
+		static void DefineResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app, const je::vk::Allocator& allocator,
+			const size_t swapChainLength, const glm::ivec2 swapChainResolution, void* userPtr)
 		{
 			const auto ptr = static_cast<RenderResources*>(userPtr);
 

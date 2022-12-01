@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "Module.h"
-#include "ECS/Cecsar.h"
+#include "JEngine/Module.h"
+#include "Jlb/Cecsar.h"
 #include "Jlb/Finder.h"
 
 namespace je

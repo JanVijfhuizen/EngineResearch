@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "EngineInfo.h"
-#include "Module.h"
+#include "JEngine/EngineInfo.h"
+#include "JEngine/Module.h"
 #include "Jlb/Arena.h"
 #include "Jlb/JVector.h"
 #include "Jlb/LinkedList.h"

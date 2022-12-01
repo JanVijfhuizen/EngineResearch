@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include "VkImage.h"
-#include "VkPipeline.h"
+#include "JEngine/Graphics/VkImage.h"
+#include "JEngine/Graphics/VkPipeline.h"
 #include "Jlb/Array.h"
 #include "Jlb/LinkedList.h"
 #include "Jlb/Queue.h"
