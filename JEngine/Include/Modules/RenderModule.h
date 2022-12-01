@@ -18,8 +18,23 @@ namespace je
 
 	namespace engine
 	{
+		struct RenderModuleCreateInfo final
+		{
+			void(*defineResources)(Arena& arena, const vk::App& app, const vk::Allocator& allocator, void* userPtr) = nullptr;
+			void(*destroyResources)(Arena& arena, const vk::App& app, const vk::Allocator& allocator, void* userPtr) = nullptr;
+			Array<vk::RenderNode>(*defineRenderGraph)(Arena& dumpArena, void* userPtr) = nullptr;
+			void(*bindRenderGraphResources)(const Array<vk::RenderNode>& nodes, const vk::App& app, void* userPtr) = nullptr;
+			void* userPtr = nullptr;
+		};
+
 		class RenderModule final : public Module
 		{
+		public:
+			explicit RenderModule(const RenderModuleCreateInfo& info);
+
+		private:
+			const RenderModuleCreateInfo _info;
+
 			vk::App _app{};
 			vk::Allocator* _allocator = nullptr;
 			vk::SwapChain* _swapChain = nullptr;

@@ -19,6 +19,16 @@
 
 namespace je::engine
 {
+	RenderModule::RenderModule(const RenderModuleCreateInfo& info) : _info(info)
+	{
+		/*
+		assert(info.defineResources);
+		assert(info.destroyResources);
+		assert(info.defineRenderGraph);
+		assert(info.bindRenderGraphResources);
+		*/
+	}
+
 	void RenderModule::OnInitialize(Info& info)
 	{
 		Module::OnInitialize(info);
@@ -230,30 +240,13 @@ namespace je::engine
 
 		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, nodes);
 
-		// Bind descriptor sets to the instance data.
+		// Bind descriptor sets to the render graph output.
 		for (size_t i = 0; i < _swapChain->GetLength(); ++i)
 		{
 			VkWriteDescriptorSet write{};
-			/*
-			// Bind instance buffer.
-			VkDescriptorBufferInfo instanceInfo{};
-			instanceInfo.buffer = _instanceBuffers[i].buffer;
-			instanceInfo.offset = 0;
-			instanceInfo.range = sizeof(Job) * JobSystem<Job>::GetLength();
 
-			auto& instanceWrite = writes[0];
-			instanceWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			instanceWrite.dstBinding = 0;
-			instanceWrite.dstSet = _descriptorSets[i];
-			instanceWrite.descriptorCount = 1;
-			instanceWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-			instanceWrite.pBufferInfo = &instanceInfo;
-			instanceWrite.dstArrayElement = 0;
-			*/
-			// Bind texture atlas.
+			// Bind render graph output.
 			VkDescriptorImageInfo  atlasInfo{};
-			//atlasInfo.imageLayout = _image->GetLayout();
-			//atlasInfo.imageView = _view;
 			const auto renderGraphResult = _renderGraph->GetResult(0);
 			atlasInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
 			atlasInfo.imageView = renderGraphResult;

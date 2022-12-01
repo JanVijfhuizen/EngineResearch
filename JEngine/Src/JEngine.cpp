@@ -6,6 +6,7 @@
 #include "ECS/Archetype.h"
 #include "Modules/JobSystem.h"
 #include "ECS/Cecsar.h"
+#include "Modules/RenderModule.h"
 #include "Modules/SceneModule.h"
 
 struct SomeTask final
@@ -54,6 +55,7 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 
 class MyEngine final : public je::Engine
 {
+private:
 	void DefineAdditionalModules(je::Arena& dumpArena, je::Finder<je::Module>::Initializer& initializer) override
 	{
 		size_t capacity = 2;
@@ -99,6 +101,11 @@ class MyEngine final : public je::Engine
 
 int main()
 {
+	je::engine::RenderModuleCreateInfo renderModuleCreateInfo{};
+
+	je::EngineRunInfo runInfo{};
+	runInfo.renderModuleCreateInfo = &renderModuleCreateInfo;
+
 	MyEngine engine{};
-	return static_cast<int>(engine.Run());
+	return static_cast<int>(engine.Run(runInfo));
 }
