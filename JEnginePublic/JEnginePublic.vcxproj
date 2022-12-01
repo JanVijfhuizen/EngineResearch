@@ -21,33 +21,33 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{8df4beb5-8031-403e-b4bd-736266d8e6a0}</ProjectGuid>
-    <RootNamespace>JEngine</RootNamespace>
+    <ProjectGuid>{4672cb36-399a-4248-9779-5b71d5f6b671}</ProjectGuid>
+    <RootNamespace>JEnginePublic</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
-    <ProjectName>Game</ProjectName>
+    <ProjectName>JEngine</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Application</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -75,11 +75,14 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
@@ -89,11 +92,14 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -103,18 +109,17 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/JEnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>JEngine/pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Ext/vulkan-1.2.189.0\Lib;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\lib-vc2022;$(SolutionDir)\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Jlb.lib;JEnginePublic.lib;vulkan-1.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -123,35 +128,86 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include;$(SolutionDir)/JEnginePublic/Include;$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>JEngine/pch.h</PrecompiledHeaderFile>
+      <AdditionalIncludeDirectories>$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>
+      </SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Ext/vulkan-1.2.189.0\Lib;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\lib-vc2022;$(SolutionDir)\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>Jlb.lib;JEnginePublic.lib;vulkan-1.lib;glfw3.lib;$(CoreLibraryDependencies);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\pch.cpp">
+    <ClInclude Include="Include\JEngine\Engine.h" />
+    <ClInclude Include="Include\JEngine\Algorithms\PackingFFDH.h" />
+    <ClInclude Include="Include\JEngine\Archetype.h" />
+    <ClInclude Include="Include\JEngine\Cecsar.h" />
+    <ClInclude Include="Include\JEngine\EngineInfo.h" />
+    <ClInclude Include="Include\JEngine\framework.h" />
+    <ClInclude Include="Include\JEngine\Graphics\ObjLoader.h" />
+    <ClInclude Include="Include\JEngine\Graphics\Texture.h" />
+    <ClInclude Include="Include\JEngine\Graphics\Vertex.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkAllocator.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkApp.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkBuffer.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkImage.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkInitializer.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkLayout.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkMemory.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkMesh.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkPipeline.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkRenderGraph.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkShader.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkShapes.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkSwapChain.h" />
+    <ClInclude Include="Include\JEngine\Module.h" />
+    <ClInclude Include="Include\JEngine\Modules\JobSystem.h" />
+    <ClInclude Include="Include\JEngine\Modules\RenderModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\SceneModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\TimeModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\WindowModule.h" />
+    <ClInclude Include="Include\JEngine\pch.h" />
+    <ClInclude Include="Include\JEngine\Graphics\VkRenderNode.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Src\JEngine\Engine.cpp" />
+    <ClCompile Include="Src\JEngine\Archetype.cpp" />
+    <ClCompile Include="Src\JEngine\Cecsar.cpp" />
+    <ClCompile Include="Src\JEngine\Algorithms\PackingFFDH.cpp" />
+    <ClCompile Include="Src\JEngine\EngineInfo.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkInitializer.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkRenderGraph.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkSwapChain.cpp" />
+    <ClCompile Include="Src\JEngine\JEnginePublic.cpp" />
+    <ClCompile Include="Src\JEngine\Module.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\RenderModule.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\SceneModule.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\TimeModule.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\ObjLoader.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\Texture.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\Vertex.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkAllocator.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkImage.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkLayout.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkMesh.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkPipeline.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkShader.cpp" />
+    <ClCompile Include="Src\JEngine\Graphics\VkShapes.cpp" />
+    <ClCompile Include="Src\JEngine\Modules\WindowModule.cpp" />
+    <ClCompile Include="Src\JEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">JEngine/pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">JEngine/pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Src\JEngine.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Include\pch.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Jlb\Jlb.vcxproj">
-      <Project>{34612c4b-4818-4548-9efb-b7e44fce3092}</Project>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
