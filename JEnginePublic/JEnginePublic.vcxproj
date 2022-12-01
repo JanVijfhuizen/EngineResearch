@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>JEngine/pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>JEngine/pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(SolutionDir)/Jlb/Include;$(ProjectDir)/Include;$(SolutionDir)Ext/glfw-3.3.4\glfw-3.3.4.bin.WIN64\include;$(SolutionDir)Ext;$(SolutionDir)Ext/vulkan-1.2.189.0/Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -145,7 +145,7 @@
   <ItemGroup>
     <ClInclude Include="Include\JEngine\Algorithms\PackingFFDH.h" />
     <ClInclude Include="Include\JEngine\EngineInfo.h" />
-    <ClInclude Include="Include\framework.h" />
+    <ClInclude Include="Include\JEngine\framework.h" />
     <ClInclude Include="Include\JEngine\Graphics\ObjLoader.h" />
     <ClInclude Include="Include\JEngine\Graphics\Texture.h" />
     <ClInclude Include="Include\JEngine\Graphics\Vertex.h" />
@@ -163,12 +163,12 @@
     <ClInclude Include="Include\JEngine\Modules\JobSystem.h" />
     <ClInclude Include="Include\JEngine\Modules\SceneModule.h" />
     <ClInclude Include="Include\JEngine\Modules\TimeModule.h" />
-    <ClInclude Include="Include\pch.h" />
+    <ClInclude Include="Include\JEngine\pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\JEngine\Algorithms\PackingFFDH.cpp" />
     <ClCompile Include="Src\JEngine\EngineInfo.cpp" />
-    <ClCompile Include="Src\JEnginePublic.cpp" />
+    <ClCompile Include="Src\JEngine\JEnginePublic.cpp" />
     <ClCompile Include="Src\JEngine\Module.cpp" />
     <ClCompile Include="Src\JEngine\Modules\SceneModule.cpp" />
     <ClCompile Include="Src\JEngine\Modules\TimeModule.cpp" />
@@ -182,11 +182,13 @@
     <ClCompile Include="Src\JEngine\Graphics\VkPipeline.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\VkShader.cpp" />
     <ClCompile Include="Src\JEngine\Graphics\VkShapes.cpp" />
-    <ClCompile Include="Src\pch.cpp">
+    <ClCompile Include="Src\JEngine\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">JEngine/pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">JEngine/pch.h</PrecompiledHeaderFile>
     </ClCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

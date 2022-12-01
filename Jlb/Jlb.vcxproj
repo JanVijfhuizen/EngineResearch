@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>jpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Jlb/pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(ProjectDir)/Include</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
@@ -130,7 +130,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile>Jlb/pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -144,7 +144,7 @@
     <ClInclude Include="Include\Jlb\Archetype.h" />
     <ClInclude Include="Include\Jlb\Arena.h" />
     <ClInclude Include="Include\Jlb\Array.h" />
-    <ClInclude Include="Include\framework.h" />
+    <ClInclude Include="Include\Jlb\framework.h" />
     <ClInclude Include="Include\Jlb\Cecsar.h" />
     <ClInclude Include="Include\Jlb\FileLoader.h" />
     <ClInclude Include="Include\Jlb\Finder.h" />
@@ -159,7 +159,7 @@
     <ClInclude Include="Include\Jlb\KeyPair.h" />
     <ClInclude Include="Include\Jlb\LinkedList.h" />
     <ClInclude Include="Include\Jlb\Tuple.h" />
-    <ClInclude Include="Include\jpch.h" />
+    <ClInclude Include="Include\Jlb\pch.h" />
     <ClInclude Include="Include\Jlb\Queue.h" />
     <ClInclude Include="Include\Jlb\Stack.h" />
     <ClInclude Include="Include\Jlb\Swap.h" />
@@ -171,14 +171,15 @@
     <ClCompile Include="Src\Arena.cpp" />
     <ClCompile Include="Src\Jlb.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Jlb/pch.h</PrecompiledHeaderFile>
     </ClCompile>
-    <ClCompile Include="Src\jpch.cpp">
+    <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jpch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Jlb/pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeaderFile Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Jlb/pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <ClCompile Include="Src\StringArray.cpp" />
   </ItemGroup>

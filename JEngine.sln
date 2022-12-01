@@ -4,12 +4,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.2.32616.157
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JEngine", "JEngine\JEngine.vcxproj", "{8DF4BEB5-8031-403E-B4BD-736266D8E6A0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{16FF0CF9-9294-41BE-A071-4D3710A1F5DB} = {16FF0CF9-9294-41BE-A071-4D3710A1F5DB}
+		{4672CB36-399A-4248-9779-5B71D5F6B671} = {4672CB36-399A-4248-9779-5B71D5F6B671}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Jlb", "Jlb\Jlb.vcxproj", "{34612C4B-4818-4548-9EFB-B7E44FCE3092}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Game", "Game\Game.vcxproj", "{16FF0CF9-9294-41BE-A071-4D3710A1F5DB}"
+	ProjectSection(ProjectDependencies) = postProject
+		{34612C4B-4818-4548-9EFB-B7E44FCE3092} = {34612C4B-4818-4548-9EFB-B7E44FCE3092}
+		{4672CB36-399A-4248-9779-5B71D5F6B671} = {4672CB36-399A-4248-9779-5B71D5F6B671}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "JEnginePublic", "JEnginePublic\JEnginePublic.vcxproj", "{4672CB36-399A-4248-9779-5B71D5F6B671}"
+	ProjectSection(ProjectDependencies) = postProject
+		{34612C4B-4818-4548-9EFB-B7E44FCE3092} = {34612C4B-4818-4548-9EFB-B7E44FCE3092}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

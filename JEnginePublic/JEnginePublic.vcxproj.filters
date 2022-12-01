@@ -15,10 +15,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\framework.h">
+    <ClInclude Include="Include\JEngine\framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\pch.h">
+    <ClInclude Include="Include\JEngine\pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Include\JEngine\EngineInfo.h">
@@ -80,10 +80,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Src\JEnginePublic.cpp">
+    <ClCompile Include="Src\JEngine\JEnginePublic.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\pch.cpp">
+    <ClCompile Include="Src\JEngine\pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\JEngine\Module.cpp">

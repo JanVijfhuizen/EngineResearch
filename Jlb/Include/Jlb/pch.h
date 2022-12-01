@@ -1,11 +1,7 @@
-#ifndef PCH_H
-#define PCH_H
-
+#pragma once
 #include "framework.h"
 #include <cstdlib>
 #include <cassert>
 #include <climits>
 #include <cstdint>
 #include <cstring>
-
-#endif
