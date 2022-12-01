@@ -55,7 +55,6 @@ void SomeSystem::OnBegin(je::engine::Info& info)
 
 class MyEngine final : public je::Engine
 {
-private:
 	void DefineAdditionalModules(je::Arena& dumpArena, je::Finder<je::Module>::Initializer& initializer) override
 	{
 		size_t capacity = 2;
@@ -101,7 +100,32 @@ private:
 
 int main()
 {
+	struct RenderResources final
+	{
+		static void DefineResources(je::Arena& arena, const je::vk::App& app, const je::vk::Allocator& allocator, void* userPtr)
+		{
+			
+		}
+		static void DestroyResources(je::Arena& arena, const je::vk::App& app, const je::vk::Allocator& allocator, void* userPtr)
+		{
+			
+		}
+		static je::Array<je::vk::RenderNode> DefineRenderGraph(je::Arena& dumpArena, void* userPtr)
+		{
+			return {};
+		}
+		static void BindRenderGraphResources(const je::Array<je::vk::RenderNode>& nodes, const je::vk::App& app, void* userPtr)
+		{
+			
+		}
+	} renderResources;
+
 	je::engine::RenderModuleCreateInfo renderModuleCreateInfo{};
+	renderModuleCreateInfo.defineResources = RenderResources::DefineResources;
+	renderModuleCreateInfo.destroyResources = RenderResources::DestroyResources;
+	renderModuleCreateInfo.defineRenderGraph = RenderResources::DefineRenderGraph;
+	renderModuleCreateInfo.bindRenderGraphResources = RenderResources::BindRenderGraphResources;
+	renderModuleCreateInfo.userPtr = &renderResources;
 
 	je::EngineRunInfo runInfo{};
 	runInfo.renderModuleCreateInfo = &renderModuleCreateInfo;

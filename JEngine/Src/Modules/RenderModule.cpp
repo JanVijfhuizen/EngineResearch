@@ -21,12 +21,10 @@ namespace je::engine
 {
 	RenderModule::RenderModule(const RenderModuleCreateInfo& info) : _info(info)
 	{
-		/*
 		assert(info.defineResources);
 		assert(info.destroyResources);
 		assert(info.defineRenderGraph);
 		assert(info.bindRenderGraphResources);
-		*/
 	}
 
 	void RenderModule::OnInitialize(Info& info)
