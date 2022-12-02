@@ -8,6 +8,7 @@
 
 namespace je 
 {
+	// Can be used to create a group of classes, after which both iteration and quick lookups can be used on said group.
 	template <typename T>
 	class Finder final
 	{
@@ -17,6 +18,7 @@ namespace je
 			friend Finder;
 
 		public:
+			// Instantiate target class. Can only instantiate one of every class type.
 			template <typename U, typename ...Args>
 			U& Add(Args&... args);
 
@@ -32,8 +34,10 @@ namespace je
 		explicit Finder(Arena& arena);
 		~Finder();
 
+		// Use the initializer to create the lookup table.
 		void Compile(const Initializer& initializer);
 
+		// Quick lookup for target class.
 		template <typename U>
 		U* Get() const;
 

@@ -41,6 +41,7 @@ namespace je
 
 		[[nodiscard]] Scope CreateScope();
 
+		// Invalidate all allocations, but keeps the allocated memory to be reused.
 		void Empty();
 		[[nodiscard]] bool IsEmpty() const;
 

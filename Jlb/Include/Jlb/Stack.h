@@ -3,7 +3,7 @@
 
 namespace je
 {
-	// First-In-Last-Out.
+	// First-In-Last-Out array.
 	template <typename T>
 	struct Stack final
 	{

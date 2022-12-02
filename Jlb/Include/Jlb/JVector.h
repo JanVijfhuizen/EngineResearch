@@ -2,6 +2,7 @@
 
 namespace je
 {
+	// Resizeable array.
 	template <typename T>
 	struct Vector final
 	{

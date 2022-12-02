@@ -2,7 +2,7 @@
 
 namespace je
 {
-	// First-In-First-Out.
+	// First-In-First-Out array.
 	template <typename T>
 	struct Queue final
 	{

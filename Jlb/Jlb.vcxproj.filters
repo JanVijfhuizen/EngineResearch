@@ -39,9 +39,6 @@
     <ClInclude Include="Include\Jlb\JMath.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Include\Jlb\StringArray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Include\Jlb\JVector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -87,9 +84,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Src\FileLoader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Src\StringArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

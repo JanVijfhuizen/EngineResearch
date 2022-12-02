@@ -2,8 +2,9 @@
 
 namespace je
 {
+	// Linear sort.
 	template <typename T>
-	void LinSort(T* arr, size_t length, bool (*comparer)(T& a , T& b))
+	void LinSort(T* arr, const size_t length, bool (*comparer)(T& a , T& b))
 	{
 		for (size_t i = 1; i < length; ++i)
 		{

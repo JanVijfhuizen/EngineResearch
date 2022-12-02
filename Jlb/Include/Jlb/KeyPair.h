@@ -2,7 +2,6 @@
 
 namespace je
 {
-	// Used in data structures like maps, heaps etc.
 	template <typename T>
 	struct KeyPair final
 	{
