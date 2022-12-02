@@ -7,6 +7,7 @@
 
 namespace je::vk
 {
+	// 2d/3d model used for rendering.
 	struct Mesh final
 	{
 		Buffer vertexBuffer;

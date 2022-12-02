@@ -7,6 +7,8 @@
 
 namespace je
 {
+	// Base class for systems that execute an array of similar commands.
+	// The jobs get removed at the end of every frame, after they've been iterated upon.
 	template <typename T>
 	class JobSystem : public Module
 	{

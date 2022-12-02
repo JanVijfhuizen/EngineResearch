@@ -2,6 +2,7 @@
 
 namespace je::vk
 {
+	// Generated from vkinit, holds all the important variables to make a vulkan application work.
 	struct App final
 	{
 		enum Queue

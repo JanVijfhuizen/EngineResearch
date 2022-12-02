@@ -16,14 +16,18 @@ namespace je
 
 		constexpr size_t SWAPCHAIN_MAX_FRAMES_IN_FLIGHT = 4;
 
+		// Tool that is used to draw directly to the screen.
 		class SwapChain final
 		{
 		public:
 			SwapChain(Arena& arena, Arena& tempArena, const App& app, const engine::WindowModule& windowModule);
 			~SwapChain();
 
+			// Wait until an image is available to draw to.
 			void WaitForImage();
+			// Call this at the start of the frame.
 			[[nodiscard]] VkCommandBuffer BeginFrame(bool manuallyCallWaitForImage = false);
+			// Call this at the end of the frame, after you've drawn everything.
 			void EndFrame(Arena& tempArena, const Array<VkSemaphore>& waitSemaphores = {});
 
 			[[nodiscard]] size_t GetLength() const;

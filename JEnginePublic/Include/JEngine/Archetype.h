@@ -6,6 +6,8 @@
 
 namespace je::ecs
 {
+	// Manages a list of similar entities.
+	// Can be iterated upon.
 	class Archetype final
 	{
 		template <typename ...Args>

@@ -7,6 +7,7 @@ namespace je::vk
 	class Allocator;
 	struct App;
 
+	// Image that can be used for things like textures or post effects.
 	struct Image final
 	{
 		VkImage image;
@@ -27,6 +28,7 @@ namespace je::vk
 
 	[[nodiscard]] Image CreateImage(const App& app, const Allocator& allocator, const ImageCreateInfo& info, glm::ivec3 resolution);
 	[[nodiscard]] Image CreateImage(const App& app, const Allocator& allocator, const ImageCreateInfo& info, const Array<unsigned char>& pixels, glm::ivec3 resolution);
+	// Transition the layout for it to be used in different ways, like for a depth attachment, or a sampled image.
 	void ImageTransitionLayout(Image& image, VkCommandBuffer cmd, VkImageLayout newLayout, VkImageAspectFlags aspectFlags);
 	void DestroyImage(const Image& image, const App& app, const Allocator& allocator);
 }

@@ -9,6 +9,7 @@ namespace je
 	{
 		struct App;
 
+		// Render pipeline that defines how meshes are drawn.
 		struct Pipeline final
 		{
 			VkPipelineLayout layout;

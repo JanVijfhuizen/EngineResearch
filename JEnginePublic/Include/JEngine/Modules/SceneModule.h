@@ -12,10 +12,12 @@ namespace je
 		SceneFunc onBegin = nullptr;
 		SceneFunc onUpdate = nullptr;
 		SceneFunc onExit = nullptr;
+		// Initial amount of memory used. Dynamically increases based on usage.
 		size_t initialCapacity = 4096;
 		void* userPtr = nullptr;
 	};
 
+	// Manages the different levels/scenes of the game.
 	class SceneModule final : public Module
 	{
 	public:

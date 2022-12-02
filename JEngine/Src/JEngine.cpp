@@ -104,7 +104,7 @@ struct RenderResources final
 #endif
 
 		
-		ptr->_image = je::texture::LoadAtlas(app, allocator, "Textures/atlas.png");
+		ptr->_image = je::texture::Load(app, allocator, "Textures/atlas.png");
 		const auto coords = je::texture::LoadAtlasCoordinates(tempArena, "Textures/atlas.txt");
 
 		VkImageViewCreateInfo viewCreateInfo{};

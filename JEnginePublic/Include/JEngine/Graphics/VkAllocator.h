@@ -11,13 +11,16 @@ namespace je
 	{
 		struct App;
 
+		// Stack allocator for vulkan-gpu memory.
 		class Allocator final
 		{
 		public:
 			explicit Allocator(Arena& arena, const App& app, size_t pageSize = 4096);
 			~Allocator();
 
+			// Allocate a chunk of memory based on the given properties.
 			[[nodiscard]] Memory Alloc(VkMemoryRequirements memRequirements, VkMemoryPropertyFlags properties, size_t count = 1) const;
+			// Only works if the allocated memory was the last one allocated.
 			[[nodiscard]] bool Free(const Memory& memory) const;
 
 		private:

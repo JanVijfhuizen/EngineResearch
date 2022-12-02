@@ -55,6 +55,7 @@ namespace je
 				VkSurfaceKHR(*createSurface)(VkInstance instance) = nullptr;
 			};
 
+			// Initialize a vulkan app that work for most common use cases like pc games.
 			[[nodiscard]] App CreateApp(const Info& info);
 			void DestroyApp(const App& app);
 

@@ -19,13 +19,18 @@ namespace je
 	{
 		struct RenderModuleCreateInfo final
 		{
+			// Create the resources used for rendering.
 			void(*defineResources)(Arena& arena, Arena& tempArena, const vk::App& app, const vk::Allocator& allocator, size_t swapChainLength, glm::ivec2 swapChainResolution, void* userPtr) = nullptr;
+			// Destroy the resources used for rendering.
 			void(*destroyResources)(Arena& arena, const vk::App& app, const vk::Allocator& allocator, void* userPtr) = nullptr;
+			// Define the shape of the render graph.
 			Array<vk::RenderNode>(*defineRenderGraph)(Arena& tempArena, size_t swapChainLength, glm::ivec2 swapChainResolution, void* userPtr) = nullptr;
+			// Link the render graph nodes to the corresponding resources.
 			void(*bindRenderGraphResources)(const Array<vk::RenderNode>& nodes, const vk::App& app, size_t swapChainLength, void* userPtr) = nullptr;
 			void* userPtr = nullptr;
 		};
 
+		// Manages the rendering and all relevant vulkan classes.
 		class RenderModule final : public Module
 		{
 		public:

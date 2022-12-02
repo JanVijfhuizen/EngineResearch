@@ -2,6 +2,7 @@
 
 namespace je::vk
 {
+	// Vulkan gpu memory.
 	struct Memory final
 	{
 		VkDeviceMemory memory = VK_NULL_HANDLE;

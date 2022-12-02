@@ -4,10 +4,13 @@
 
 namespace je::engine
 {
+	// Manages the time/deltatime tracking for this application.
 	class TimeModule final : public Module
 	{
 	public:
+		// Returns the total runtime of the application.
 		[[nodiscard]] float GetTime() const;
+		// Returns the duration of the previous frame.
 		[[nodiscard]] float GetDeltaTime() const;
 
 	private:
