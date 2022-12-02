@@ -1,6 +1,7 @@
 ﻿#include "JEngine/pch.h"
 #include "JEngine/Graphics/Texture.h"
 #include "JEngine/Algorithms/PackingFFDH.h"
+#include "JEngine/Graphics/VkImage.h"
 #include <fstream>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -77,8 +78,8 @@ namespace je::texture
 
 		outfile.close();
 	}
-
-	vk::Image LoadAtlas(const vk::App& app, const vk::Allocator& allocator, const char* imageFilePath, const char* metaFilePath)
+	
+	vk::Image LoadAtlas(const vk::App& app, const vk::Allocator& allocator, const char* imageFilePath)
 	{
 		// Load pixels.
 		int texWidth, texHeight, texChannels;
@@ -91,10 +92,28 @@ namespace je::texture
 		aPixels.data = pixels;
 
 		constexpr vk::ImageCreateInfo info{};
-		const auto image = vk::CreateImage(app, allocator, info, aPixels, glm::ivec3(texWidth, texHeight, 4));
+		const auto image = CreateImage(app, allocator, info, aPixels, glm::ivec3(texWidth, texHeight, 4));
 
 		// Free pixels.
 		stbi_image_free(pixels);
+
 		return image;
+	}
+
+	Array<glm::ivec2> LoadAtlasCoordinates(Arena& arena, const char* metaFilePath)
+	{
+		std::ifstream inFile;
+		inFile.open(metaFilePath);
+
+		const size_t lineCount = std::count(
+			std::istreambuf_iterator(inFile), std::istreambuf_iterator<char>(), '\n');
+		const auto coordinates = CreateArray<glm::ivec2>(arena, lineCount);
+
+		glm::ivec2 pos;
+		size_t i = 0;
+		while (inFile >> pos.x >> pos.y)
+			coordinates[++i] = pos;
+
+		return coordinates;
 	}
 }

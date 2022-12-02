@@ -70,6 +70,7 @@ struct RenderResources final
 	static void DefineResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app, const je::vk::Allocator& allocator,
 		const size_t swapChainLength, const glm::ivec2 swapChainResolution, void* userPtr)
 	{
+		const auto _ = tempArena.CreateScope();
 		const auto ptr = static_cast<RenderResources*>(userPtr);
 
 		je::vk::Binding binding;
@@ -99,10 +100,12 @@ struct RenderResources final
 		textures.data[1] = "Textures/moveArrow.png";
 		textures.data[2] = "Textures/bash-card.png";
 		textures.data[3] = "Textures/tile.png";
-		je::texture::GenerateAtlas(arena, tempArena, textures, "Textures/atlas.png", "atlas.txt");
+		je::texture::GenerateAtlas(arena, tempArena, textures, "Textures/atlas.png", "Textures/atlas.txt");
 #endif
 
-		ptr->_image = je::texture::LoadAtlas(app, allocator, "Textures/atlas.png", "atlas.txt");
+		
+		ptr->_image = je::texture::LoadAtlas(app, allocator, "Textures/atlas.png");
+		const auto coords = je::texture::LoadAtlasCoordinates(tempArena, "Textures/atlas.txt");
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
