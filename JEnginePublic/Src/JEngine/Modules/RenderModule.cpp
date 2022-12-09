@@ -178,8 +178,8 @@ namespace je::engine
 			vkDestroyShaderModule(_app.device, mod, nullptr);
 
 		const auto nodes = info.finder.GetAll<IRenderNode>(info.tempArena);
-		for (const auto& node : nodes)
-			node->DestroyRenderResources(info.arena, _app, *_allocator);
+		for (int64_t i = static_cast<int64_t>(nodes.length) - 1; i >= 0; --i)
+			nodes[i]->DestroyRenderResources(info.arena, _app, *_allocator);
 		DestroyArray(nodes, info.tempArena);
 
 		info.arena.Delete(_swapChain);

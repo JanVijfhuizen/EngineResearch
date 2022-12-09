@@ -129,7 +129,7 @@ namespace je
 	{
 		size_t count = 0;
 		for (auto& instance : _array)
-			count += dynamic_cast<U*>(instance);
+			count += dynamic_cast<U*>(instance) != nullptr;
 		const auto arr = CreateArray<U*>(arena, count);
 		count = 0;
 		for (auto& instance : _array)

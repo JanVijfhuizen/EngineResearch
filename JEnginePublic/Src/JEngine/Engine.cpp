@@ -31,8 +31,7 @@ namespace je
 	{
 		assert(!_running);
 		_running = true;
-
-		assert(runInfo.renderModuleCreateInfo);
+		
 		assert(runInfo.defineAdditionalModules);
 
 		const auto _ = _persistentArena.CreateScope();
@@ -44,7 +43,7 @@ namespace je
 			
 			initializer.Add<engine::WindowModule>();
 			initializer.Add<engine::TimeModule>();
-			initializer.Add<engine::RenderModule>(*runInfo.renderModuleCreateInfo);
+			initializer.Add<engine::RenderModule>();
 			runInfo.defineAdditionalModules(_frameArena, initializer);
 			
 			finder.Compile(initializer);
