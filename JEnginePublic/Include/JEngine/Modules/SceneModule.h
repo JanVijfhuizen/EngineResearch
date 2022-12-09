@@ -37,7 +37,7 @@ namespace je
 			bool loaded = false;
 		};
 
-		// Dump arena, only valid .
+		// Frame arena, only valid .
 		Array<SceneInfo> _sceneInfos;
 
 		const Finder<Module>* _finder = nullptr;

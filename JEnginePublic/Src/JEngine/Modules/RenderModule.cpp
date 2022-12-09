@@ -16,13 +16,6 @@
 
 namespace je::engine
 {
-	RenderModule::RenderModule(const RenderModuleCreateInfo& info) : _info(info)
-	{
-		assert(info.defineResources);
-		assert(info.destroyResources);
-		assert(info.defineRenderGraph);
-	}
-
 	void RenderModule::OnInitialize(Info& info)
 	{
 		Module::OnInitialize(info);
@@ -40,10 +33,12 @@ namespace je::engine
 		vkInfo.instanceExtensions = windowExtensionsArr;
 
 		_app = CreateApp(vkInfo);
-		_allocator = info.persistentArena.New<vk::Allocator>(1, info.persistentArena, _app);
-		_swapChain = info.persistentArena.New<vk::SwapChain>(1, info.persistentArena, info.tempArena, _app, *info.finder.Get<WindowModule>());
-
-		_info.defineResources(info.persistentArena, info.tempArena, _app, *_allocator, _swapChain->GetLength(), _swapChain->GetResolution(), _info.userPtr);
+		_allocator = info.arena.New<vk::Allocator>(1, info.arena, _app);
+		_swapChain = info.arena.New<vk::SwapChain>(1, info.arena, info.tempArena, _app, *info.finder.Get<WindowModule>());
+		
+		const auto nodes = info.finder.GetAll<IRenderNode>(info.tempArena);
+		for (auto& node : nodes)
+			node->CreateRenderResources(info.arena, info.tempArena, _app, *_allocator, _swapChain->GetLength(), _swapChain->GetResolution());
 
 		// Temp.
 		_modules[0] = CreateShaderModule(info.tempArena, _app, "Shaders/vert.spv");
@@ -105,10 +100,10 @@ namespace je::engine
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = _descriptorPool;
-		allocInfo.descriptorSetCount = layouts.length;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.length);
 		allocInfo.pSetLayouts = layouts.data;
 
-		_descriptorSets = CreateArray<VkDescriptorSet>(info.persistentArena, _swapChain->GetLength());
+		_descriptorSets = CreateArray<VkDescriptorSet>(info.arena, _swapChain->GetLength());
 		result = vkAllocateDescriptorSets(_app.device, &allocInfo, _descriptorSets.data);
 		assert(!result);
 
@@ -135,9 +130,12 @@ namespace je::engine
 		samplerInfo.maxLod = 0;
 
 		result = vkCreateSampler(_app.device, &samplerInfo, nullptr, &_sampler);
+		
+		const auto graphNodes = CreateArray<vk::RenderNode>(info.tempArena, nodes.length);
+		for (size_t i = 0; i < nodes.length; ++i)
+			graphNodes[i] = nodes[i]->DefineNode(info.frameArena, _swapChain->GetResolution());
 
-		const auto nodes = _info.defineRenderGraph(info.tempArena, _swapChain->GetLength(), _swapChain->GetResolution(), _info.userPtr);
-		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, nodes);
+		_renderGraph = info.arena.New<vk::RenderGraph>(1, info.arena, info.tempArena, _app, *_allocator, *_swapChain, graphNodes);
 
 		// Bind descriptor sets to the render graph output.
 		for (size_t i = 0; i < _swapChain->GetLength(); ++i)
@@ -169,19 +167,23 @@ namespace je::engine
 		assert(!result);
 
 		vkDestroySampler(_app.device, _sampler, nullptr);
-		DestroyArray(_descriptorSets, info.persistentArena);
+		DestroyArray(_descriptorSets, info.arena);
 		vkDestroyDescriptorPool(_app.device, _descriptorPool, nullptr);
 		
-		info.persistentArena.Delete(_renderGraph);
+		info.arena.Delete(_renderGraph);
 		DestroyMesh(_mesh, _app, *_allocator);
 		DestroyPipeline(_pipeline, _app);
 		vkDestroyDescriptorSetLayout(_app.device, _layout, nullptr);
 		for (const auto& mod : _modules)
 			vkDestroyShaderModule(_app.device, mod, nullptr);
 
-		_info.destroyResources(info.persistentArena, _app, *_allocator, _info.userPtr);
-		info.persistentArena.Delete(_swapChain);
-		info.persistentArena.Delete(_allocator);
+		const auto nodes = info.finder.GetAll<IRenderNode>(info.tempArena);
+		for (int64_t i = static_cast<int64_t>(nodes.length) - 1; i >= 0; --i)
+			nodes[i]->DestroyRenderResources(info.arena, _app, *_allocator);
+		DestroyArray(nodes, info.tempArena);
+
+		info.arena.Delete(_swapChain);
+		info.arena.Delete(_allocator);
 		vk::init::DestroyApp(_app);
 
 		Module::OnExit(info);

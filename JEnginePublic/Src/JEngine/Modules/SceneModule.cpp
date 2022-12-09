@@ -14,7 +14,7 @@ namespace je
 		Module::OnBegin(info);
 		_finder = &info.finder;
 		
-		_scenes = CreateArray<Scene>(info.persistentArena, _sceneInfos.length);
+		_scenes = CreateArray<Scene>(info.arena, _sceneInfos.length);
 
 		for (size_t i = 0; i < _scenes.length; ++i)
 		{
@@ -45,7 +45,7 @@ namespace je
 	{
 		for (size_t i = 0; i < _scenes.length; ++i)
 			Unload(i);
-		DestroyArray(_scenes, info.persistentArena);
+		DestroyArray(_scenes, info.arena);
 		Module::OnExit(info);
 	}
 

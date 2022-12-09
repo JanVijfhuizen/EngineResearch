@@ -8,22 +8,20 @@ namespace je
 	namespace engine
 	{
 		struct Info;
-		struct RenderModuleCreateInfo;
 	}
 
 	struct EngineCreateInfo final
 	{
 		size_t persistentArenaSize = 4096;
 		size_t tempArenaSize = 4096;
-		size_t dumpArenaSize = 4096;
+		size_t frameArenaSize = 4096;
 
 		[[nodiscard]] size_t GetMemorySpaceRequired() const;
 	};
 
 	struct EngineRunInfo final
 	{
-		engine::RenderModuleCreateInfo* renderModuleCreateInfo = nullptr;
-		void(*defineAdditionalModules)(Arena& dumpArena, Finder<Module>::Initializer& initializer);
+		void(*defineAdditionalModules)(Arena& frameArena, Finder<Module>::Initializer& initializer);
 	};
 
 	// Engine class that manages all the modules, like the windowing, resource manager or rendering.
@@ -40,7 +38,7 @@ namespace je
 		void* _memory;
 		Arena _persistentArena;
 		Arena _tempArena;
-		Arena _dumpArena;
+		Arena _frameArena;
 		bool _running = false;
 	};
 }

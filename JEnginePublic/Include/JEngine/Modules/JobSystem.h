@@ -23,14 +23,14 @@ namespace je
 		using Batch = Vector<T>;
 		using Jobs = LinkedList<Batch>;
 
-		virtual void OnUpdate(engine::Info& info, const Jobs& jobs) = 0;
+		virtual void OnUpdate(engine::Info& info, const Jobs& jobs);
 		virtual bool Validate(const T& job);
 
 	private:
 		const size_t _capacity;
 		const size_t _chunkCapacity;
 		Arena* _arena = nullptr;
-		Arena* _dumpArena = nullptr;
+		Arena* _frameArena = nullptr;
 		Batch _mainBatch{};
 		LinkedList<Batch> _additionalBatches{};
 
@@ -48,8 +48,8 @@ namespace je
 	void JobSystem<T>::OnBegin(engine::Info& info)
 	{
 		Module::OnBegin(info);
-		_arena = &info.persistentArena;
-		_dumpArena = &info.dumpArena;
+		_arena = &info.arena;
+		_frameArena = &info.frameArena;
 		_mainBatch = CreateVector<T>(*_arena, _capacity);
 		_additionalBatches = CreateLinkedList<Vector<T>>();
 	}
@@ -77,11 +77,16 @@ namespace je
 		{
 			if (_chunkCapacity == 0)
 				return false;
-			LinkedListAdd(_additionalBatches, *_dumpArena, CreateVector<T>(*_dumpArena, _chunkCapacity));
+			LinkedListAdd(_additionalBatches, *_frameArena, CreateVector<T>(*_frameArena, _chunkCapacity));
 		}
 			
 		_additionalBatches[0].Add(job);
 		return true;
+	}
+
+	template <typename T>
+	void JobSystem<T>::OnUpdate(engine::Info& info, const Jobs& jobs)
+	{
 	}
 
 	template <typename T>
@@ -103,7 +108,7 @@ namespace je
 		
 		OnUpdate(info, _additionalBatches);
 		_mainBatch.Clear();
-		// It's in the dump arena so it will get deallocated correctly anyway.
+		// It's in the frame arena so it will get deallocated correctly anyway.
 		_additionalBatches = CreateLinkedList<Vector<T>>();
 	}
 }

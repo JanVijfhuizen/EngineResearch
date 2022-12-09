@@ -3,10 +3,10 @@
 
 namespace je::engine
 {
-	Info::Info(Arena& persistentArena, Arena& tempArena, Arena& dumpArena, const Finder<Module>& finder) :
-		persistentArena(persistentArena),
+	Info::Info(Arena& persistentArena, Arena& tempArena, Arena& frameArena, const Finder<Module>& finder) :
+		arena(persistentArena),
 		tempArena(tempArena),
-		dumpArena(dumpArena),
+		frameArena(frameArena),
 		finder(finder)
 	{
 
