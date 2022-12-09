@@ -20,13 +20,15 @@ namespace game
 	{
 		const auto _ = tempArena.CreateScope();
 
-		je::vk::Binding binding;
-		binding.flag = VK_SHADER_STAGE_FRAGMENT_BIT;
-		binding.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		je::Array<je::vk::Binding> bindings{};
-		bindings.data = &binding;
-		bindings.length = 1;
-		_layout = CreateLayout(tempArena, app, bindings);
+		je::vk::Binding bindings[2]{};
+		bindings[0].flag = VK_SHADER_STAGE_VERTEX_BIT;
+		bindings[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bindings[1].flag = VK_SHADER_STAGE_FRAGMENT_BIT;
+		bindings[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		je::Array<je::vk::Binding> bindingsArr{};
+		bindingsArr.data = bindings;
+		bindingsArr.length = 2;
+		_layout = CreateLayout(tempArena, app, bindingsArr);
 
 		_modules[0] = CreateShaderModule(tempArena, app, "Shaders/vert2.spv");
 		_modules[1] = CreateShaderModule(tempArena, app, "Shaders/frag2.spv");
@@ -72,13 +74,15 @@ namespace game
 		assert(!result);
 
 		// Create descriptor pool.
-		VkDescriptorPoolSize poolSize;
-		poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSize.descriptorCount = static_cast<uint32_t>(swapChainLength);
+		VkDescriptorPoolSize poolSizes[2]{};
+		poolSizes[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainLength);
+		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainLength);
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.poolSizeCount = 2;
+		poolInfo.pPoolSizes = poolSizes;
 		poolInfo.maxSets = static_cast<uint32_t>(swapChainLength);
 
 		result = vkCreateDescriptorPool(app.device, &poolInfo, nullptr, &_descriptorPool);
@@ -91,7 +95,7 @@ namespace game
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = _descriptorPool;
-		allocInfo.descriptorSetCount = layouts.length;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.length);
 		allocInfo.pSetLayouts = layouts.data;
 
 		_descriptorSets = je::CreateArray<VkDescriptorSet>(arena, swapChainLength);
@@ -122,17 +126,17 @@ namespace game
 
 		result = vkCreateSampler(app.device, &samplerInfo, nullptr, &_sampler);
 
-		_storageBuffers = CreateStorageBuffers<BasicRenderTask>(arena, app, allocator, swapChainLength, GetCapacity());
+		_instanceBuffers = CreateStorageBuffers<BasicRenderTask>(arena, app, allocator, swapChainLength, GetCapacity());
 	}
 
 	void BasicRenderSystem::DestroyRenderResources(je::Arena& arena, const je::vk::App& app,
 		const je::vk::Allocator& allocator)
 	{
-		for (int64_t i = static_cast<int64_t>(_storageBuffers.length) - 1; i >= 0; --i)
+		for (int64_t i = static_cast<int64_t>(_instanceBuffers.length) - 1; i >= 0; --i)
 		{
-			const bool result = allocator.Free(_storageBuffers[i].memory);
+			const bool result = allocator.Free(_instanceBuffers[i].memory);
 			assert(result);
-			vkDestroyBuffer(app.device, _storageBuffers[i].buffer, nullptr);
+			vkDestroyBuffer(app.device, _instanceBuffers[i].buffer, nullptr);
 		}
 		vkDestroySampler(app.device, _sampler, nullptr);
 		vkDestroyDescriptorSetLayout(app.device, _layout, nullptr);
@@ -152,39 +156,39 @@ namespace game
 		// Bind descriptor sets for the render node.
 		for (size_t i = 0; i < frameCount; ++i)
 		{
-			VkWriteDescriptorSet write{};
-
-			/*
+			VkWriteDescriptorSet writes[2]{};
+			
 			// Bind instance buffer.
 			VkDescriptorBufferInfo instanceInfo{};
-			instanceInfo.buffer = _instanceBuffers[i].buffer;
+			instanceInfo.buffer = ptr->_instanceBuffers[i].buffer;
 			instanceInfo.offset = 0;
-			instanceInfo.range = sizeof(Job) * JobSystem<Job>::GetLength();
+			instanceInfo.range = sizeof(BasicRenderTask) * ptr->GetCapacity();
 
 			auto& instanceWrite = writes[0];
 			instanceWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			instanceWrite.dstBinding = 0;
-			instanceWrite.dstSet = _descriptorSets[i];
+			instanceWrite.dstSet = ptr->_descriptorSets[i];
 			instanceWrite.descriptorCount = 1;
 			instanceWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			instanceWrite.pBufferInfo = &instanceInfo;
 			instanceWrite.dstArrayElement = 0;
-			*/
+
 			// Bind texture atlas.
 			VkDescriptorImageInfo  atlasInfo{};
 			atlasInfo.imageLayout = ptr->_image.layout;
 			atlasInfo.imageView = ptr->_view;
 			atlasInfo.sampler = ptr->_sampler;
 
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstBinding = 0;
-			write.dstSet = ptr->_descriptorSets[i];
-			write.descriptorCount = 1;
-			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			write.pImageInfo = &atlasInfo;
-			write.dstArrayElement = 0;
+			auto& atlasWrite = writes[1];
+			atlasWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			atlasWrite.dstBinding = 1;
+			atlasWrite.dstSet = ptr->_descriptorSets[i];
+			atlasWrite.descriptorCount = 1;
+			atlasWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			atlasWrite.pImageInfo = &atlasInfo;
+			atlasWrite.dstArrayElement = 0;
 
-			vkUpdateDescriptorSets(app.device, 1, &write, 0, nullptr);
+			vkUpdateDescriptorSets(app.device, 2, writes, 0, nullptr);
 		}
 	}
 	void  BasicRenderSystem::Render(const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)

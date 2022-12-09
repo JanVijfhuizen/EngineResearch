@@ -27,7 +27,7 @@ namespace game
 		VkDescriptorPool _descriptorPool{};
 		je::Array<VkDescriptorSet_T*> _descriptorSets{};
 		VkSampler _sampler{};
-		je::Array<je::vk::Buffer> _storageBuffers{};
+		je::Array<je::vk::Buffer> _instanceBuffers{};
 
 		void CreateRenderResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app,
 			const je::vk::Allocator& allocator, size_t swapChainLength, glm::ivec2 swapChainResolution) override;

@@ -13,7 +13,7 @@ namespace game
 
 		VkBufferCreateInfo vertBufferInfo{};
 		vertBufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
-		vertBufferInfo.size = sizeof(Type);
+		vertBufferInfo.size = sizeof(Type) * length;
 		vertBufferInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		vertBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		
@@ -28,7 +28,7 @@ namespace game
 			VkMemoryRequirements memRequirements;
 			vkGetBufferMemoryRequirements(device, buffer.buffer, &memRequirements);
 
-			buffer.memory = allocator.Alloc(memRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, length);
+			buffer.memory = allocator.Alloc(memRequirements, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
 			
 			result = vkBindBufferMemory(device, buffer.buffer, buffer.memory.memory, buffer.memory.offset);
 			assert(!result);
