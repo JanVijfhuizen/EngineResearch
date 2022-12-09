@@ -148,6 +148,7 @@
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Include\Graphics\InstancingUtils.h" />
     <ClInclude Include="Include\Graphics\SubTexture.h" />
     <ClInclude Include="Include\Modules\BasicRenderSystem.h" />
     <ClInclude Include="Include\pch.h" />

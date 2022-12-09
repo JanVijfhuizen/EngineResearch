@@ -19,6 +19,8 @@ namespace je
 
 		[[nodiscard]] bool TryAdd(const T& job);
 
+		[[nodiscard]] size_t GetCapacity() const;
+
 	protected:
 		using Batch = Vector<T>;
 		using Jobs = LinkedList<Batch>;
@@ -82,6 +84,12 @@ namespace je
 			
 		_additionalBatches[0].Add(job);
 		return true;
+	}
+
+	template <typename T>
+	size_t JobSystem<T>::GetCapacity() const
+	{
+		return _capacity;
 	}
 
 	template <typename T>

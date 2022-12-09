@@ -35,5 +35,8 @@
     <ClInclude Include="Include\Graphics\SubTexture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\Graphics\InstancingUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

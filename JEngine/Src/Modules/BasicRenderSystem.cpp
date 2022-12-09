@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "Modules/BasicRenderSystem.h"
 
+#include "Graphics/InstancingUtils.h"
 #include "JEngine/Graphics/ObjLoader.h"
 #include "JEngine/Graphics/Texture.h"
 #include "JEngine/Graphics/VkLayout.h"
@@ -48,7 +49,6 @@ namespace game
 		textures.data[3] = "Textures/tile.png";
 		je::texture::GenerateAtlas(arena, tempArena, textures, "Textures/atlas.png", "Textures/atlas.txt");
 #endif
-
 
 		_image = je::texture::Load(app, allocator, "Textures/atlas.png");
 		const auto coords = je::texture::LoadAtlasCoordinates(tempArena, "Textures/atlas.txt");
@@ -121,11 +121,19 @@ namespace game
 		samplerInfo.maxLod = 0;
 
 		result = vkCreateSampler(app.device, &samplerInfo, nullptr, &_sampler);
+
+		_storageBuffers = CreateStorageBuffers<BasicRenderTask>(arena, app, allocator, swapChainLength, GetCapacity());
 	}
 
 	void BasicRenderSystem::DestroyRenderResources(je::Arena& arena, const je::vk::App& app,
 		const je::vk::Allocator& allocator)
 	{
+		for (int64_t i = static_cast<int64_t>(_storageBuffers.length) - 1; i >= 0; --i)
+		{
+			const bool result = allocator.Free(_storageBuffers[i].memory);
+			assert(result);
+			vkDestroyBuffer(app.device, _storageBuffers[i].buffer, nullptr);
+		}
 		vkDestroySampler(app.device, _sampler, nullptr);
 		vkDestroyDescriptorSetLayout(app.device, _layout, nullptr);
 		DestroyArray(_descriptorSets, arena);
