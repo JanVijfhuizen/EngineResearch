@@ -8,6 +8,16 @@
 #include "JEngine/Modules/SceneModule.h"
 #include "Modules/BasicRenderSystem.h"
 
+class DemoSys final : public je::Module
+{
+protected:
+	void OnUpdate(je::engine::Info& info) override
+	{
+		game::BasicRenderTask task{};
+		const auto res = info.finder.Get<game::BasicRenderSystem>()->TryAdd(task);
+	}
+};
+
 int main()
 {
 	je::EngineRunInfo runInfo{};
@@ -43,11 +53,13 @@ int main()
 				});
 
 			finder.Get<je::SceneModule>()->Unload(0);
+			
 			return true;
 		};
 
 		initializer.Add<je::SceneModule>(scenes);
 		constexpr size_t renderCapacity = 256;
+		initializer.Add<DemoSys>();
 		initializer.Add<game::BasicRenderSystem>(renderCapacity);
 	};
 

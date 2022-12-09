@@ -20,6 +20,7 @@ namespace je
 		[[nodiscard]] bool TryAdd(const T& job);
 
 		[[nodiscard]] size_t GetCapacity() const;
+		[[nodiscard]] size_t GetCount() const;
 
 	protected:
 		using Batch = Vector<T>;
@@ -27,6 +28,8 @@ namespace je
 
 		virtual void OnUpdate(engine::Info& info, const Jobs& jobs);
 		virtual bool Validate(const T& job);
+
+		[[nodiscard]] T* GetData() const;
 
 	private:
 		const size_t _capacity;
@@ -37,6 +40,7 @@ namespace je
 		LinkedList<Batch> _additionalBatches{};
 
 		void OnUpdate(engine::Info& info) override;
+		void OnPostUpdate(engine::Info& info) override;
 	};
 
 	template <typename T>
@@ -93,6 +97,12 @@ namespace je
 	}
 
 	template <typename T>
+	size_t JobSystem<T>::GetCount() const
+	{
+		return _mainBatch.count;
+	}
+
+	template <typename T>
 	void JobSystem<T>::OnUpdate(engine::Info& info, const Jobs& jobs)
 	{
 	}
@@ -101,6 +111,12 @@ namespace je
 	bool JobSystem<T>::Validate(const T& job)
 	{
 		return true;
+	}
+
+	template <typename T>
+	T* JobSystem<T>::GetData() const
+	{
+		return _mainBatch.data;
 	}
 
 	template <typename T>
@@ -115,8 +131,15 @@ namespace je
 		_additionalBatches.next = &node;
 		
 		OnUpdate(info, _additionalBatches);
+	}
+
+	template <typename T>
+	void JobSystem<T>::OnPostUpdate(engine::Info& info)
+	{
+		Module::OnPostUpdate(info);
+
 		_mainBatch.Clear();
-		// It's in the frame arena so it will get deallocated correctly anyway.
+		// It's in the frame arena so it will get de allocated correctly anyway.
 		_additionalBatches = CreateLinkedList<Vector<T>>();
 	}
 }

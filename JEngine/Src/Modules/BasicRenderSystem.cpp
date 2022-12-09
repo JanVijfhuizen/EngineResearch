@@ -6,6 +6,7 @@
 #include "JEngine/Graphics/Texture.h"
 #include "JEngine/Graphics/VkLayout.h"
 #include "JEngine/Graphics/VkShader.h"
+#include "JEngine/Graphics/VkShapes.h"
 
 struct RenderResources;
 
@@ -39,7 +40,7 @@ namespace game
 			je::Array<je::vk::Vertex> verts{};
 			je::Array<je::vk::Vertex::Index> inds{};
 			constexpr float scale = .5f;
-			je::obj::Load(tempArena, "Meshes/cube.obj", verts, inds, scale);
+			CreateQuadShape(tempArena, verts, inds, scale);
 			_mesh = CreateMesh(app, allocator, verts, inds);
 		}
 
@@ -191,12 +192,24 @@ namespace game
 			vkUpdateDescriptorSets(app.device, 2, writes, 0, nullptr);
 		}
 	}
-	void  BasicRenderSystem::Render(const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)
+	void BasicRenderSystem::Render(const je::vk::App& app, const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)
 	{
 		const auto ptr = static_cast<BasicRenderSystem*>(userPtr);
+
+		const size_t count = ptr->GetCount();
+		if (count == 0)
+			return;
+
+		const auto& instanceBuffer = ptr->_instanceBuffers[frameIndex];
+		void* instanceData;
+		const auto result = vkMapMemory(app.device, instanceBuffer.memory.memory, instanceBuffer.memory.offset, instanceBuffer.memory.size, 0, &instanceData);
+		assert(!result);
+		memcpy(instanceData, ptr->GetData(), sizeof(BasicRenderTask) * ptr->GetCount());
+		vkUnmapMemory(app.device, instanceBuffer.memory.memory);
+
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, layout,
 			0, 1, &ptr->_descriptorSets[frameIndex], 0, nullptr);
-		ptr->_mesh.Draw(cmd, 1);
+		ptr->_mesh.Draw(cmd, count);
 	}
 
 	je::vk::RenderNode BasicRenderSystem::DefineNode(je::Arena& frameArena, glm::ivec2 swapChainResolution)

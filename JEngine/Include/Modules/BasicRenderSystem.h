@@ -36,6 +36,6 @@ namespace game
 		[[nodiscard]] je::vk::RenderNode DefineNode(je::Arena& frameArena, glm::ivec2 swapChainResolution) override;
 
 		static void BindRenderGraphResources(const je::vk::App& app, const je::Array<VkImageView>& views, size_t frameCount, void* userPtr);
-		static void Render(VkCommandBuffer cmd, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
+		static void Render(const je::vk::App& app, VkCommandBuffer cmd, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
 	};
 }

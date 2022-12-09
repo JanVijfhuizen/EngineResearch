@@ -43,8 +43,8 @@ namespace je
 			
 			initializer.Add<engine::WindowModule>();
 			initializer.Add<engine::TimeModule>();
-			initializer.Add<engine::RenderModule>();
 			runInfo.defineAdditionalModules(_frameArena, initializer);
+			initializer.Add<engine::RenderModule>();
 			
 			finder.Compile(initializer);
 		}
@@ -63,6 +63,8 @@ namespace je
 			const auto _ = _frameArena.CreateScope();
 			for (const auto& mod : finder)
 				mod->OnUpdate(info);
+			for (const auto& mod : finder)
+				mod->OnPostUpdate(info);
 		}
 
 		{
