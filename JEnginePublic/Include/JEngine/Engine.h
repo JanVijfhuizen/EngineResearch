@@ -8,7 +8,6 @@ namespace je
 	namespace engine
 	{
 		struct Info;
-		struct RenderModuleCreateInfo;
 	}
 
 	struct EngineCreateInfo final
@@ -22,7 +21,6 @@ namespace je
 
 	struct EngineRunInfo final
 	{
-		engine::RenderModuleCreateInfo* renderModuleCreateInfo = nullptr;
 		void(*defineAdditionalModules)(Arena& frameArena, Finder<Module>::Initializer& initializer);
 	};
 

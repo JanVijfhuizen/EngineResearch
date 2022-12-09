@@ -39,7 +39,10 @@ namespace je
 
 		// Quick lookup for target class.
 		template <typename U>
-		U* Get() const;
+		[[nodiscard]] U* Get() const;
+
+		template <typename U>
+		[[nodiscard]] Array<U*> GetAll(Arena& arena) const;
 
 		[[nodiscard]] Iterator<T*> begin();
 		[[nodiscard]] Iterator<T*> end();
@@ -118,6 +121,21 @@ namespace je
 		Module* mod = *_map.Contains(typeid(U).hash_code());
 		assert(mod);
 		return static_cast<U*>(mod);
+	}
+
+	template <typename T>
+	template <typename U>
+	Array<U*> Finder<T>::GetAll(Arena& arena) const
+	{
+		size_t count = 0;
+		for (auto& instance : _array)
+			count += dynamic_cast<U*>(instance);
+		const auto arr = CreateArray<U*>(arena, count);
+		count = 0;
+		for (auto& instance : _array)
+			if (const auto res = dynamic_cast<U*>(instance))
+				arr[count++] = res;
+		return arr;
 	}
 
 	template <typename T>

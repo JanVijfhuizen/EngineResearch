@@ -48,7 +48,7 @@ namespace je
 	void JobSystem<T>::OnBegin(engine::Info& info)
 	{
 		Module::OnBegin(info);
-		_arena = &info.persistentArena;
+		_arena = &info.arena;
 		_frameArena = &info.frameArena;
 		_mainBatch = CreateVector<T>(*_arena, _capacity);
 		_additionalBatches = CreateLinkedList<Vector<T>>();

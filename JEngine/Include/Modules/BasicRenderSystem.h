@@ -2,11 +2,6 @@
 #include "Graphics/SubTexture.h"
 #include "JEngine/Modules/JobSystem.h"
 
-namespace je::vk
-{
-	struct RenderNode;
-}
-
 namespace game
 {
 	struct BasicRenderTask final
@@ -21,7 +16,5 @@ namespace game
 	{
 	public:
 		explicit BasicRenderSystem(size_t capacity);
-
-		[[nodiscard]] je::vk::RenderNode DefineRenderNode(je::Arena& frameArena);
 	};
 }

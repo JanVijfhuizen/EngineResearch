@@ -44,8 +44,8 @@ namespace je
 			
 			initializer.Add<engine::WindowModule>();
 			initializer.Add<engine::TimeModule>();
-			runInfo.defineAdditionalModules(_frameArena, initializer);
 			initializer.Add<engine::RenderModule>(*runInfo.renderModuleCreateInfo);
+			runInfo.defineAdditionalModules(_frameArena, initializer);
 			
 			finder.Compile(initializer);
 		}

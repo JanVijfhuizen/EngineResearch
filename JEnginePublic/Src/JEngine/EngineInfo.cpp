@@ -4,7 +4,7 @@
 namespace je::engine
 {
 	Info::Info(Arena& persistentArena, Arena& tempArena, Arena& frameArena, const Finder<Module>& finder) :
-		persistentArena(persistentArena),
+		arena(persistentArena),
 		tempArena(tempArena),
 		frameArena(frameArena),
 		finder(finder)
