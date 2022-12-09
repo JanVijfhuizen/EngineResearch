@@ -22,11 +22,6 @@ namespace game
 	public:
 		explicit BasicRenderSystem(size_t capacity);
 
-		[[nodiscard]] je::vk::RenderNode DefineRenderNode();
-
-	protected:
-		void OnBegin(je::engine::Info& info) override;
-		void OnUpdate(je::engine::Info& info, const Jobs& jobs) override;
-		void OnExit(je::engine::Info& info) override;
+		[[nodiscard]] je::vk::RenderNode DefineRenderNode(je::Arena& frameArena);
 	};
 }

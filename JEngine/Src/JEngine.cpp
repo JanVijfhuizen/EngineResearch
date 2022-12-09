@@ -189,7 +189,7 @@ struct RenderResources final
 		for (const auto& mod : ptr->_modules)
 			vkDestroyShaderModule(app.device, mod, nullptr);
 	}
-	static je::Array<je::vk::RenderNode> DefineRenderGraph(je::Arena& dumpArena, const size_t swapChainLength, const glm::ivec2 swapChainResolution, void* userPtr)
+	static je::Array<je::vk::RenderNode> DefineRenderGraph(je::Arena& frameArena, const size_t swapChainLength, const glm::ivec2 swapChainResolution, void* userPtr)
 	{
 		const auto ptr = static_cast<RenderResources*>(userPtr);
 
@@ -202,11 +202,11 @@ struct RenderResources final
 		shader.data = shaderModules;
 		shader.length = 2;
 
-		const auto outputs = je::CreateArray<je::vk::RenderNode::Output>(dumpArena, 1);
+		const auto outputs = je::CreateArray<je::vk::RenderNode::Output>(frameArena, 1);
 		outputs[0].name = "Result";
 		outputs[0].resource.resolution = swapChainResolution;
 
-		const auto nodes = je::CreateArray<je::vk::RenderNode>(dumpArena, 1);
+		const auto nodes = je::CreateArray<je::vk::RenderNode>(frameArena, 1);
 		auto& node = nodes[0];
 		node.outputs = outputs;
 		node.renderFunc = Render;
@@ -280,13 +280,13 @@ int main()
 
 	je::EngineRunInfo runInfo{};
 	runInfo.renderModuleCreateInfo = &renderModuleCreateInfo;
-	runInfo.defineAdditionalModules = [](je::Arena& dumpArena, je::Finder<je::Module>::Initializer& initializer)
+	runInfo.defineAdditionalModules = [](je::Arena& frameArena, je::Finder<je::Module>::Initializer& initializer)
 	{
 		size_t capacity = 2;
 		size_t chunkCapacity = 4;
 		initializer.Add<SomeSystem>(capacity, chunkCapacity);
 
-		const auto scenes = je::CreateArray<je::SceneInfo>(dumpArena, 1);
+		const auto scenes = je::CreateArray<je::SceneInfo>(frameArena, 1);
 
 		auto& scene = scenes[0];
 		scene.onBegin = [](const je::Finder<je::Module>& finder, je::ecs::Cecsar& cecsar, void* userPtr)

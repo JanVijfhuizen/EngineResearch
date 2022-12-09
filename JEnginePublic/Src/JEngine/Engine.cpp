@@ -10,14 +10,14 @@ namespace je
 {
 	size_t EngineCreateInfo::GetMemorySpaceRequired() const
 	{
-		return persistentArenaSize + tempArenaSize + dumpArenaSize;
+		return persistentArenaSize + tempArenaSize + frameArenaSize;
 	}
 
 	Engine::Engine(const EngineCreateInfo& info) :
 		_memory(malloc(info.GetMemorySpaceRequired())),
 		_persistentArena(_memory, info.persistentArenaSize),
 		_tempArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize, info.tempArenaSize),
-		_dumpArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.dumpArenaSize)
+		_frameArena(static_cast<unsigned char*>(_memory) + info.persistentArenaSize + info.tempArenaSize, info.frameArenaSize)
 	{
 
 	}
@@ -44,30 +44,30 @@ namespace je
 			
 			initializer.Add<engine::WindowModule>();
 			initializer.Add<engine::TimeModule>();
+			runInfo.defineAdditionalModules(_frameArena, initializer);
 			initializer.Add<engine::RenderModule>(*runInfo.renderModuleCreateInfo);
-			runInfo.defineAdditionalModules(_dumpArena, initializer);
 			
 			finder.Compile(initializer);
 		}
 		
-		engine::Info info{_persistentArena, _tempArena, _dumpArena, finder};
+		engine::Info info{_persistentArena, _tempArena, _frameArena, finder};
 
 		for (const auto& mod : finder)
 			mod->OnInitialize(info);
 		for (const auto& mod : finder)
 			mod->OnBegin(info);
 
-		_dumpArena.Empty();
+		_frameArena.Empty();
 
 		while(!info.quit)
 		{
-			const auto _ = _dumpArena.CreateScope();
+			const auto _ = _frameArena.CreateScope();
 			for (const auto& mod : finder)
 				mod->OnUpdate(info);
 		}
 
 		{
-			const auto _ = _dumpArena.CreateScope();
+			const auto _ = _frameArena.CreateScope();
 			for (const auto& mod : finder)
 				mod->OnExit(info);
 		}

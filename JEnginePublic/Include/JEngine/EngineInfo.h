@@ -18,11 +18,11 @@ namespace je
 			// Meant for temporary allocations, will be deallocated at the end of every phase.
 			Arena& tempArena;
 			// Will be deallocated at the end of every frame.
-			Arena& dumpArena;
+			Arena& frameArena;
 			const Finder<Module>& finder;
 			bool quit = false;
 			
-			explicit Info(Arena& persistentArena, Arena& tempArena, Arena& dumpArena, const Finder<Module>& finder);
+			explicit Info(Arena& persistentArena, Arena& tempArena, Arena& frameArena, const Finder<Module>& finder);
 		};
 	}
 }

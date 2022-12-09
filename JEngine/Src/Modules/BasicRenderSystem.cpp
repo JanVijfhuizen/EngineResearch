@@ -8,22 +8,8 @@ namespace game
 	{
 	}
 
-	je::vk::RenderNode BasicRenderSystem::DefineRenderNode()
+	je::vk::RenderNode BasicRenderSystem::DefineRenderNode(je::Arena& frameArena)
 	{
 		return {};
-	}
-
-	void BasicRenderSystem::OnBegin(je::engine::Info& info)
-	{
-		JobSystem<BasicRenderTask>::OnBegin(info);
-	}
-
-	void BasicRenderSystem::OnUpdate(je::engine::Info& info, const Jobs& jobs)
-	{
-	}
-
-	void BasicRenderSystem::OnExit(je::engine::Info& info)
-	{
-		JobSystem<BasicRenderTask>::OnExit(info);
 	}
 }
