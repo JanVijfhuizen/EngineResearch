@@ -21,7 +21,6 @@ namespace je::engine
 		assert(info.defineResources);
 		assert(info.destroyResources);
 		assert(info.defineRenderGraph);
-		assert(info.bindRenderGraphResources);
 	}
 
 	void RenderModule::OnInitialize(Info& info)
@@ -139,7 +138,6 @@ namespace je::engine
 
 		const auto nodes = _info.defineRenderGraph(info.tempArena, _swapChain->GetLength(), _swapChain->GetResolution(), _info.userPtr);
 		_renderGraph = info.persistentArena.New<vk::RenderGraph>(1, info.persistentArena, info.tempArena, _app, *_allocator, *_swapChain, nodes);
-		_info.bindRenderGraphResources(nodes, _app, _swapChain->GetLength(), _info.userPtr);
 
 		// Bind descriptor sets to the render graph output.
 		for (size_t i = 0; i < _swapChain->GetLength(); ++i)

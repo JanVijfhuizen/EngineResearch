@@ -452,12 +452,18 @@ namespace je::vk
 			auto& renderNode = *tempNode->renderNode;
 			auto& inputVariations = tempNode->inputResourceVariations;
 			size_t index = 0;
+
+			const auto views = CreateArray<VkImageView>(tempArena, inputVariations.GetCount() * frameCount);
+
 			for (auto& inputVariation : inputVariations)
 				for (size_t i = 0; i < frameCount; ++i)
 				{
-					renderNode.outImageViews[index] = _attachments[inputVariation->imageIndex + i * imageCount].view;
+					views[index] = _attachments[inputVariation->imageIndex + i * imageCount].view;
 					++index;
 				}
+
+			tempNode->renderNode->bindResourcesFunc(app, views, frameCount, tempNode->renderNode->userPtr);
+			DestroyArray(views, tempArena);
 		}
 	}
 

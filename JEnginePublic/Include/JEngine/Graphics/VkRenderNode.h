@@ -6,6 +6,7 @@ namespace je::vk
 {
 	// Render function used by the render graph.
 	typedef void(*RenderFunc)(VkCommandBuffer cmdBuffer, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
+	typedef void(*BindResourcesFunc)(const App& app, const Array<VkImageView>& views, size_t frameCount, void* userPtr);
 
 	// Defines the behaviour of a node in a render graph.
 	struct RenderNode final
@@ -35,10 +36,9 @@ namespace je::vk
 
 		// Function called during rendering.
 		RenderFunc renderFunc = nullptr;
+		// Function called after defining the resources, to link the nodes to each other.
+		BindResourcesFunc bindResourcesFunc = nullptr;
 		// Pointer that will be forwarded to the render function.
 		void* userPtr = nullptr;
-
-		// This will be filled with the image views for the inputs. View will have to be defined by the end user.
-		Array<VkImageView> outImageViews{};
 	};
 }

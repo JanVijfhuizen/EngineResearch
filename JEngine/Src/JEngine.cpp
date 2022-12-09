@@ -189,10 +189,9 @@ struct RenderResources final
 		for (const auto& mod : ptr->_modules)
 			vkDestroyShaderModule(app.device, mod, nullptr);
 	}
-	static je::Array<je::vk::RenderNode> DefineRenderGraph(je::Arena& tempArena, const size_t swapChainLength, const glm::ivec2 swapChainResolution, void* userPtr)
+	static je::Array<je::vk::RenderNode> DefineRenderGraph(je::Arena& dumpArena, const size_t swapChainLength, const glm::ivec2 swapChainResolution, void* userPtr)
 	{
 		const auto ptr = static_cast<RenderResources*>(userPtr);
-		const auto views = je::CreateArray<VkImageView>(tempArena, swapChainLength * 0);
 
 		je::vk::PipelineCreateInfo::Module shaderModules[2];
 		shaderModules[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
@@ -203,30 +202,27 @@ struct RenderResources final
 		shader.data = shaderModules;
 		shader.length = 2;
 
-		je::vk::RenderNode::Output output{};
-		output.name = "Result";
-		output.resource.resolution = swapChainResolution;
-		je::Array<je::vk::RenderNode::Output> outputs{};
-		outputs.data = &output;
-		outputs.length = 1;
+		const auto outputs = je::CreateArray<je::vk::RenderNode::Output>(dumpArena, 1);
+		outputs[0].name = "Result";
+		outputs[0].resource.resolution = swapChainResolution;
 
-		const auto nodes = je::CreateArray<je::vk::RenderNode>(tempArena, 1);
+		const auto nodes = je::CreateArray<je::vk::RenderNode>(dumpArena, 1);
 		auto& node = nodes[0];
 		node.outputs = outputs;
 		node.renderFunc = Render;
+		node.bindResourcesFunc = BindRenderGraphResources;
 		node.userPtr = ptr;
 		node.modules = shader;
-		node.outImageViews = views;
 		node.layouts.length = 1;
 		node.layouts.data = &ptr->_layout;
 		return nodes;
 	}
-	static void BindRenderGraphResources(const je::Array<je::vk::RenderNode>& nodes, const je::vk::App& app, const size_t swapChainLength, void* userPtr)
+	static void BindRenderGraphResources(const je::vk::App& app, const je::Array<VkImageView>& views, const size_t frameCount, void* userPtr)
 	{
 		const auto ptr = static_cast<RenderResources*>(userPtr);
 
 		// Bind descriptor sets for the render node.
-		for (size_t i = 0; i < swapChainLength; ++i)
+		for (size_t i = 0; i < frameCount; ++i)
 		{
 			VkWriteDescriptorSet write{};
 
@@ -280,7 +276,6 @@ int main()
 	renderModuleCreateInfo.defineResources = RenderResources::DefineResources;
 	renderModuleCreateInfo.destroyResources = RenderResources::DestroyResources;
 	renderModuleCreateInfo.defineRenderGraph = RenderResources::DefineRenderGraph;
-	renderModuleCreateInfo.bindRenderGraphResources = RenderResources::BindRenderGraphResources;
 	renderModuleCreateInfo.userPtr = &renderResources;
 
 	je::EngineRunInfo runInfo{};

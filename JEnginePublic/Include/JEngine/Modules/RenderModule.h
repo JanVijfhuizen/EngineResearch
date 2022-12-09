@@ -24,9 +24,7 @@ namespace je
 			// Destroy the resources used for rendering.
 			void(*destroyResources)(Arena& arena, const vk::App& app, const vk::Allocator& allocator, void* userPtr) = nullptr;
 			// Define the shape of the render graph.
-			Array<vk::RenderNode>(*defineRenderGraph)(Arena& tempArena, size_t swapChainLength, glm::ivec2 swapChainResolution, void* userPtr) = nullptr;
-			// Link the render graph nodes to the corresponding resources.
-			void(*bindRenderGraphResources)(const Array<vk::RenderNode>& nodes, const vk::App& app, size_t swapChainLength, void* userPtr) = nullptr;
+			Array<vk::RenderNode>(*defineRenderGraph)(Arena& dumpArena, size_t swapChainLength, glm::ivec2 swapChainResolution, void* userPtr) = nullptr;
 			void* userPtr = nullptr;
 		};
 
