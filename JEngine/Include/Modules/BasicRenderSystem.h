@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include "Graphics/SubTexture.h"
+#include "JEngine/Graphics/SubTexture.h"
 #include "JEngine/Modules/JobSystem.h"
 #include "JEngine/Modules/RenderModule.h"
 
@@ -31,15 +31,16 @@ namespace game
 	{
 	public:
 		explicit BasicRenderSystem(const BasicRenderSystemCreateInfo& info);
+		[[nodiscard]] SubTexture GetSubTexture(size_t index) const;
 
 	private:
 		const BasicRenderSystemCreateInfo _info;
 
-		je::Array<SubTexture> _subTextures{};
 		VkDescriptorSetLayout _layout{};
 		VkShaderModule _modules[2]{};
 		je::vk::Mesh _mesh{};
 		je::vk::Image _image{};
+		je::Array<SubTexture> _subTextures{};
 		VkImageView _view{};
 		VkDescriptorPool _descriptorPool{};
 		je::Array<VkDescriptorSet_T*> _descriptorSets{};

@@ -108,6 +108,9 @@
     <ClInclude Include="Include\JEngine\Utils\StringArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Include\JEngine\Graphics\SubTexture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\JEngine\JEnginePublic.cpp">

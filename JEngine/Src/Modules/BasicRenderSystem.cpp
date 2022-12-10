@@ -17,6 +17,11 @@ namespace game
 		
 	}
 
+	SubTexture BasicRenderSystem::GetSubTexture(const size_t index) const
+	{
+		return _subTextures[index];
+	}
+
 	void BasicRenderSystem::CreateRenderResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app,
 		const je::vk::Allocator& allocator, size_t swapChainLength, glm::ivec2 swapChainResolution)
 	{
@@ -50,8 +55,7 @@ namespace game
 #endif
 
 		_image = je::texture::Load(app, allocator, _info.atlasPath);
-		// TODO change into subtextures.
-		const auto coords = je::texture::LoadAtlasCoordinates(tempArena, _info.atlasCoordsPath);
+		_subTextures = je::texture::LoadAtlasMetaData(arena, _info.atlasCoordsPath);
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

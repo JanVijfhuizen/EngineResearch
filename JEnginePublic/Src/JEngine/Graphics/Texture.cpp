@@ -9,6 +9,8 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+#include "JEngine/Graphics/SubTexture.h"
+
 namespace je::texture
 {
 	void GenerateAtlas(Arena& arena, Arena& tempArena, const Array<const char*>& filePaths, 
@@ -69,11 +71,14 @@ namespace je::texture
 			const auto& shape = shapes[i];
 			const auto& position = positions[i];
 
-			outfile << shape.x << std::endl;
-			outfile << shape.y << std::endl;
+			const auto lTop = glm::vec2(position) / glm::vec2(area);
+			const auto rBot = lTop + glm::vec2(shape) / glm::vec2(area);
 
-			outfile << position.x << std::endl;
-			outfile << position.y << std::endl;
+			outfile << lTop.x << std::endl;
+			outfile << lTop.y << std::endl;
+
+			outfile << rBot.x << std::endl;
+			outfile << rBot.y << std::endl;
 		}
 
 		outfile.close();
@@ -100,20 +105,27 @@ namespace je::texture
 		return image;
 	}
 
-	Array<glm::ivec2> LoadAtlasCoordinates(Arena& arena, const char* metaFilePath)
+	Array<game::SubTexture> LoadAtlasMetaData(Arena& arena, const char* metaFilePath)
 	{
 		std::ifstream inFile;
 		inFile.open(metaFilePath);
 
 		const size_t lineCount = std::count(
 			std::istreambuf_iterator(inFile), std::istreambuf_iterator<char>(), '\n');
-		const auto coordinates = CreateArray<glm::ivec2>(arena, lineCount);
+		inFile.seekg(0, std::ios::beg);
 
-		glm::ivec2 pos;
+		const auto metaData = CreateArray<game::SubTexture>(arena, lineCount / 4);
+
+		glm::vec2 lTop;
+		glm::vec2 rBot;
 		size_t i = 0;
-		while (inFile >> pos.x >> pos.y)
-			coordinates[++i] = pos;
+		while (inFile >> lTop.x >> lTop.y >> rBot.x >> rBot.y)
+		{
+			auto& instance = metaData[i++];
+			instance.lTop = lTop;
+			instance.rBot = rBot;
+		}
 
-		return coordinates;
+		return metaData;
 	}
 }
