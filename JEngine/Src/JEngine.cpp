@@ -16,6 +16,8 @@ protected:
 	{
 		const float t = info.finder.Get<je::engine::TimeModule>()->GetTime();
 		const auto basicRenderSys = info.finder.Get<game::BasicRenderSystem>();
+		basicRenderSys->camera.rotation += 0.001f;
+		basicRenderSys->camera.zoom = sin(basicRenderSys->camera.rotation * 1.12f) * .2f;
 
 		game::BasicRenderTask task{};
 		auto res = basicRenderSys->TryAdd(task);

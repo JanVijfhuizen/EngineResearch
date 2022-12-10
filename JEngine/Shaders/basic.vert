@@ -36,11 +36,13 @@ layout(location = 1) out vec2 fragPos;
 
 void HandleInstance(in InstanceData instance)
 {
-    vec3 pos = inPosition.xyz * vec3(instance.scale, 1.0) + vec3(instance.position, 0.0);
+    vec2 pos = inPosition.xy * instance.scale + instance.position;
+    pos *= vec2(1.0 + pushConstants.camera.zoom);
+    pos = Rotate(pos, pushConstants.camera.rotation);
     float aspectFix = pushConstants.resolution.y / pushConstants.resolution.x;
     pos.x *= aspectFix;
 
-    gl_Position = vec4(pos, 1.0);
+    gl_Position = vec4(pos, 0.0, 1.0);
     fragPos = CalculateTextureCoordinates(instance.subTexture, inTexCoords);
     fragColor = instance.color.xyz;
 }
