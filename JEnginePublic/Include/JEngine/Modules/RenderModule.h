@@ -17,6 +17,7 @@ namespace je
 
 	namespace engine
 	{
+		// Having a module inherit from this allows it to function as a render graph node.
 		class IRenderNode
 		{
 			friend class RenderModule;

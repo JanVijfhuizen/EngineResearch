@@ -5,6 +5,7 @@
 
 namespace game
 {
+	// Defines a task for the basic render system.
 	struct BasicRenderTask final
 	{
 		glm::vec2 position;
@@ -13,6 +14,7 @@ namespace game
 		glm::vec4 color{ 1 };
 	};
 
+	// Used to define the basic render system.
 	struct BasicRenderSystemCreateInfo final
 	{
 		size_t capacity = 256;
@@ -27,6 +29,7 @@ namespace game
 #endif
 	};
 
+	// Camera for the basic render system.
 	struct BasicRenderCamera final
 	{
 		glm::vec2 cameraPosition{};
@@ -34,12 +37,16 @@ namespace game
 		float rotation = 0;
 	};
 
+	// Manages simple 2d rendering.
+	// Uses instanced-bindless rendering, so is extremely performant.
 	class BasicRenderSystem final : public je::JobSystem<BasicRenderTask>, public je::engine::IRenderNode
 	{
 	public:
 		BasicRenderCamera camera{};
 
 		explicit BasicRenderSystem(const BasicRenderSystemCreateInfo& info);
+
+		// Get a sub texture based on the given index.
 		[[nodiscard]] SubTexture GetSubTexture(size_t index) const;
 
 	private:
