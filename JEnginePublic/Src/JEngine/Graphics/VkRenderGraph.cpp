@@ -439,6 +439,7 @@ namespace je::vk
 				createInfo.renderPass = node.renderPass;
 				createInfo.modules = renderNode.modules;
 				createInfo.resolution = resolution;
+				createInfo.pushConstantSize = renderNode.pushConstantSize;
 				node.pipeline = CreatePipeline(createInfo, tempArena, app);
 
 				node.resolution = resolution;

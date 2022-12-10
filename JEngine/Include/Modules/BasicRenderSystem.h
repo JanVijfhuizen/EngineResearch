@@ -27,15 +27,31 @@ namespace game
 #endif
 	};
 
+	struct BasicRenderCamera final
+	{
+		glm::vec2 cameraPosition{};
+		float zoom = 0;
+		float rotation = 0;
+	};
+
 	class BasicRenderSystem final : public je::JobSystem<BasicRenderTask>, public je::engine::IRenderNode
 	{
 	public:
+		BasicRenderCamera camera{};
+
 		explicit BasicRenderSystem(const BasicRenderSystemCreateInfo& info);
 		[[nodiscard]] SubTexture GetSubTexture(size_t index) const;
 
 	private:
+		struct PushConstants final
+		{
+			BasicRenderCamera camera;
+			glm::vec2 resolution;
+		};
+
 		const BasicRenderSystemCreateInfo _info;
 
+		glm::vec2 _resolution{};
 		VkDescriptorSetLayout _layout{};
 		VkShaderModule _modules[2]{};
 		je::vk::Mesh _mesh{};

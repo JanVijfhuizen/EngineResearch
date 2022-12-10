@@ -23,9 +23,10 @@ namespace game
 	}
 
 	void BasicRenderSystem::CreateRenderResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app,
-		const je::vk::Allocator& allocator, size_t swapChainLength, glm::ivec2 swapChainResolution)
+		const je::vk::Allocator& allocator, size_t swapChainLength, const glm::ivec2 swapChainResolution)
 	{
 		const auto _ = tempArena.CreateScope();
+		_resolution = swapChainResolution;
 
 		je::vk::Binding bindings[2]{};
 		bindings[0].flag = VK_SHADER_STAGE_VERTEX_BIT;
@@ -201,6 +202,12 @@ namespace game
 		if (count == 0)
 			return;
 
+		PushConstants pushConstants{};
+		pushConstants.camera = ptr->camera;
+		pushConstants.resolution = ptr->_resolution;
+
+		vkCmdPushConstants(cmd, layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants), &pushConstants);
+
 		const auto& instanceBuffer = ptr->_instanceBuffers[frameIndex];
 		void* instanceData;
 		const auto result = vkMapMemory(app.device, instanceBuffer.memory.memory, instanceBuffer.memory.offset, instanceBuffer.memory.size, 0, &instanceData);
@@ -232,6 +239,7 @@ namespace game
 		node.modules = modules;
 		node.layouts.length = 1;
 		node.layouts.data = &_layout;
+		node.pushConstantSize = sizeof(PushConstants);
 		return node;
 	}
 }

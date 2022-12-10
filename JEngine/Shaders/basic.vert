@@ -13,6 +13,19 @@ struct InstanceData
     vec4 color;
 };
 
+struct Camera
+{
+    vec2 position;
+    float zoom;
+    float rotation;
+};
+
+layout(push_constant) uniform PushConstants
+{
+    Camera camera;
+    vec2 resolution;
+} pushConstants;
+
 layout(std140, set = 0, binding = 0) readonly buffer InstanceBuffer
 {
 	InstanceData instances[];
@@ -23,7 +36,11 @@ layout(location = 1) out vec2 fragPos;
 
 void HandleInstance(in InstanceData instance)
 {
-    gl_Position = vec4(inPosition.xyz * vec3(instance.scale, 1.0) + vec3(instance.position, 0.0), 1.0);
+    vec3 pos = inPosition.xyz * vec3(instance.scale, 1.0) + vec3(instance.position, 0.0);
+    float aspectFix = pushConstants.resolution.y / pushConstants.resolution.x;
+    pos.x *= aspectFix;
+
+    gl_Position = vec4(pos, 1.0);
     fragPos = CalculateTextureCoordinates(instance.subTexture, inTexCoords);
     fragColor = instance.color.xyz;
 }

@@ -33,6 +33,8 @@ namespace je::vk
 		Array<VkDescriptorSetLayout> layouts{};
 		// Shader modules used for rendering.
 		Array<PipelineCreateInfo::Module> modules{};
+		// Size of push constant.
+		size_t pushConstantSize = 0;
 
 		// Function called during rendering.
 		RenderFunc renderFunc = nullptr;
