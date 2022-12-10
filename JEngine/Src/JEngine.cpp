@@ -66,9 +66,19 @@ int main()
 		};
 
 		initializer.Add<je::SceneModule>(scenes);
-		constexpr size_t renderCapacity = 256;
 		initializer.Add<DemoSys>();
-		initializer.Add<game::BasicRenderSystem>(renderCapacity);
+
+		game::BasicRenderSystemCreateInfo rCreateInfo{};
+
+#ifdef _DEBUG
+		rCreateInfo.texturePaths = je::CreateArray<const char*>(frameArena, 4);
+		rCreateInfo.texturePaths[0] = "Textures/humanoid.png";
+		rCreateInfo.texturePaths[1] = "Textures/moveArrow.png";
+		rCreateInfo.texturePaths[2] = "Textures/bash-card.png";
+		rCreateInfo.texturePaths[3] = "Textures/tile.png";
+#endif
+
+		initializer.Add<game::BasicRenderSystem>(rCreateInfo);
 	};
 
 	je::Engine engine{};

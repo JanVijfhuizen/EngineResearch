@@ -12,8 +12,9 @@ struct RenderResources;
 
 namespace game
 {
-	BasicRenderSystem::BasicRenderSystem(const size_t capacity): JobSystem<BasicRenderTask>(capacity, 0)
+	BasicRenderSystem::BasicRenderSystem(const BasicRenderSystemCreateInfo& info) : JobSystem<BasicRenderTask>(info.capacity, 0), _info(info)
 	{
+		
 	}
 
 	void BasicRenderSystem::CreateRenderResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app,
@@ -31,8 +32,8 @@ namespace game
 		bindingsArr.length = 2;
 		_layout = CreateLayout(tempArena, app, bindingsArr);
 
-		_modules[0] = CreateShaderModule(tempArena, app, "Shaders/vert2.spv");
-		_modules[1] = CreateShaderModule(tempArena, app, "Shaders/frag2.spv");
+		_modules[0] = CreateShaderModule(tempArena, app, _info.vertPath);
+		_modules[1] = CreateShaderModule(tempArena, app, _info.fragPath);
 
 		{
 			const auto _ = tempArena.CreateScope();
@@ -45,16 +46,12 @@ namespace game
 		}
 
 #ifdef _DEBUG
-		const auto textures = je::CreateArray<const char*>(tempArena, 4);
-		textures.data[0] = "Textures/humanoid.png";
-		textures.data[1] = "Textures/moveArrow.png";
-		textures.data[2] = "Textures/bash-card.png";
-		textures.data[3] = "Textures/tile.png";
-		je::texture::GenerateAtlas(arena, tempArena, textures, "Textures/atlas.png", "Textures/atlas.txt");
+		je::texture::GenerateAtlas(arena, tempArena, _info.texturePaths, _info.atlasPath, _info.atlasCoordsPath);
 #endif
 
-		_image = je::texture::Load(app, allocator, "Textures/atlas.png");
-		const auto coords = je::texture::LoadAtlasCoordinates(tempArena, "Textures/atlas.txt");
+		_image = je::texture::Load(app, allocator, _info.atlasPath);
+		// TODO change into subtextures.
+		const auto coords = je::texture::LoadAtlasCoordinates(tempArena, _info.atlasCoordsPath);
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

@@ -56,15 +56,13 @@ namespace je
 		for (const auto& mod : finder)
 			mod->OnBegin(info);
 
-		_frameArena.Empty();
-
 		while(!info.quit)
 		{
-			const auto _ = _frameArena.CreateScope();
 			for (const auto& mod : finder)
 				mod->OnUpdate(info);
 			for (const auto& mod : finder)
 				mod->OnPostUpdate(info);
+			_frameArena.Empty();
 		}
 
 		{
