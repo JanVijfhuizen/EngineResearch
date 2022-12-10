@@ -39,7 +39,7 @@ namespace game
 
 			je::Array<je::vk::Vertex> verts{};
 			je::Array<je::vk::Vertex::Index> inds{};
-			constexpr float scale = .5f;
+			constexpr float scale = 1;
 			CreateQuadShape(tempArena, verts, inds, scale);
 			_mesh = CreateMesh(app, allocator, verts, inds);
 		}
