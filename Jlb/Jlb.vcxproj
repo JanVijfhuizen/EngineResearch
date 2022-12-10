@@ -132,6 +132,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Jlb/pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)/Include</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>

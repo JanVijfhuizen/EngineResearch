@@ -164,7 +164,7 @@ namespace je::vk::init
 	VkDebugUtilsMessengerEXT CreateDebugger(const VkInstance instance)
 	{
 #ifdef NDEBUG
-		return;
+		return {};
 #endif
 
 		const auto createInfo = CreateDebugInfo();
