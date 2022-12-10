@@ -19,6 +19,7 @@ namespace je
 		virtual void OnInitialize(engine::Info& info);
 		virtual void OnBegin(engine::Info& info);
 		virtual void OnUpdate(engine::Info& info);
+		virtual void OnPostUpdate(engine::Info& info);
 		virtual void OnExit(engine::Info& info);
 	};
 }

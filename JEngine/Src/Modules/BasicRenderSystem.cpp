@@ -1,57 +1,62 @@
 ﻿#include "pch.h"
 #include "Modules/BasicRenderSystem.h"
 
+#include "Graphics/InstancingUtils.h"
 #include "JEngine/Graphics/ObjLoader.h"
 #include "JEngine/Graphics/Texture.h"
 #include "JEngine/Graphics/VkLayout.h"
 #include "JEngine/Graphics/VkShader.h"
+#include "JEngine/Graphics/VkShapes.h"
 
 struct RenderResources;
 
 namespace game
 {
-	BasicRenderSystem::BasicRenderSystem(const size_t capacity): JobSystem<BasicRenderTask>(capacity, 0)
+	BasicRenderSystem::BasicRenderSystem(const BasicRenderSystemCreateInfo& info) : JobSystem<BasicRenderTask>(info.capacity, 0), _info(info)
 	{
+		
+	}
+
+	SubTexture BasicRenderSystem::GetSubTexture(const size_t index) const
+	{
+		return _subTextures[index];
 	}
 
 	void BasicRenderSystem::CreateRenderResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app,
-		const je::vk::Allocator& allocator, size_t swapChainLength, glm::ivec2 swapChainResolution)
+		const je::vk::Allocator& allocator, size_t swapChainLength, const glm::ivec2 swapChainResolution)
 	{
 		const auto _ = tempArena.CreateScope();
+		_resolution = swapChainResolution;
 
-		je::vk::Binding binding;
-		binding.flag = VK_SHADER_STAGE_FRAGMENT_BIT;
-		binding.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		je::Array<je::vk::Binding> bindings{};
-		bindings.data = &binding;
-		bindings.length = 1;
-		_layout = CreateLayout(tempArena, app, bindings);
+		je::vk::Binding bindings[2]{};
+		bindings[0].flag = VK_SHADER_STAGE_VERTEX_BIT;
+		bindings[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		bindings[1].flag = VK_SHADER_STAGE_FRAGMENT_BIT;
+		bindings[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		je::Array<je::vk::Binding> bindingsArr{};
+		bindingsArr.data = bindings;
+		bindingsArr.length = 2;
+		_layout = CreateLayout(tempArena, app, bindingsArr);
 
-		_modules[0] = CreateShaderModule(tempArena, app, "Shaders/vert2.spv");
-		_modules[1] = CreateShaderModule(tempArena, app, "Shaders/frag2.spv");
+		_modules[0] = CreateShaderModule(tempArena, app, _info.vertPath);
+		_modules[1] = CreateShaderModule(tempArena, app, _info.fragPath);
 
 		{
 			const auto _ = tempArena.CreateScope();
 
 			je::Array<je::vk::Vertex> verts{};
 			je::Array<je::vk::Vertex::Index> inds{};
-			constexpr float scale = .5f;
-			je::obj::Load(tempArena, "Meshes/cube.obj", verts, inds, scale);
+			constexpr float scale = 1;
+			CreateQuadShape(tempArena, verts, inds, scale);
 			_mesh = CreateMesh(app, allocator, verts, inds);
 		}
 
 #ifdef _DEBUG
-		const auto textures = je::CreateArray<const char*>(tempArena, 4);
-		textures.data[0] = "Textures/humanoid.png";
-		textures.data[1] = "Textures/moveArrow.png";
-		textures.data[2] = "Textures/bash-card.png";
-		textures.data[3] = "Textures/tile.png";
-		je::texture::GenerateAtlas(arena, tempArena, textures, "Textures/atlas.png", "Textures/atlas.txt");
+		je::texture::GenerateAtlas(arena, tempArena, _info.texturePaths, _info.atlasPath, _info.atlasCoordsPath);
 #endif
 
-
-		_image = je::texture::Load(app, allocator, "Textures/atlas.png");
-		const auto coords = je::texture::LoadAtlasCoordinates(tempArena, "Textures/atlas.txt");
+		_image = je::texture::Load(app, allocator, _info.atlasPath);
+		_subTextures = je::texture::LoadAtlasMetaData(arena, _info.atlasCoordsPath);
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -72,13 +77,15 @@ namespace game
 		assert(!result);
 
 		// Create descriptor pool.
-		VkDescriptorPoolSize poolSize;
-		poolSize.type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		poolSize.descriptorCount = static_cast<uint32_t>(swapChainLength);
+		VkDescriptorPoolSize poolSizes[2]{};
+		poolSizes[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
+		poolSizes[0].descriptorCount = static_cast<uint32_t>(swapChainLength);
+		poolSizes[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		poolSizes[1].descriptorCount = static_cast<uint32_t>(swapChainLength);
 		VkDescriptorPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-		poolInfo.poolSizeCount = 1;
-		poolInfo.pPoolSizes = &poolSize;
+		poolInfo.poolSizeCount = 2;
+		poolInfo.pPoolSizes = poolSizes;
 		poolInfo.maxSets = static_cast<uint32_t>(swapChainLength);
 
 		result = vkCreateDescriptorPool(app.device, &poolInfo, nullptr, &_descriptorPool);
@@ -91,7 +98,7 @@ namespace game
 		VkDescriptorSetAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 		allocInfo.descriptorPool = _descriptorPool;
-		allocInfo.descriptorSetCount = layouts.length;
+		allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.length);
 		allocInfo.pSetLayouts = layouts.data;
 
 		_descriptorSets = je::CreateArray<VkDescriptorSet>(arena, swapChainLength);
@@ -121,11 +128,19 @@ namespace game
 		samplerInfo.maxLod = 0;
 
 		result = vkCreateSampler(app.device, &samplerInfo, nullptr, &_sampler);
+
+		_instanceBuffers = CreateStorageBuffers<BasicRenderTask>(arena, app, allocator, swapChainLength, GetCapacity());
 	}
 
 	void BasicRenderSystem::DestroyRenderResources(je::Arena& arena, const je::vk::App& app,
 		const je::vk::Allocator& allocator)
 	{
+		for (int64_t i = static_cast<int64_t>(_instanceBuffers.length) - 1; i >= 0; --i)
+		{
+			const bool result = allocator.Free(_instanceBuffers[i].memory);
+			assert(result);
+			vkDestroyBuffer(app.device, _instanceBuffers[i].buffer, nullptr);
+		}
 		vkDestroySampler(app.device, _sampler, nullptr);
 		vkDestroyDescriptorSetLayout(app.device, _layout, nullptr);
 		DestroyArray(_descriptorSets, arena);
@@ -144,47 +159,65 @@ namespace game
 		// Bind descriptor sets for the render node.
 		for (size_t i = 0; i < frameCount; ++i)
 		{
-			VkWriteDescriptorSet write{};
-
-			/*
+			VkWriteDescriptorSet writes[2]{};
+			
 			// Bind instance buffer.
 			VkDescriptorBufferInfo instanceInfo{};
-			instanceInfo.buffer = _instanceBuffers[i].buffer;
+			instanceInfo.buffer = ptr->_instanceBuffers[i].buffer;
 			instanceInfo.offset = 0;
-			instanceInfo.range = sizeof(Job) * JobSystem<Job>::GetLength();
+			instanceInfo.range = sizeof(BasicRenderTask) * ptr->GetCapacity();
 
 			auto& instanceWrite = writes[0];
 			instanceWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
 			instanceWrite.dstBinding = 0;
-			instanceWrite.dstSet = _descriptorSets[i];
+			instanceWrite.dstSet = ptr->_descriptorSets[i];
 			instanceWrite.descriptorCount = 1;
 			instanceWrite.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 			instanceWrite.pBufferInfo = &instanceInfo;
 			instanceWrite.dstArrayElement = 0;
-			*/
+
 			// Bind texture atlas.
 			VkDescriptorImageInfo  atlasInfo{};
 			atlasInfo.imageLayout = ptr->_image.layout;
 			atlasInfo.imageView = ptr->_view;
 			atlasInfo.sampler = ptr->_sampler;
 
-			write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
-			write.dstBinding = 0;
-			write.dstSet = ptr->_descriptorSets[i];
-			write.descriptorCount = 1;
-			write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-			write.pImageInfo = &atlasInfo;
-			write.dstArrayElement = 0;
+			auto& atlasWrite = writes[1];
+			atlasWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+			atlasWrite.dstBinding = 1;
+			atlasWrite.dstSet = ptr->_descriptorSets[i];
+			atlasWrite.descriptorCount = 1;
+			atlasWrite.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+			atlasWrite.pImageInfo = &atlasInfo;
+			atlasWrite.dstArrayElement = 0;
 
-			vkUpdateDescriptorSets(app.device, 1, &write, 0, nullptr);
+			vkUpdateDescriptorSets(app.device, 2, writes, 0, nullptr);
 		}
 	}
-	void  BasicRenderSystem::Render(const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)
+	void BasicRenderSystem::Render(const je::vk::App& app, const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)
 	{
 		const auto ptr = static_cast<BasicRenderSystem*>(userPtr);
+
+		const size_t count = ptr->GetCount();
+		if (count == 0)
+			return;
+
+		PushConstants pushConstants{};
+		pushConstants.camera = ptr->camera;
+		pushConstants.resolution = ptr->_resolution;
+
+		vkCmdPushConstants(cmd, layout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(PushConstants), &pushConstants);
+
+		const auto& instanceBuffer = ptr->_instanceBuffers[frameIndex];
+		void* instanceData;
+		const auto result = vkMapMemory(app.device, instanceBuffer.memory.memory, instanceBuffer.memory.offset, instanceBuffer.memory.size, 0, &instanceData);
+		assert(!result);
+		memcpy(instanceData, ptr->GetData(), sizeof(BasicRenderTask) * ptr->GetCount());
+		vkUnmapMemory(app.device, instanceBuffer.memory.memory);
+
 		vkCmdBindDescriptorSets(cmd, VK_PIPELINE_BIND_POINT_GRAPHICS, layout,
 			0, 1, &ptr->_descriptorSets[frameIndex], 0, nullptr);
-		ptr->_mesh.Draw(cmd, 1);
+		ptr->_mesh.Draw(cmd, count);
 	}
 
 	je::vk::RenderNode BasicRenderSystem::DefineNode(je::Arena& frameArena, glm::ivec2 swapChainResolution)
@@ -206,6 +239,7 @@ namespace game
 		node.modules = modules;
 		node.layouts.length = 1;
 		node.layouts.data = &_layout;
+		node.pushConstantSize = sizeof(PushConstants);
 		return node;
 	}
 }

@@ -5,7 +5,7 @@
 namespace je::vk
 {
 	// Render function used by the render graph.
-	typedef void(*RenderFunc)(VkCommandBuffer cmdBuffer, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
+	typedef void(*RenderFunc)(const App& app, VkCommandBuffer cmdBuffer, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
 	typedef void(*BindResourcesFunc)(const App& app, const Array<VkImageView>& views, size_t frameCount, void* userPtr);
 
 	// Defines the behaviour of a node in a render graph.
@@ -33,6 +33,8 @@ namespace je::vk
 		Array<VkDescriptorSetLayout> layouts{};
 		// Shader modules used for rendering.
 		Array<PipelineCreateInfo::Module> modules{};
+		// Size of push constant.
+		size_t pushConstantSize = 0;
 
 		// Function called during rendering.
 		RenderFunc renderFunc = nullptr;

@@ -439,6 +439,7 @@ namespace je::vk
 				createInfo.renderPass = node.renderPass;
 				createInfo.modules = renderNode.modules;
 				createInfo.resolution = resolution;
+				createInfo.pushConstantSize = renderNode.pushConstantSize;
 				node.pipeline = CreatePipeline(createInfo, tempArena, app);
 
 				node.resolution = resolution;
@@ -547,7 +548,7 @@ namespace je::vk
 
 				vkCmdBeginRenderPass(frame.cmdBuffer, &renderPassBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
 				node.pipeline.Bind(frame.cmdBuffer);
-				node.renderFunc(frame.cmdBuffer, node.pipeline.layout, node.userPtr, frameIndex);
+				node.renderFunc(_app, frame.cmdBuffer, node.pipeline.layout, node.userPtr, frameIndex);
 				vkCmdEndRenderPass(frame.cmdBuffer);
 
 				// transition layouts to shader read only.

@@ -76,7 +76,7 @@ namespace je::engine
 
 			Array<vk::Vertex> verts{};
 			Array<vk::Vertex::Index> inds{};
-			CreateQuadShape(info.tempArena, verts, inds, .5f);
+			CreateQuadShape(info.tempArena, verts, inds, 1);
 			_mesh = CreateMesh(_app, *_allocator, verts, inds);
 		}
 
