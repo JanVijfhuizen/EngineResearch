@@ -3,7 +3,7 @@
 #include "JEngine/Modules/JobSystem.h"
 #include "JEngine/Modules/RenderModule.h"
 
-namespace game
+namespace je
 {
 	// Defines a task for the basic render system.
 	struct BasicRenderTask final
@@ -25,7 +25,7 @@ namespace game
 
 #ifdef _DEBUG
 		// Frame arena.
-		je::Array<const char*> texturePaths{};
+		Array<const char*> texturePaths{};
 #endif
 	};
 
@@ -39,7 +39,7 @@ namespace game
 
 	// Manages simple 2d rendering.
 	// Uses instanced-bindless rendering, so is extremely performant.
-	class BasicRenderSystem final : public je::JobSystem<BasicRenderTask>, public je::engine::IRenderNode
+	class BasicRenderSystem final : public JobSystem<BasicRenderTask>, public engine::IRenderNode
 	{
 	public:
 		BasicRenderCamera camera{};
@@ -61,22 +61,22 @@ namespace game
 		glm::vec2 _resolution{};
 		VkDescriptorSetLayout _layout{};
 		VkShaderModule _modules[2]{};
-		je::vk::Mesh _mesh{};
-		je::vk::Image _image{};
-		je::Array<SubTexture> _subTextures{};
+		vk::Mesh _mesh{};
+		vk::Image _image{};
+		Array<SubTexture> _subTextures{};
 		VkImageView _view{};
 		VkDescriptorPool _descriptorPool{};
-		je::Array<VkDescriptorSet_T*> _descriptorSets{};
+		Array<VkDescriptorSet_T*> _descriptorSets{};
 		VkSampler _sampler{};
-		je::Array<je::vk::Buffer> _instanceBuffers{};
+		Array<vk::Buffer> _instanceBuffers{};
 
-		void CreateRenderResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app,
-		    const je::vk::Allocator& allocator, size_t swapChainLength, glm::ivec2 swapChainResolution) override;
-		void DestroyRenderResources(je::Arena& arena, const je::vk::App& app,
-			const je::vk::Allocator& allocator) override;
-		[[nodiscard]] je::vk::RenderNode DefineNode(je::Arena& frameArena, glm::ivec2 swapChainResolution) override;
+		void CreateRenderResources(Arena& arena, Arena& tempArena, const vk::App& app,
+		    const vk::Allocator& allocator, size_t swapChainLength, glm::ivec2 swapChainResolution) override;
+		void DestroyRenderResources(Arena& arena, const vk::App& app,
+			const vk::Allocator& allocator) override;
+		[[nodiscard]] vk::RenderNode DefineNode(Arena& frameArena, glm::ivec2 swapChainResolution) override;
 
-		static void BindRenderGraphResources(const je::vk::App& app, const je::Array<VkImageView>& views, size_t frameCount, void* userPtr);
-		static void Render(const je::vk::App& app, VkCommandBuffer cmd, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
+		static void BindRenderGraphResources(const vk::App& app, const Array<VkImageView>& views, size_t frameCount, void* userPtr);
+		static void Render(const vk::App& app, VkCommandBuffer cmd, VkPipelineLayout layout, void* userPtr, size_t frameIndex);
 	};
 }

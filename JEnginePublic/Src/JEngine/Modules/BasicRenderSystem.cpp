@@ -1,7 +1,7 @@
-﻿#include "pch.h"
-#include "Modules/BasicRenderSystem.h"
+﻿#include "JEngine/pch.h"
+#include "JEngine/Modules/BasicRenderSystem.h"
 
-#include "Graphics/InstancingUtils.h"
+#include "JEngine/Graphics/InstancingUtils.h"
 #include "JEngine/Graphics/ObjLoader.h"
 #include "JEngine/Graphics/Texture.h"
 #include "JEngine/Graphics/VkLayout.h"
@@ -10,7 +10,7 @@
 
 struct RenderResources;
 
-namespace game
+namespace je
 {
 	BasicRenderSystem::BasicRenderSystem(const BasicRenderSystemCreateInfo& info) : JobSystem<BasicRenderTask>(info.capacity, 0), _info(info)
 	{
@@ -22,18 +22,18 @@ namespace game
 		return _subTextures[index];
 	}
 
-	void BasicRenderSystem::CreateRenderResources(je::Arena& arena, je::Arena& tempArena, const je::vk::App& app,
-		const je::vk::Allocator& allocator, size_t swapChainLength, const glm::ivec2 swapChainResolution)
+	void BasicRenderSystem::CreateRenderResources(Arena& arena, Arena& tempArena, const vk::App& app,
+		const vk::Allocator& allocator, size_t swapChainLength, const glm::ivec2 swapChainResolution)
 	{
 		const auto _ = tempArena.CreateScope();
 		_resolution = swapChainResolution;
 
-		je::vk::Binding bindings[2]{};
+		vk::Binding bindings[2]{};
 		bindings[0].flag = VK_SHADER_STAGE_VERTEX_BIT;
 		bindings[0].type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		bindings[1].flag = VK_SHADER_STAGE_FRAGMENT_BIT;
 		bindings[1].type = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
-		je::Array<je::vk::Binding> bindingsArr{};
+		Array<vk::Binding> bindingsArr{};
 		bindingsArr.data = bindings;
 		bindingsArr.length = 2;
 		_layout = CreateLayout(tempArena, app, bindingsArr);
@@ -44,19 +44,19 @@ namespace game
 		{
 			const auto _ = tempArena.CreateScope();
 
-			je::Array<je::vk::Vertex> verts{};
-			je::Array<je::vk::Vertex::Index> inds{};
+			Array<vk::Vertex> verts{};
+			Array<vk::Vertex::Index> inds{};
 			constexpr float scale = 1;
 			CreateQuadShape(tempArena, verts, inds, scale);
 			_mesh = CreateMesh(app, allocator, verts, inds);
 		}
 
 #ifdef _DEBUG
-		je::texture::GenerateAtlas(arena, tempArena, _info.texturePaths, _info.atlasPath, _info.atlasCoordsPath);
+		texture::GenerateAtlas(arena, tempArena, _info.texturePaths, _info.atlasPath, _info.atlasCoordsPath);
 #endif
 
-		_image = je::texture::Load(app, allocator, _info.atlasPath);
-		_subTextures = je::texture::LoadAtlasMetaData(arena, _info.atlasCoordsPath);
+		_image = texture::Load(app, allocator, _info.atlasPath);
+		_subTextures = texture::LoadAtlasMetaData(arena, _info.atlasCoordsPath);
 
 		VkImageViewCreateInfo viewCreateInfo{};
 		viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -91,7 +91,7 @@ namespace game
 		result = vkCreateDescriptorPool(app.device, &poolInfo, nullptr, &_descriptorPool);
 		assert(!result);
 
-		auto layouts = je::CreateArray<VkDescriptorSetLayout>(tempArena, swapChainLength);
+		auto layouts = CreateArray<VkDescriptorSetLayout>(tempArena, swapChainLength);
 		for (auto& layout : layouts)
 			layout = _layout;
 
@@ -101,7 +101,7 @@ namespace game
 		allocInfo.descriptorSetCount = static_cast<uint32_t>(layouts.length);
 		allocInfo.pSetLayouts = layouts.data;
 
-		_descriptorSets = je::CreateArray<VkDescriptorSet>(arena, swapChainLength);
+		_descriptorSets = CreateArray<VkDescriptorSet>(arena, swapChainLength);
 		result = vkAllocateDescriptorSets(app.device, &allocInfo, _descriptorSets.data);
 		assert(!result);
 
@@ -132,8 +132,8 @@ namespace game
 		_instanceBuffers = CreateStorageBuffers<BasicRenderTask>(arena, app, allocator, swapChainLength, GetCapacity());
 	}
 
-	void BasicRenderSystem::DestroyRenderResources(je::Arena& arena, const je::vk::App& app,
-		const je::vk::Allocator& allocator)
+	void BasicRenderSystem::DestroyRenderResources(Arena& arena, const vk::App& app,
+		const vk::Allocator& allocator)
 	{
 		for (int64_t i = static_cast<int64_t>(_instanceBuffers.length) - 1; i >= 0; --i)
 		{
@@ -152,7 +152,7 @@ namespace game
 			vkDestroyShaderModule(app.device, mod, nullptr);
 	}
 
-	void BasicRenderSystem::BindRenderGraphResources(const je::vk::App& app, const je::Array<VkImageView>& views, const size_t frameCount, void* userPtr)
+	void BasicRenderSystem::BindRenderGraphResources(const vk::App& app, const Array<VkImageView>& views, const size_t frameCount, void* userPtr)
 	{
 		const auto ptr = static_cast<BasicRenderSystem*>(userPtr);
 
@@ -194,7 +194,7 @@ namespace game
 			vkUpdateDescriptorSets(app.device, 2, writes, 0, nullptr);
 		}
 	}
-	void BasicRenderSystem::Render(const je::vk::App& app, const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)
+	void BasicRenderSystem::Render(const vk::App& app, const VkCommandBuffer cmd, const VkPipelineLayout layout, void* userPtr, const size_t frameIndex)
 	{
 		const auto ptr = static_cast<BasicRenderSystem*>(userPtr);
 
@@ -220,18 +220,18 @@ namespace game
 		ptr->_mesh.Draw(cmd, count);
 	}
 
-	je::vk::RenderNode BasicRenderSystem::DefineNode(je::Arena& frameArena, glm::ivec2 swapChainResolution)
+	vk::RenderNode BasicRenderSystem::DefineNode(Arena& frameArena, glm::ivec2 swapChainResolution)
 	{
-		const auto modules = je::CreateArray<je::vk::PipelineCreateInfo::Module>(frameArena, 2);
+		const auto modules = CreateArray<vk::PipelineCreateInfo::Module>(frameArena, 2);
 		modules[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
 		modules[0].module = _modules[0];
 		modules[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
 		modules[1].module = _modules[1];
-		const auto outputs = je::CreateArray<je::vk::RenderNode::Output>(frameArena, 1);
+		const auto outputs = CreateArray<vk::RenderNode::Output>(frameArena, 1);
 		outputs[0].name = "Result";
 		outputs[0].resource.resolution = swapChainResolution;
 		
-		je::vk::RenderNode node{};
+		vk::RenderNode node{};
 		node.outputs = outputs;
 		node.renderFunc = Render;
 		node.bindResourcesFunc = BindRenderGraphResources;

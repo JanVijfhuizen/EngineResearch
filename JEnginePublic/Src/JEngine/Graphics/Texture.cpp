@@ -105,7 +105,7 @@ namespace je::texture
 		return image;
 	}
 
-	Array<game::SubTexture> LoadAtlasMetaData(Arena& arena, const char* metaFilePath)
+	Array<SubTexture> LoadAtlasMetaData(Arena& arena, const char* metaFilePath)
 	{
 		std::ifstream inFile;
 		inFile.open(metaFilePath);
@@ -114,7 +114,7 @@ namespace je::texture
 			std::istreambuf_iterator(inFile), std::istreambuf_iterator<char>(), '\n');
 		inFile.seekg(0, std::ios::beg);
 
-		const auto metaData = CreateArray<game::SubTexture>(arena, lineCount / 4);
+		const auto metaData = CreateArray<SubTexture>(arena, lineCount / 4);
 
 		glm::vec2 lTop;
 		glm::vec2 rBot;

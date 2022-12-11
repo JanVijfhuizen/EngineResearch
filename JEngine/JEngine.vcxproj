@@ -140,7 +140,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Src\Modules\BasicRenderSystem.cpp" />
     <ClCompile Include="Src\pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -148,8 +147,6 @@
     <ClCompile Include="Src\JEngine.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Include\Graphics\InstancingUtils.h" />
-    <ClInclude Include="Include\Modules\BasicRenderSystem.h" />
     <ClInclude Include="Include\pch.h" />
   </ItemGroup>
   <ItemGroup>

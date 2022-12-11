@@ -1,6 +1,6 @@
 #pragma once
 
-namespace game
+namespace je
 {
 	struct SubTexture final
 	{

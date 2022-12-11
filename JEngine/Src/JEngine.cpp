@@ -7,7 +7,7 @@
 #include "JEngine/Cecsar.h"
 #include "JEngine/Modules/SceneModule.h"
 #include "JEngine/Modules/TimeModule.h"
-#include "Modules/BasicRenderSystem.h"
+#include "JEngine/Modules/BasicRenderSystem.h"
 
 class DemoSys final : public je::Module
 {
@@ -15,18 +15,18 @@ protected:
 	void OnUpdate(je::engine::Info& info) override
 	{
 		const float t = info.finder.Get<je::engine::TimeModule>()->GetTime();
-		const auto basicRenderSys = info.finder.Get<game::BasicRenderSystem>();
+		const auto basicRenderSys = info.finder.Get<je::BasicRenderSystem>();
 		basicRenderSys->camera.rotation += 0.001f;
 		basicRenderSys->camera.zoom = sin(basicRenderSys->camera.rotation * 1.12f) * .2f;
 
-		game::BasicRenderTask task{};
+		je::BasicRenderTask task{};
 		auto res = basicRenderSys->TryAdd(task);
 		task.position.x = sin(t * .01f);
 		task.scale = glm::vec2(.5f + cos(t * .02f) * .25f);
 		task.color = glm::vec4(sin(t * .03f), cos(t * .01f), sin(t * .02f), 1);
 		task.subTexture.rBot *= .8f + sin(t * 0.05f) * .1f;
 		task.subTexture = basicRenderSys->GetSubTexture(static_cast<int>(2 + 2.f * sin(t * 0.025)));
-		res = info.finder.Get<game::BasicRenderSystem>()->TryAdd(task);
+		res = info.finder.Get<je::BasicRenderSystem>()->TryAdd(task);
 	}
 };
 
@@ -72,7 +72,7 @@ int main()
 		initializer.Add<je::SceneModule>(scenes);
 		initializer.Add<DemoSys>();
 
-		game::BasicRenderSystemCreateInfo rCreateInfo{};
+		je::BasicRenderSystemCreateInfo rCreateInfo{};
 
 #ifdef _DEBUG
 		rCreateInfo.texturePaths = je::CreateArray<const char*>(frameArena, 4);
@@ -82,7 +82,7 @@ int main()
 		rCreateInfo.texturePaths[3] = "Textures/tile.png";
 #endif
 
-		initializer.Add<game::BasicRenderSystem>(rCreateInfo);
+		initializer.Add<je::BasicRenderSystem>(rCreateInfo);
 	};
 
 	je::Engine engine{};

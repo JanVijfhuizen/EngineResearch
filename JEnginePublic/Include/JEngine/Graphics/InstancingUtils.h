@@ -4,10 +4,10 @@
 #include "JEngine/Graphics/VkBuffer.h"
 #include "Jlb/Array.h"
 
-namespace game
+namespace je
 {
 	template <typename Type>
-	je::Array<je::vk::Buffer> CreateStorageBuffers(je::Arena& arena, const je::vk::App& app, const je::vk::Allocator& allocator, const size_t swapChainLength, const size_t length)
+	Array<vk::Buffer> CreateStorageBuffers(Arena& arena, const vk::App& app, const vk::Allocator& allocator, const size_t swapChainLength, const size_t length)
 	{
 		auto& device = app.device;
 
@@ -17,7 +17,7 @@ namespace game
 		vertBufferInfo.usage = VK_BUFFER_USAGE_STORAGE_BUFFER_BIT;
 		vertBufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 		
-		const auto buffers = je::CreateArray<je::vk::Buffer>(arena, swapChainLength);
+		const auto buffers = CreateArray<vk::Buffer>(arena, swapChainLength);
 
 		for (size_t i = 0; i < swapChainLength; ++i)
 		{
