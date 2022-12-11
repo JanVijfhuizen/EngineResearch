@@ -48,6 +48,7 @@ namespace je
 
 		// Get a sub texture based on the given index.
 		[[nodiscard]] SubTexture GetSubTexture(size_t index) const;
+		[[nodiscard]] glm::ivec2 GetAtlasResolution() const;
 
 	private:
 		struct PushConstants final

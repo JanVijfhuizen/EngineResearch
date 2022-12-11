@@ -22,8 +22,13 @@ namespace je
 		return _subTextures[index];
 	}
 
+	glm::ivec2 BasicRenderSystem::GetAtlasResolution() const
+	{
+		return _image.resolution;
+	}
+
 	void BasicRenderSystem::CreateRenderResources(Arena& arena, Arena& tempArena, const vk::App& app,
-		const vk::Allocator& allocator, size_t swapChainLength, const glm::ivec2 swapChainResolution)
+		 const vk::Allocator& allocator, size_t swapChainLength, const glm::ivec2 swapChainResolution)
 	{
 		const auto _ = tempArena.CreateScope();
 		_resolution = swapChainResolution;
@@ -46,7 +51,7 @@ namespace je
 
 			Array<vk::Vertex> verts{};
 			Array<vk::Vertex::Index> inds{};
-			constexpr float scale = 1;
+			constexpr float scale = .5f;
 			CreateQuadShape(tempArena, verts, inds, scale);
 			_mesh = CreateMesh(app, allocator, verts, inds);
 		}
