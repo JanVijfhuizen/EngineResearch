@@ -173,6 +173,7 @@
     <ClInclude Include="Include\JEngine\Modules\JobSystem.h" />
     <ClInclude Include="Include\JEngine\Modules\RenderModule.h" />
     <ClInclude Include="Include\JEngine\Modules\SceneModule.h" />
+    <ClInclude Include="Include\JEngine\Modules\TextRenderSystem.h" />
     <ClInclude Include="Include\JEngine\Modules\TimeModule.h" />
     <ClInclude Include="Include\JEngine\Modules\WindowModule.h" />
     <ClInclude Include="Include\JEngine\pch.h" />
@@ -180,6 +181,7 @@
     <ClInclude Include="Include\JEngine\Utils\StringArray.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Src\JEngine\Modules\TextRenderSystem.cpp" />
     <ClCompile Include="Src\JEngine\Modules\BasicRenderSystem.cpp" />
     <ClCompile Include="Src\JEngine\Engine.cpp" />
     <ClCompile Include="Src\JEngine\Archetype.cpp" />

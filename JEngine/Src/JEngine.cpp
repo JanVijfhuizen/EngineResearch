@@ -8,6 +8,7 @@
 #include "JEngine/Modules/SceneModule.h"
 #include "JEngine/Modules/TimeModule.h"
 #include "JEngine/Modules/BasicRenderSystem.h"
+#include "JEngine/Modules/TextRenderSystem.h"
 
 class DemoSys final : public je::Module
 {
@@ -17,7 +18,7 @@ protected:
 		const float t = info.finder.Get<je::engine::TimeModule>()->GetTime();
 		const auto basicRenderSys = info.finder.Get<je::BasicRenderSystem>();
 		basicRenderSys->camera.rotation += 0.001f;
-		basicRenderSys->camera.zoom = sin(basicRenderSys->camera.rotation * 1.12f) * .2f;
+		basicRenderSys->camera.zoom = -.4f;
 
 		je::BasicRenderTask task{};
 		auto res = basicRenderSys->TryAdd(task);
@@ -26,7 +27,12 @@ protected:
 		task.color = glm::vec4(sin(t * .03f), cos(t * .01f), sin(t * .02f), 1);
 		task.subTexture.rBot *= .8f + sin(t * 0.05f) * .1f;
 		task.subTexture = basicRenderSys->GetSubTexture(static_cast<int>(2 + 2.f * sin(t * 0.025)));
-		res = info.finder.Get<je::BasicRenderSystem>()->TryAdd(task);
+		res = basicRenderSys->TryAdd(task);
+
+		je::TextRenderTask tTask{};
+		tTask.lineLength = 2;
+		tTask.text = "hello 44 .-/,";
+		info.finder.Get<je::TextRenderSystem>()->TryAdd(tTask);
 	}
 };
 
@@ -75,13 +81,17 @@ int main()
 		je::BasicRenderSystemCreateInfo rCreateInfo{};
 
 #ifdef _DEBUG
-		rCreateInfo.texturePaths = je::CreateArray<const char*>(frameArena, 4);
-		rCreateInfo.texturePaths[0] = "Textures/humanoid.png";
-		rCreateInfo.texturePaths[1] = "Textures/moveArrow.png";
-		rCreateInfo.texturePaths[2] = "Textures/bash-card.png";
-		rCreateInfo.texturePaths[3] = "Textures/tile.png";
+		rCreateInfo.texturePaths = je::CreateArray<const char*>(frameArena, 7);
+		rCreateInfo.texturePaths[0] = "Textures/alphabet.png";
+		rCreateInfo.texturePaths[1] = "Textures/numbers.png";
+		rCreateInfo.texturePaths[2] = "Textures/symbols.png";
+		rCreateInfo.texturePaths[3] = "Textures/humanoid.png";
+		rCreateInfo.texturePaths[4] = "Textures/moveArrow.png";
+		rCreateInfo.texturePaths[5] = "Textures/bash-card.png";
+		rCreateInfo.texturePaths[6] = "Textures/tile.png";
 #endif
 
+		initializer.Add<je::TextRenderSystem>();
 		initializer.Add<je::BasicRenderSystem>(rCreateInfo);
 	};
 
