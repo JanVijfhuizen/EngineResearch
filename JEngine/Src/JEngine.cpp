@@ -30,6 +30,7 @@ protected:
 		res = basicRenderSys->TryAdd(task);
 
 		je::TextRenderTask tTask{};
+		tTask.lineLength = 2;
 		tTask.text = "hello 44 .-/,";
 		info.finder.Get<je::TextRenderSystem>()->TryAdd(tTask);
 	}

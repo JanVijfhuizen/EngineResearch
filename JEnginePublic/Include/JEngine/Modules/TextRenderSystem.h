@@ -9,6 +9,8 @@ namespace je
 		glm::vec2 position{};
 		float scale = .2f;
 		int32_t spacing = -2;
+		uint32_t lineLength = 96;
+		int32_t lineSpacing = 0;
 	};
 
 	struct TextRenderSystemCreateInfo final

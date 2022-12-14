@@ -34,13 +34,26 @@ namespace je
 				task.position = job.position;
 				task.scale = glm::vec2(job.scale);
 				const float spacing = job.scale * (1.f + static_cast<float>(job.spacing) / _symbolSize);
+				const float lineSpacing = job.scale * (1.f + static_cast<float>(job.lineSpacing) / _symbolSize);
+
+				uint32_t lineLength = 0;
 
 				const size_t len = strlen(job.text);
 				for (size_t i = 0; i < len; ++i)
 				{
 					const auto& c = job.text[i];
 
-					if(c != ' ')
+					if(c == ' ')
+					{
+						if (lineLength >= job.lineLength)
+						{
+							lineLength = 0;
+							task.position.x = job.position.x;
+							task.position.y += lineSpacing;
+							continue;
+						}
+					}
+					else
 					{
 						const bool isSymbol = c < '0';
 						const bool isInteger = !isSymbol && c < 'a';
@@ -60,6 +73,7 @@ namespace je
 					}
 					
 					task.position.x += spacing;
+					lineLength++;
 				}
 			}
 
